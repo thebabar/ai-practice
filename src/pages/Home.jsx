@@ -79,9 +79,11 @@ const AgentLoopIcon = () => (
 )
 
 const ICON_MAP = {
-  '/token-optimization': <TokenIcon />,
-  '/agents-tools': <AgentLoopIcon />,
+  'token-optimization': TokenIcon,
+  'agents-tools': AgentLoopIcon,
 }
+
+const VISUALIZATIONS = [
   {
     path: '/token-optimization',
     icon: null,
@@ -163,7 +165,7 @@ export default function Home() {
           {ready.map(v => (
             <Link key={v.title} to={v.path} className="viz-card"
               style={{ '--card-accent': v.accent, '--card-accent-dim': v.accentDim, '--card-icon-bg': v.iconBg, '--card-glow': v.glow, '--card-glow-color': v.glowColor, '--card-tag-bg': v.iconBg }}>
-              <div className="card-icon-wrap">{ICON_MAP[v.path] || v.icon}</div>
+              <div className="card-icon-wrap">{(() => { const IC = v.path && ICON_MAP[v.path.replace('/','')]; return IC ? <IC /> : v.icon })()}</div>
               <div className="card-tag">{v.tag}</div>
               <div className="card-title">{v.title}</div>
               <div className="card-desc">{v.desc}</div>
@@ -182,7 +184,7 @@ export default function Home() {
             <div key={v.title} className="viz-card coming-soon"
               style={{ '--card-accent': v.accent, '--card-accent-dim': v.accentDim, '--card-icon-bg': v.iconBg, '--card-glow': v.glow, '--card-glow-color': v.glowColor, '--card-tag-bg': v.iconBg }}>
               <div className="coming-label">Coming Soon</div>
-              <div className="card-icon-wrap">{ICON_MAP[v.path] || v.icon}</div>
+              <div className="card-icon-wrap">{(() => { const IC = v.path && ICON_MAP[v.path.replace('/','')]; return IC ? <IC /> : v.icon })()}</div>
               <div className="card-tag">{v.tag}</div>
               <div className="card-title">{v.title}</div>
               <div className="card-desc">{v.desc}</div>
