@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 
 const navStyle = `
-  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
   .nav-bar {
     position: sticky;
@@ -17,7 +17,7 @@ const navStyle = `
   }
 
   .nav-logo {
-    font-family: 'Syne', sans-serif;
+    font-family: 'IBM Plex Sans', sans-serif;
     font-weight: 800;
     font-size: 16px;
     color: #fff;
@@ -31,8 +31,8 @@ const navStyle = `
   .nav-logo span { color: #38bdf8; }
 
   .nav-back {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 16px;
     color: #7a9bbf;
     text-decoration: none;
     letter-spacing: 0.1em;
@@ -48,8 +48,8 @@ const navStyle = `
   .nav-back:hover { border-color: #38bdf8; color: #38bdf8; }
 
   .nav-badge {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
     color: #38bdf8;
     background: rgba(56,189,248,0.1);
     border: 1px solid rgba(56,189,248,0.25);

@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import NavBar from '../components/NavBar.jsx'
 
 const styleTag = `
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 .tok-root {
   min-height: 100vh;
   background: #050810;
   color: #e0e8f0;
-  font-family: 'DM Mono', monospace;
+  font-family: 'IBM Plex Mono', monospace;
   overflow-x: hidden;
 }
 
@@ -29,7 +29,7 @@ const styleTag = `
 }
 
 .tok-eyebrow {
-  font-size: 11px;
+  font-size: 16px;
   letter-spacing: 0.22em;
   color: #38bdf8;
   text-transform: uppercase;
@@ -37,7 +37,7 @@ const styleTag = `
 }
 
 .tok-title {
-  font-family: 'Syne', sans-serif;
+  font-family: 'IBM Plex Sans', sans-serif;
   font-size: clamp(28px, 5vw, 50px);
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -49,7 +49,7 @@ const styleTag = `
 .tok-title span { color: #38bdf8; }
 
 .tok-subtitle {
-  font-size: 13px;
+  font-size: 16px;
   color: #7a9bbf;
   max-width: 500px;
   margin: 0 auto 32px;
@@ -68,8 +68,8 @@ const styleTag = `
   background: transparent;
   border: 1px solid #1e3048;
   color: #7a9bbf;
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 16px;
   letter-spacing: 0.1em;
   padding: 8px 16px;
   border-radius: 6px;
@@ -82,27 +82,27 @@ const styleTag = `
 
 .tok-panel { max-width: 860px; margin: 0 auto; padding: 0 20px 80px; }
 
-.tok-section-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 8px; }
-.tok-section-sub { font-size: 12px; color: #7a9bbf; margin-bottom: 28px; line-height: 1.7; }
+.tok-section-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.tok-section-sub { font-size: 16px; color: #7a9bbf; margin-bottom: 28px; line-height: 1.7; }
 
 .tok-card { background: #0d1520; border: 1px solid #1e3048; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
-.tok-card-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: #38bdf8; margin-bottom: 14px; }
+.tok-card-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #38bdf8; margin-bottom: 14px; }
 
-.tok-input { width: 100%; background: #07101a; border: 1px solid #1e3048; border-radius: 8px; color: #e0e8f0; font-family: 'DM Mono', monospace; font-size: 13px; padding: 14px; resize: vertical; min-height: 80px; outline: none; transition: border-color 0.2s; }
+.tok-input { width: 100%; background: #07101a; border: 1px solid #1e3048; border-radius: 8px; color: #e0e8f0; font-family: 'IBM Plex Mono', monospace; font-size: 16px; padding: 14px; resize: vertical; min-height: 80px; outline: none; transition: border-color 0.2s; }
 .tok-input:focus { border-color: #38bdf8; }
 
 .tok-tokens-display { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 14px; min-height: 40px; }
 
-.tok-token { display: inline-block; padding: 3px 7px; border-radius: 4px; font-size: 12px; font-family: 'DM Mono', monospace; border: 1px solid transparent; transition: transform 0.15s; cursor: default; }
+.tok-token { display: inline-block; padding: 3px 7px; border-radius: 4px; font-size: 16px; font-family: 'IBM Plex Mono', monospace; border: 1px solid transparent; transition: transform 0.15s; cursor: default; }
 .tok-token:hover { transform: scale(1.08); }
 
 .tok-stats-row { display: flex; gap: 16px; margin-top: 16px; flex-wrap: wrap; }
 .tok-stat { background: #07101a; border: 1px solid #1e3048; border-radius: 8px; padding: 10px 16px; flex: 1; min-width: 100px; text-align: center; }
-.tok-stat-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: #38bdf8; }
-.tok-stat-lbl { font-size: 10px; color: #7a9bbf; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
+.tok-stat-val { font-family: 'IBM Plex Sans', sans-serif; font-size: 22px; font-weight: 800; color: #38bdf8; }
+.tok-stat-lbl { font-size: 12px; color: #7a9bbf; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
 
 .cost-bar-wrap { margin-bottom: 14px; }
-.cost-bar-label { display: flex; justify-content: space-between; font-size: 11px; color: #7a9bbf; margin-bottom: 5px; }
+.cost-bar-label { display: flex; justify-content: space-between; font-size: 16px; color: #7a9bbf; margin-bottom: 5px; }
 .cost-bar-track { background: #07101a; border-radius: 100px; height: 22px; overflow: hidden; border: 1px solid #1e3048; }
 .cost-bar-fill { height: 100%; border-radius: 100px; transition: width 0.5s cubic-bezier(.4,0,.2,1); }
 
@@ -116,29 +116,29 @@ const styleTag = `
 .technique-card:hover::before, .technique-card.selected::before { opacity: 1; }
 
 .technique-icon { font-size: 22px; margin-bottom: 10px; }
-.technique-name { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: #e0e8f0; margin-bottom: 6px; }
-.technique-desc { font-size: 11px; color: #7a9bbf; line-height: 1.6; }
-.technique-saving { display: inline-block; margin-top: 10px; font-size: 10px; padding: 3px 8px; border-radius: 4px; border: 1px solid; letter-spacing: 0.06em; }
+.technique-name { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #e0e8f0; margin-bottom: 6px; }
+.technique-desc { font-size: 16px; color: #7a9bbf; line-height: 1.6; }
+.technique-saving { display: inline-block; margin-top: 10px; font-size: 12px; padding: 3px 8px; border-radius: 4px; border: 1px solid; letter-spacing: 0.06em; }
 
 .ba-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 @media (max-width: 560px) { .ba-compare { grid-template-columns: 1fr; } }
 .ba-box { background: #07101a; border-radius: 8px; padding: 14px; border: 1px solid #1e3048; }
-.ba-label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; font-weight: 500; }
-.ba-text { font-size: 12px; color: #b0c8e0; line-height: 1.7; white-space: pre-wrap; }
-.ba-tok-count { margin-top: 10px; font-size: 11px; color: #7a9bbf; }
-.ba-tok-count span { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; }
+.ba-label { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; font-weight: 500; }
+.ba-text { font-size: 16px; color: #b0c8e0; line-height: 1.7; white-space: pre-wrap; }
+.ba-tok-count { margin-top: 10px; font-size: 16px; color: #7a9bbf; }
+.ba-tok-count span { font-family: 'IBM Plex Sans', sans-serif; font-weight: 700; font-size: 16px; }
 
-.savings-badge { display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.2); border-radius: 8px; padding: 10px; margin-top: 12px; font-size: 12px; color: #34d399; }
+.savings-badge { display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.2); border-radius: 8px; padding: 10px; margin-top: 12px; font-size: 16px; color: #34d399; }
 
 .kv-visual { display: flex; gap: 6px; flex-wrap: wrap; margin: 14px 0; }
-.kv-block { height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; transition: all 0.3s; min-width: 50px; flex: 1; }
+.kv-block { height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; transition: all 0.3s; min-width: 50px; flex: 1; }
 .kv-cached { background: rgba(56,189,248,0.15); border: 1px solid rgba(56,189,248,0.4); color: #38bdf8; }
 .kv-new    { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.35); color: #fbbf24; }
-.kv-legend { display: flex; gap: 18px; font-size: 11px; color: #7a9bbf; margin-bottom: 14px; }
+.kv-legend { display: flex; gap: 18px; font-size: 16px; color: #7a9bbf; margin-bottom: 14px; }
 .kv-dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; margin-right: 5px; vertical-align: middle; }
 
 .ctx-bar { background: #07101a; border: 1px solid #1e3048; border-radius: 10px; height: 48px; overflow: hidden; display: flex; margin: 16px 0 8px; }
-.ctx-segment { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; transition: width 0.5s cubic-bezier(.4,0,.2,1); overflow: hidden; white-space: nowrap; }
+.ctx-segment { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 500; transition: width 0.5s cubic-bezier(.4,0,.2,1); overflow: hidden; white-space: nowrap; }
 .ctx-system  { background: rgba(139,92,246,0.3);  color: #c4b5fd; }
 .ctx-history { background: rgba(56,189,248,0.2);  color: #7dd3fc; }
 .ctx-user    { background: rgba(251,191,36,0.2);  color: #fde68a; }
@@ -146,24 +146,24 @@ const styleTag = `
 .ctx-overflow{ background: rgba(239,68,68,0.2);   color: #fca5a5; }
 
 .info-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-.info-chip { font-size: 11px; padding: 4px 10px; border-radius: 100px; border: 1px solid; display: flex; align-items: center; gap: 5px; }
+.info-chip { font-size: 16px; padding: 4px 10px; border-radius: 100px; border: 1px solid; display: flex; align-items: center; gap: 5px; }
 
-.quiz-q { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 16px; line-height: 1.4; }
+.quiz-q { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 16px; line-height: 1.4; }
 .quiz-opts { display: flex; flex-direction: column; gap: 8px; }
-.quiz-opt { background: #07101a; border: 1px solid #1e3048; border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #b0c8e0; cursor: pointer; text-align: left; font-family: 'DM Mono', monospace; transition: all 0.18s; }
+.quiz-opt { background: #07101a; border: 1px solid #1e3048; border-radius: 8px; padding: 12px 16px; font-size: 16px; color: #b0c8e0; cursor: pointer; text-align: left; font-family: 'IBM Plex Mono', monospace; transition: all 0.18s; }
 .quiz-opt:hover:not(:disabled) { border-color: #38bdf8; color: #e0e8f0; }
 .quiz-opt.correct { border-color: #34d399; background: rgba(52,211,153,0.1); color: #34d399; }
 .quiz-opt.wrong   { border-color: #ef4444; background: rgba(239,68,68,0.08); color: #f87171; }
-.quiz-explanation { margin-top: 14px; padding: 12px; background: rgba(56,189,248,0.06); border: 1px solid rgba(56,189,248,0.2); border-radius: 8px; font-size: 12px; color: #93c5fd; line-height: 1.7; }
-.quiz-next { margin-top: 14px; background: rgba(56,189,248,0.15); border: 1px solid #38bdf8; color: #38bdf8; font-family: 'DM Mono', monospace; font-size: 12px; padding: 10px 20px; border-radius: 6px; cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.18s; }
+.quiz-explanation { margin-top: 14px; padding: 12px; background: rgba(56,189,248,0.06); border: 1px solid rgba(56,189,248,0.2); border-radius: 8px; font-size: 16px; color: #93c5fd; line-height: 1.7; }
+.quiz-next { margin-top: 14px; background: rgba(56,189,248,0.15); border: 1px solid #38bdf8; color: #38bdf8; font-family: 'IBM Plex Mono', monospace; font-size: 16px; padding: 10px 20px; border-radius: 6px; cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.18s; }
 .quiz-next:hover { background: rgba(56,189,248,0.25); }
 
 .progress-bar { background: #0d1520; border-radius: 100px; height: 4px; margin-bottom: 20px; overflow: hidden; }
 .progress-fill { height: 100%; background: linear-gradient(90deg, #38bdf8, #818cf8); border-radius: 100px; transition: width 0.4s; }
 
 .score-display { text-align: center; padding: 30px; }
-.score-num { font-family: 'Syne', sans-serif; font-size: 64px; font-weight: 800; color: #38bdf8; }
-.score-sub { font-size: 14px; color: #7a9bbf; margin-top: 8px; }
+.score-num { font-family: 'IBM Plex Sans', sans-serif; font-size: 64px; font-weight: 800; color: #38bdf8; }
+.score-sub { font-size: 16px; color: #7a9bbf; margin-top: 8px; }
 `;
 
 const TOKEN_COLORS = [
@@ -307,7 +307,7 @@ export default function TokenOptimization() {
             <textarea className="tok-input" value={inputText} onChange={e => setInputText(e.target.value)} placeholder="Type something to tokenize..." />
             <div className="tok-tokens-display">
               {tokens.filter(t => !t.isSpace || t.text.trim()).length === 0
-                ? <span style={{ color: "#3a5a7a", fontSize: 12 }}>tokens appear here...</span>
+                ? <span style={{ color: "#3a5a7a", fontSize: 16 }}>tokens appear here...</span>
                 : tokens.map((t, i) => {
                     if (/^\s+$/.test(t.text)) return null;
                     const c = TOKEN_COLORS[i % TOKEN_COLORS.length];
@@ -327,14 +327,14 @@ export default function TokenOptimization() {
                 <div key={title} style={{ display: "flex", gap: 12 }}>
                   <div style={{ color: "#38bdf8", fontSize: 16, flexShrink: 0 }}>▸</div>
                   <div>
-                    <div style={{ fontFamily: "'Syne',sans-serif", fontSize: 13, fontWeight: 700, color: "#e0e8f0", marginBottom: 3 }}>{title}</div>
-                    <div style={{ fontSize: 12, color: "#7a9bbf", lineHeight: 1.6 }}>{desc}</div>
+                    <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontSize: 16, fontWeight: 700, color: "#e0e8f0", marginBottom: 3 }}>{title}</div>
+                    <div style={{ fontSize: 16, color: "#7a9bbf", lineHeight: 1.6 }}>{desc}</div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-          <p style={{ fontSize: 10, color: "#3a5a7a" }}>* Uses Claude Sonnet input pricing ($3/M tokens). Tokenization is illustrative.</p>
+          <p style={{ fontSize: 12, color: "#3a5a7a" }}>* Uses Claude Sonnet input pricing ($3/M tokens). Tokenization is illustrative.</p>
         </div>
       )}
 
@@ -346,7 +346,7 @@ export default function TokenOptimization() {
             <div className="tok-card-title">// Model Cost Comparison (per 1M tokens)</div>
             {COSTS.map(m => (
               <div key={m.name} style={{ marginBottom: 18 }}>
-                <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 13, color: m.color, marginBottom: 8 }}>{m.name}</div>
+                <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 700, fontSize: 16, color: m.color, marginBottom: 8 }}>{m.name}</div>
                 {[["Input", m.inputPer1M], ["Output", m.outputPer1M]].map(([label, price]) => (
                   <div key={label} className="cost-bar-wrap">
                     <div className="cost-bar-label"><span>{label}</span><span>${price}/M</span></div>
@@ -361,26 +361,26 @@ export default function TokenOptimization() {
           <div className="tok-card">
             <div className="tok-card-title">// Interactive Cost Calculator</div>
             <div style={{ marginBottom: 16 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#7a9bbf", marginBottom: 4 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 16, color: "#7a9bbf", marginBottom: 4 }}>
                 <span>Tokens per request</span>
-                <span style={{ color: "#38bdf8", fontFamily: "'Syne',sans-serif", fontWeight: 700 }}>{tokenSlider.toLocaleString()}</span>
+                <span style={{ color: "#38bdf8", fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 700 }}>{tokenSlider.toLocaleString()}</span>
               </div>
               <input type="range" className="tok-slider" min={100} max={100000} step={100} value={tokenSlider} onChange={e => setTokenSlider(+e.target.value)} />
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}>
               {[10, 1000, 100000].map(calls => (
                 <div key={calls} className="tok-stat">
-                  <div style={{ fontSize: 10, color: "#7a9bbf", marginBottom: 6 }}>{calls.toLocaleString()} calls</div>
+                  <div style={{ fontSize: 12, color: "#7a9bbf", marginBottom: 6 }}>{calls.toLocaleString()} calls</div>
                   {COSTS.map(m => (
-                    <div key={m.name} style={{ fontSize: 12, color: m.color, margin: "3px 0" }}>
-                      <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700 }}>${((tokenSlider / 1_000_000) * m.inputPer1M * calls).toFixed(calls >= 1000 ? 1 : 3)}</span>
-                      <span style={{ fontSize: 10, color: "#3a5a7a", marginLeft: 4 }}>{m.name.split(" ")[0]}</span>
+                    <div key={m.name} style={{ fontSize: 16, color: m.color, margin: "3px 0" }}>
+                      <span style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 700 }}>${((tokenSlider / 1_000_000) * m.inputPer1M * calls).toFixed(calls >= 1000 ? 1 : 3)}</span>
+                      <span style={{ fontSize: 12, color: "#3a5a7a", marginLeft: 4 }}>{m.name.split(" ")[0]}</span>
                     </div>
                   ))}
                 </div>
               ))}
             </div>
-            <div style={{ marginTop: 14, padding: "10px 14px", background: "rgba(251,191,36,0.08)", border: "1px solid rgba(251,191,36,0.2)", borderRadius: 8, fontSize: 12, color: "#fbbf24" }}>
+            <div style={{ marginTop: 14, padding: "10px 14px", background: "rgba(251,191,36,0.08)", border: "1px solid rgba(251,191,36,0.2)", borderRadius: 8, fontSize: 16, color: "#fbbf24" }}>
               ⚡ At scale, halving token usage = halving your bill.
             </div>
           </div>
@@ -440,10 +440,10 @@ export default function TokenOptimization() {
                 ))
               )}
             </div>
-            <div style={{ fontSize: 12, color: "#7a9bbf", marginTop: 12 }}>
+            <div style={{ fontSize: 16, color: "#7a9bbf", marginTop: 12 }}>
               Turn <strong style={{ color: "#38bdf8" }}>{Math.min(kvTurn + 1, KV_TURNS.length)}</strong> of {KV_TURNS.length} — only new tokens cost compute.
               {kvTurn >= KV_TURNS.length - 1 && (
-                <button onClick={() => setKvTurn(0)} style={{ marginLeft: 12, background: "none", border: "1px solid #38bdf8", color: "#38bdf8", fontSize: 11, padding: "3px 10px", borderRadius: 4, cursor: "pointer" }}>Replay ↺</button>
+                <button onClick={() => setKvTurn(0)} style={{ marginLeft: 12, background: "none", border: "1px solid #38bdf8", color: "#38bdf8", fontSize: 16, padding: "3px 10px", borderRadius: 4, cursor: "pointer" }}>Replay ↺</button>
               )}
             </div>
           </div>
@@ -453,15 +453,15 @@ export default function TokenOptimization() {
               {[{ label: "Without caching", detail: "Every API call re-computes the full system prompt (2,000 tokens × $3/M × 1,000 calls = $6.00)", color: "#ef4444", val: "$6.00" },
                 { label: "With prompt caching", detail: "System prompt computed once, cached. 999 subsequent calls pay ~10% of normal price.", color: "#34d399", val: "$0.60" }].map(row => (
                 <div key={row.label} style={{ display: "flex", gap: 14, padding: 12, background: "#07101a", borderRadius: 8, border: `1px solid ${row.color}30` }}>
-                  <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 22, color: row.color, minWidth: 60 }}>{row.val}</div>
+                  <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 800, fontSize: 22, color: row.color, minWidth: 60 }}>{row.val}</div>
                   <div>
-                    <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 13, color: row.color, marginBottom: 4 }}>{row.label}</div>
-                    <div style={{ fontSize: 11, color: "#7a9bbf", lineHeight: 1.6 }}>{row.detail}</div>
+                    <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 700, fontSize: 16, color: row.color, marginBottom: 4 }}>{row.label}</div>
+                    <div style={{ fontSize: 16, color: "#7a9bbf", lineHeight: 1.6 }}>{row.detail}</div>
                   </div>
                 </div>
               ))}
             </div>
-            <div style={{ marginTop: 14, fontSize: 12, color: "#34d399", background: "rgba(52,211,153,0.06)", border: "1px solid rgba(52,211,153,0.2)", borderRadius: 8, padding: "10px 14px" }}>
+            <div style={{ marginTop: 14, fontSize: 16, color: "#34d399", background: "rgba(52,211,153,0.06)", border: "1px solid rgba(52,211,153,0.2)", borderRadius: 8, padding: "10px 14px" }}>
               💡 Always put your static system prompt and documents FIRST in the message.
             </div>
           </div>
@@ -478,7 +478,7 @@ export default function TokenOptimization() {
               { label: "Conversation History", val: historyToks, set: setHistoryToks, max: 6000, color: "#38bdf8" },
               { label: "User Input", val: userToks, set: setUserToks, max: 2000, color: "#fbbf24" }].map(s => (
               <div key={s.label} style={{ marginBottom: 14 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#7a9bbf", marginBottom: 4 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 16, color: "#7a9bbf", marginBottom: 4 }}>
                   <span style={{ color: s.color }}>{s.label}</span><span>{s.val.toLocaleString()} tokens</span>
                 </div>
                 <input type="range" className="tok-slider" min={0} max={s.max} step={50} value={s.val} onChange={e => s.set(+e.target.value)} style={{ accentColor: s.color }} />
@@ -498,7 +498,7 @@ export default function TokenOptimization() {
                 : <div className="info-chip" style={{ borderColor: "#34d39940", color: "#6ee7b7" }}>✓ Reserve: {(CTX_MAX - ctxUsed).toLocaleString()} tokens</div>}
             </div>
             {overflowToks > 0 && (
-              <div style={{ marginTop: 14, fontSize: 12, color: "#fca5a5", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 8, padding: "10px 14px" }}>
+              <div style={{ marginTop: 14, fontSize: 16, color: "#fca5a5", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 8, padding: "10px 14px" }}>
                 ⚠ {overflowToks.toLocaleString()} tokens will be truncated — the model will lose that context.
               </div>
             )}
@@ -513,7 +513,7 @@ export default function TokenOptimization() {
           {!done ? (
             <div className="tok-card">
               <div className="progress-bar"><div className="progress-fill" style={{ width: `${(qIdx / QUIZ.length) * 100}%` }} /></div>
-              <div style={{ fontSize: 11, color: "#7a9bbf", marginBottom: 16 }}>QUESTION {qIdx + 1} / {QUIZ.length}</div>
+              <div style={{ fontSize: 16, color: "#7a9bbf", marginBottom: 16 }}>QUESTION {qIdx + 1} / {QUIZ.length}</div>
               <div className="quiz-q">{QUIZ[qIdx].q}</div>
               <div className="quiz-opts">
                 {QUIZ[qIdx].opts.map((opt, i) => (
@@ -534,7 +534,7 @@ export default function TokenOptimization() {
           ) : (
             <div className="tok-card">
               <div className="score-display">
-                <div style={{ fontSize: 12, color: "#7a9bbf", marginBottom: 12 }}>FINAL SCORE</div>
+                <div style={{ fontSize: 16, color: "#7a9bbf", marginBottom: 12 }}>FINAL SCORE</div>
                 <div className="score-num">{score}/{QUIZ.length}</div>
                 <div className="score-sub">{score === QUIZ.length ? "Perfect! You're a token expert. 🎉" : score >= QUIZ.length / 2 ? "Good work! Review the tricky sections. 📚" : "Keep exploring to build your knowledge. 💪"}</div>
                 <button className="quiz-next" style={{ marginTop: 24 }} onClick={() => { setQIdx(0); setChosen(null); setScore(0); setDone(false); }}>Retake Quiz ↺</button>

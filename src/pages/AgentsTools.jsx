@@ -2,28 +2,28 @@ import { useState, useEffect, useRef } from 'react'
 import NavBar from '../components/NavBar.jsx'
 
 const css = `
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
-.ag-root { min-height: 100vh; background: #050810; color: #e0e8f0; font-family: 'DM Mono', monospace; overflow-x: hidden; }
+.ag-root { min-height: 100vh; background: #050810; color: #e0e8f0; font-family: 'IBM Plex Mono', monospace; overflow-x: hidden; }
 
 .ag-hero { text-align: center; padding: 48px 24px 28px; position: relative; }
 .ag-hero::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 700px; height: 320px; background: radial-gradient(ellipse at 50% 0%, rgba(52,211,153,0.1) 0%, transparent 70%); pointer-events: none; }
-.ag-eyebrow { font-size: 11px; letter-spacing: 0.22em; color: #34d399; text-transform: uppercase; margin-bottom: 14px; }
-.ag-title { font-family: 'Syne', sans-serif; font-size: clamp(28px, 5vw, 52px); font-weight: 800; letter-spacing: -0.02em; color: #fff; line-height: 1.05; margin-bottom: 12px; }
+.ag-eyebrow { font-size: 16px; letter-spacing: 0.22em; color: #34d399; text-transform: uppercase; margin-bottom: 14px; }
+.ag-title { font-family: 'IBM Plex Sans', sans-serif; font-size: clamp(28px, 5vw, 52px); font-weight: 800; letter-spacing: -0.02em; color: #fff; line-height: 1.05; margin-bottom: 12px; }
 .ag-title span { color: #34d399; }
-.ag-subtitle { font-size: 13px; color: #6a8a7a; max-width: 520px; margin: 0 auto 32px; line-height: 1.8; }
+.ag-subtitle { font-size: 16px; color: #6a8a7a; max-width: 520px; margin: 0 auto 32px; line-height: 1.8; }
 
 .ag-tabs { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; padding: 0 16px 32px; }
-.ag-tab { background: transparent; border: 1px solid #1a2e22; color: #6a8a7a; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: all 0.18s; text-transform: uppercase; }
+.ag-tab { background: transparent; border: 1px solid #1a2e22; color: #6a8a7a; font-family: 'IBM Plex Mono', monospace; font-size: 16px; letter-spacing: 0.1em; padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: all 0.18s; text-transform: uppercase; }
 .ag-tab:hover { border-color: #34d399; color: #34d399; }
 .ag-tab.active { background: rgba(52,211,153,0.1); border-color: #34d399; color: #34d399; }
 
 .ag-panel { max-width: 920px; margin: 0 auto; padding: 0 20px 80px; }
-.ag-section-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 8px; }
-.ag-section-sub { font-size: 12px; color: #6a8a7a; margin-bottom: 28px; line-height: 1.8; }
+.ag-section-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.ag-section-sub { font-size: 16px; color: #6a8a7a; margin-bottom: 28px; line-height: 1.8; }
 
 .ag-card { background: #080f14; border: 1px solid #0f2018; border-radius: 14px; padding: 24px; margin-bottom: 20px; }
-.ag-card-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: #34d399; margin-bottom: 16px; }
+.ag-card-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #34d399; margin-bottom: 16px; }
 
 /* ── Agent Loop ── */
 .loop-container { position: relative; display: flex; flex-direction: column; align-items: center; gap: 0; }
@@ -33,18 +33,18 @@ const css = `
 .loop-node.done { opacity: 0.5; }
 
 .loop-connector { width: 2px; height: 32px; margin: 0 auto; position: relative; z-index: 1; }
-.loop-connector::after { content: '▼'; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); font-size: 10px; }
+.loop-connector::after { content: '▼'; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); font-size: 12px; }
 
 .node-icon { font-size: 22px; flex-shrink: 0; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: var(--node-icon-bg); }
 .node-content { flex: 1; }
-.node-label { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 4px; }
-.node-desc { font-size: 11px; color: #6a8a7a; line-height: 1.6; }
-.node-output { margin-top: 8px; font-size: 11px; color: var(--node-color); background: var(--node-icon-bg); border: 1px solid var(--node-border); border-radius: 6px; padding: 6px 10px; font-style: italic; line-height: 1.5; }
+.node-label { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.node-desc { font-size: 16px; color: #6a8a7a; line-height: 1.6; }
+.node-output { margin-top: 8px; font-size: 16px; color: var(--node-color); background: var(--node-icon-bg); border: 1px solid var(--node-border); border-radius: 6px; padding: 6px 10px; font-style: italic; line-height: 1.5; }
 
 .loop-badge { position: absolute; right: -12px; top: 50%; transform: translateY(-50%); background: #080f14; border: 1px solid #1a2e22; border-radius: 100px; font-size: 9px; color: #34d399; padding: 3px 8px; letter-spacing: 0.1em; white-space: nowrap; }
 
 .loop-controls { display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
-.loop-btn { background: rgba(52,211,153,0.1); border: 1px solid #34d399; color: #34d399; font-family: 'DM Mono', monospace; font-size: 11px; padding: 8px 18px; border-radius: 6px; cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.18s; }
+.loop-btn { background: rgba(52,211,153,0.1); border: 1px solid #34d399; color: #34d399; font-family: 'IBM Plex Mono', monospace; font-size: 16px; padding: 8px 18px; border-radius: 6px; cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.18s; }
 .loop-btn:hover { background: rgba(52,211,153,0.2); }
 .loop-btn.secondary { background: transparent; border-color: #1a2e22; color: #6a8a7a; }
 .loop-btn.secondary:hover { border-color: #34d399; color: #34d399; }
@@ -65,14 +65,14 @@ const css = `
 }
 
 .tool-icon { font-size: 20px; margin-bottom: 10px; }
-.tool-name { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: #e0e8f0; margin-bottom: 4px; }
-.tool-sig { font-size: 10px; color: var(--t-accent); margin-bottom: 6px; font-style: italic; }
-.tool-desc { font-size: 11px; color: #4a6a5a; line-height: 1.6; }
+.tool-name { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #e0e8f0; margin-bottom: 4px; }
+.tool-sig { font-size: 12px; color: var(--t-accent); margin-bottom: 6px; font-style: italic; }
+.tool-desc { font-size: 16px; color: #4a6a5a; line-height: 1.6; }
 
-.tool-call-sim { background: #020809; border: 1px solid #0f2018; border-radius: 10px; padding: 18px; font-family: 'DM Mono', monospace; font-size: 12px; line-height: 1.9; }
+.tool-call-sim { background: #020809; border: 1px solid #0f2018; border-radius: 10px; padding: 18px; font-family: 'IBM Plex Mono', monospace; font-size: 16px; line-height: 1.9; }
 .tc-line { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 4px; opacity: 0; transform: translateY(4px); transition: all 0.3s; }
 .tc-line.visible { opacity: 1; transform: translateY(0); }
-.tc-role { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; flex-shrink: 0; margin-top: 2px; }
+.tc-role { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; flex-shrink: 0; margin-top: 2px; }
 .tc-role.llm    { background: rgba(52,211,153,0.12); color: #34d399; border: 1px solid rgba(52,211,153,0.25); }
 .tc-role.tool   { background: rgba(251,191,36,0.1);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.25); }
 .tc-role.system { background: rgba(129,140,248,0.1); color: #818cf8; border: 1px solid rgba(129,140,248,0.25); }
@@ -89,10 +89,10 @@ const css = `
 .react-step::before { content: ''; position: absolute; left: 19px; top: 44px; bottom: -16px; width: 2px; background: linear-gradient(#0f2018, transparent); }
 .react-step:last-child::before { display: none; }
 
-.react-dot { width: 40px; height: 40px; border-radius: 50%; border: 2px solid; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; margin-top: 2px; }
+.react-dot { width: 40px; height: 40px; border-radius: 50%; border: 2px solid; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; margin-top: 2px; }
 .react-body { flex: 1; padding-bottom: 24px; }
-.react-type { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 6px; font-weight: 500; }
-.react-content { background: #06100d; border: 1px solid #0f2018; border-radius: 8px; padding: 12px 16px; font-size: 12px; color: #9abaa8; line-height: 1.7; }
+.react-type { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 6px; font-weight: 500; }
+.react-content { background: #06100d; border: 1px solid #0f2018; border-radius: 8px; padding: 12px 16px; font-size: 16px; color: #9abaa8; line-height: 1.7; }
 .react-content strong { color: #e0e8f0; }
 
 /* ── Context Engineering ── */
@@ -102,32 +102,32 @@ const css = `
 .ctx-layer-header { display: flex; align-items: center; gap: 12px; margin-bottom: 0; }
 .ctx-layer.expanded .ctx-layer-header { margin-bottom: 12px; }
 .ctx-layer-icon { font-size: 18px; flex-shrink: 0; }
-.ctx-layer-name { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; flex: 1; }
-.ctx-layer-tokens { font-size: 10px; letter-spacing: 0.08em; padding: 3px 8px; border-radius: 100px; border: 1px solid; }
-.ctx-layer-chevron { font-size: 12px; transition: transform 0.2s; color: #4a6a5a; }
+.ctx-layer-name { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; flex: 1; }
+.ctx-layer-tokens { font-size: 12px; letter-spacing: 0.08em; padding: 3px 8px; border-radius: 100px; border: 1px solid; }
+.ctx-layer-chevron { font-size: 16px; transition: transform 0.2s; color: #4a6a5a; }
 .ctx-layer.expanded .ctx-layer-chevron { transform: rotate(90deg); }
-.ctx-layer-body { font-size: 12px; color: #6a8a7a; line-height: 1.8; border-top: 1px solid; padding-top: 12px; }
-.ctx-layer-body code { background: rgba(52,211,153,0.08); color: #34d399; padding: 1px 5px; border-radius: 3px; font-size: 11px; }
-.ctx-tip { font-size: 11px; margin-top: 8px; padding: 8px 12px; background: rgba(52,211,153,0.05); border-left: 2px solid #34d399; border-radius: 0 6px 6px 0; color: #5a8a6a; line-height: 1.6; }
+.ctx-layer-body { font-size: 16px; color: #6a8a7a; line-height: 1.8; border-top: 1px solid; padding-top: 12px; }
+.ctx-layer-body code { background: rgba(52,211,153,0.08); color: #34d399; padding: 1px 5px; border-radius: 3px; font-size: 16px; }
+.ctx-tip { font-size: 16px; margin-top: 8px; padding: 8px 12px; background: rgba(52,211,153,0.05); border-left: 2px solid #34d399; border-radius: 0 6px 6px 0; color: #5a8a6a; line-height: 1.6; }
 
 /* ── Multi-Agent ── */
 .ma-diagram { position: relative; display: grid; grid-template-columns: 1fr auto 1fr; gap: 0; align-items: start; }
 .ma-agents { display: flex; flex-direction: column; gap: 10px; }
 .ma-agent { background: #06100d; border: 1px solid; border-radius: 10px; padding: 14px 16px; transition: all 0.3s; }
 .ma-agent.active { box-shadow: 0 0 20px var(--a-glow); transform: scale(1.02); }
-.ma-agent-name { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; margin-bottom: 4px; }
-.ma-agent-role { font-size: 10px; color: #4a6a5a; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+.ma-agent-name { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.ma-agent-role { font-size: 12px; color: #4a6a5a; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
 .ma-agent-tools { display: flex; flex-wrap: wrap; gap: 4px; }
 .ma-tool-tag { font-size: 9px; padding: 2px 6px; border-radius: 3px; border: 1px solid; letter-spacing: 0.06em; }
 
 .ma-center { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 20px; gap: 8px; }
 .ma-orchestrator { background: rgba(52,211,153,0.08); border: 2px solid #34d399; border-radius: 14px; padding: 20px 16px; text-align: center; width: 130px; }
 .ma-orch-icon { font-size: 28px; margin-bottom: 8px; }
-.ma-orch-name { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; color: #34d399; }
-.ma-orch-sub { font-size: 10px; color: #4a6a5a; margin-top: 4px; }
+.ma-orch-name { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #34d399; }
+.ma-orch-sub { font-size: 12px; color: #4a6a5a; margin-top: 4px; }
 .ma-arrow { font-size: 18px; color: #1a3a28; }
 
-.ma-msg { background: #020809; border: 1px solid #0f2018; border-radius: 8px; padding: 10px 14px; font-size: 11px; color: #6a8a7a; line-height: 1.6; margin-top: 14px; min-height: 60px; transition: all 0.3s; }
+.ma-msg { background: #020809; border: 1px solid #0f2018; border-radius: 8px; padding: 10px 14px; font-size: 16px; color: #6a8a7a; line-height: 1.6; margin-top: 14px; min-height: 60px; transition: all 0.3s; }
 .ma-msg strong { color: #34d399; }
 
 @media (max-width: 600px) {
@@ -136,18 +136,18 @@ const css = `
 }
 
 /* ── Quiz ── */
-.ag-quiz-q { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 16px; line-height: 1.4; }
+.ag-quiz-q { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 16px; line-height: 1.4; }
 .ag-quiz-opts { display: flex; flex-direction: column; gap: 8px; }
-.ag-quiz-opt { background: #06100d; border: 1px solid #0f2018; border-radius: 8px; padding: 12px 16px; font-size: 12px; color: #9abaa8; cursor: pointer; text-align: left; font-family: 'DM Mono', monospace; transition: all 0.18s; }
+.ag-quiz-opt { background: #06100d; border: 1px solid #0f2018; border-radius: 8px; padding: 12px 16px; font-size: 16px; color: #9abaa8; cursor: pointer; text-align: left; font-family: 'IBM Plex Mono', monospace; transition: all 0.18s; }
 .ag-quiz-opt:hover:not(:disabled) { border-color: #34d399; color: #e0e8f0; }
 .ag-quiz-opt.correct { border-color: #34d399; background: rgba(52,211,153,0.08); color: #34d399; }
 .ag-quiz-opt.wrong   { border-color: #ef4444; background: rgba(239,68,68,0.06); color: #f87171; }
-.ag-quiz-exp { margin-top: 14px; padding: 12px; background: rgba(52,211,153,0.05); border: 1px solid rgba(52,211,153,0.18); border-radius: 8px; font-size: 12px; color: #7ab898; line-height: 1.7; }
-.ag-quiz-next { margin-top: 12px; background: rgba(52,211,153,0.1); border: 1px solid #34d399; color: #34d399; font-family: 'DM Mono', monospace; font-size: 11px; padding: 9px 18px; border-radius: 6px; cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.18s; }
+.ag-quiz-exp { margin-top: 14px; padding: 12px; background: rgba(52,211,153,0.05); border: 1px solid rgba(52,211,153,0.18); border-radius: 8px; font-size: 16px; color: #7ab898; line-height: 1.7; }
+.ag-quiz-next { margin-top: 12px; background: rgba(52,211,153,0.1); border: 1px solid #34d399; color: #34d399; font-family: 'IBM Plex Mono', monospace; font-size: 16px; padding: 9px 18px; border-radius: 6px; cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.18s; }
 .ag-quiz-next:hover { background: rgba(52,211,153,0.2); }
 .ag-progress { background: #0a1810; border-radius: 100px; height: 4px; margin-bottom: 20px; overflow: hidden; }
 .ag-progress-fill { height: 100%; background: linear-gradient(90deg, #34d399, #38bdf8); border-radius: 100px; transition: width 0.4s; }
-.ag-score-num { font-family: 'Syne', sans-serif; font-size: 64px; font-weight: 800; color: #34d399; text-align: center; }
+.ag-score-num { font-family: 'IBM Plex Sans', sans-serif; font-size: 64px; font-weight: 800; color: #34d399; text-align: center; }
 `
 
 // ── AGENT LOOP STEPS ──────────────────────────────────────────────────────────
@@ -440,9 +440,9 @@ export default function AgentsTools() {
                 { label: '✅ Agent', color: '#34d399', bg: 'rgba(52,211,153,0.05)', border: 'rgba(52,211,153,0.2)', points: ['Multi-step reasoning loop', 'Calls real tools (search, code, APIs)', 'Grounds answers in live data', 'Self-corrects by observing results'] },
               ].map(col => (
                 <div key={col.label} style={{ background: col.bg, border: `1px solid ${col.border}`, borderRadius: 10, padding: 16 }}>
-                  <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 13, color: col.color, marginBottom: 12 }}>{col.label}</div>
+                  <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 700, fontSize: 16, color: col.color, marginBottom: 12 }}>{col.label}</div>
                   {col.points.map(p => (
-                    <div key={p} style={{ display: 'flex', gap: 8, marginBottom: 7, fontSize: 12, color: '#6a8a7a', lineHeight: 1.5 }}>
+                    <div key={p} style={{ display: 'flex', gap: 8, marginBottom: 7, fontSize: 16, color: '#6a8a7a', lineHeight: 1.5 }}>
                       <span style={{ color: col.color, flexShrink: 0 }}>▸</span>{p}
                     </div>
                   ))}
@@ -477,7 +477,7 @@ export default function AgentsTools() {
 
           <div className="ag-card">
             <div className="ag-card-title">// Live Tool Call Simulation</div>
-            <p style={{ fontSize: 12, color: '#6a8a7a', marginBottom: 14, lineHeight: 1.7 }}>Watch how an agent uses <span style={{ color: '#38bdf8' }}>web_search</span> and <span style={{ color: '#38bdf8' }}>browse_url</span> to answer a research question — each tool result feeding back into the agent's context.</p>
+            <p style={{ fontSize: 16, color: '#6a8a7a', marginBottom: 14, lineHeight: 1.7 }}>Watch how an agent uses <span style={{ color: '#38bdf8' }}>web_search</span> and <span style={{ color: '#38bdf8' }}>browse_url</span> to answer a research question — each tool result feeding back into the agent's context.</p>
             <div className="tool-call-sim">
               {TOOL_CALL_DEMO.map((line, i) => (
                 <div key={i} className={`tc-line${demoLines.includes(i) ? ' visible' : ''}`} style={{ transitionDelay: `${i * 0.05}s` }}>
@@ -486,7 +486,7 @@ export default function AgentsTools() {
                 </div>
               ))}
               {demoLines.length === 0 && !demoRunning && (
-                <div style={{ color: '#1a3a28', fontSize: 12 }}>// Press "Run Demo" to watch the agent work...</div>
+                <div style={{ color: '#1a3a28', fontSize: 16 }}>// Press "Run Demo" to watch the agent work...</div>
               )}
             </div>
             <div style={{ marginTop: 14, display: 'flex', gap: 10 }}>
@@ -532,8 +532,8 @@ export default function AgentsTools() {
                 <div key={title} style={{ display: 'flex', gap: 12 }}>
                   <span style={{ fontSize: 18, flexShrink: 0 }}>{title.split(' ')[0]}</span>
                   <div>
-                    <div style={{ fontFamily: "'Syne',sans-serif", fontSize: 13, fontWeight: 700, color: '#e0e8f0', marginBottom: 3 }}>{title.slice(2)}</div>
-                    <div style={{ fontSize: 12, color: '#6a8a7a', lineHeight: 1.6 }}>{desc}</div>
+                    <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontSize: 16, fontWeight: 700, color: '#e0e8f0', marginBottom: 3 }}>{title.slice(2)}</div>
+                    <div style={{ fontSize: 16, color: '#6a8a7a', lineHeight: 1.6 }}>{desc}</div>
                   </div>
                 </div>
               ))}
@@ -550,16 +550,16 @@ export default function AgentsTools() {
 
           <div className="ag-card">
             <div className="ag-card-title">// Agent Context Window Anatomy</div>
-            <div style={{ fontSize: 12, color: '#6a8a7a', marginBottom: 16, lineHeight: 1.7 }}>
+            <div style={{ fontSize: 16, color: '#6a8a7a', marginBottom: 16, lineHeight: 1.7 }}>
               A typical agent context window has 5 layers. Together they define everything the agent can perceive.
-              Total: <span style={{ color: '#34d399', fontFamily: "'Syne',sans-serif", fontWeight: 700 }}>~4,550 tokens</span> before any tool results.
+              Total: <span style={{ color: '#34d399', fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 700 }}>~4,550 tokens</span> before any tool results.
             </div>
 
             {/* Stacked bar */}
             <div style={{ display: 'flex', height: 32, borderRadius: 8, overflow: 'hidden', marginBottom: 20, border: '1px solid #0f2018' }}>
               {CTX_LAYERS.map((l, i) => {
                 const widths = [17, 9, 26, 44, 4]
-                return <div key={i} style={{ width: `${widths[i]}%`, background: l.bg, borderRight: i < CTX_LAYERS.length - 1 ? `1px solid #0a1810` : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: l.color, letterSpacing: '0.06em', overflow: 'hidden', whiteSpace: 'nowrap', padding: '0 4px' }}>
+                return <div key={i} style={{ width: `${widths[i]}%`, background: l.bg, borderRight: i < CTX_LAYERS.length - 1 ? `1px solid #0a1810` : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: l.color, letterSpacing: '0.06em', overflow: 'hidden', whiteSpace: 'nowrap', padding: '0 4px' }}>
                   {widths[i] > 10 ? l.name.split(' ')[0] : ''}
                 </div>
               })}
@@ -579,7 +579,7 @@ export default function AgentsTools() {
                   {expandedCtx === i && (
                     <div className="ctx-layer-body" style={{ borderColor: layer.border, color: '#7a9a88' }}>
                       <p style={{ marginBottom: 12 }}>{layer.body}</p>
-                      <div style={{ background: '#020809', border: `1px solid ${layer.border}`, borderRadius: 6, padding: 12, fontFamily: "'DM Mono',monospace", fontSize: 11, color: layer.color, lineHeight: 1.7, whiteSpace: 'pre-wrap', marginBottom: 10 }}>{layer.code}</div>
+                      <div style={{ background: '#020809', border: `1px solid ${layer.border}`, borderRadius: 6, padding: 12, fontFamily: "'DM Mono',monospace", fontSize: 16, color: layer.color, lineHeight: 1.7, whiteSpace: 'pre-wrap', marginBottom: 10 }}>{layer.code}</div>
                       <div className="ctx-tip">{layer.tip}</div>
                     </div>
                   )}
@@ -649,9 +649,9 @@ export default function AgentsTools() {
                 { label: '⚠️ Avoid When', color: '#fbbf24', bg: 'rgba(251,191,36,0.05)', border: 'rgba(251,191,36,0.2)', points: ['Single-step tasks (over-engineering)', 'Latency is critical (agents add overhead)', 'Debugging is already hard (adds complexity)', 'Cost is constrained (multiple LLM calls)'] },
               ].map(col => (
                 <div key={col.label} style={{ background: col.bg, border: `1px solid ${col.border}`, borderRadius: 10, padding: 16 }}>
-                  <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 12, color: col.color, marginBottom: 10 }}>{col.label}</div>
+                  <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 700, fontSize: 16, color: col.color, marginBottom: 10 }}>{col.label}</div>
                   {col.points.map(p => (
-                    <div key={p} style={{ display: 'flex', gap: 8, marginBottom: 6, fontSize: 11, color: '#6a8a7a', lineHeight: 1.5 }}>
+                    <div key={p} style={{ display: 'flex', gap: 8, marginBottom: 6, fontSize: 16, color: '#6a8a7a', lineHeight: 1.5 }}>
                       <span style={{ color: col.color, flexShrink: 0 }}>▸</span>{p}
                     </div>
                   ))}
@@ -670,7 +670,7 @@ export default function AgentsTools() {
           {!done ? (
             <div className="ag-card">
               <div className="ag-progress"><div className="ag-progress-fill" style={{ width: `${(qIdx / QUIZ.length) * 100}%` }} /></div>
-              <div style={{ fontSize: 11, color: '#4a6a5a', marginBottom: 16 }}>QUESTION {qIdx + 1} / {QUIZ.length}</div>
+              <div style={{ fontSize: 16, color: '#4a6a5a', marginBottom: 16 }}>QUESTION {qIdx + 1} / {QUIZ.length}</div>
               <div className="ag-quiz-q">{QUIZ[qIdx].q}</div>
               <div className="ag-quiz-opts">
                 {QUIZ[qIdx].opts.map((opt, i) => (
@@ -690,9 +690,9 @@ export default function AgentsTools() {
             </div>
           ) : (
             <div className="ag-card" style={{ textAlign: 'center', padding: 40 }}>
-              <div style={{ fontSize: 12, color: '#4a6a5a', marginBottom: 12, letterSpacing: '0.12em' }}>FINAL SCORE</div>
+              <div style={{ fontSize: 16, color: '#4a6a5a', marginBottom: 12, letterSpacing: '0.12em' }}>FINAL SCORE</div>
               <div className="ag-score-num">{score}/{QUIZ.length}</div>
-              <div style={{ fontSize: 14, color: '#6a8a7a', marginTop: 8 }}>
+              <div style={{ fontSize: 16, color: '#6a8a7a', marginTop: 8 }}>
                 {score === QUIZ.length ? 'Perfect! You understand agents deeply. 🤖' : score >= 2 ? 'Good work! Revisit the tricky sections. 📚' : 'Keep exploring — agents take time to click. 💪'}
               </div>
               <button className="ag-quiz-next" style={{ marginTop: 24 }} onClick={() => { setQIdx(0); setChosen(null); setScore(0); setDone(false) }}>Retake Quiz ↺</button>
