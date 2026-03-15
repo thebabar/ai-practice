@@ -78,9 +78,42 @@ const AgentLoopIcon = () => (
   </svg>
 )
 
+const TemperatureIcon = () => (
+  <svg width="30" height="30" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
+    <rect x="20" y="12" width="10" height="46" rx="5" fill="rgba(236,72,153,0.15)" stroke="#ec4899" strokeWidth="2"/>
+    <circle cx="25" cy="65" r="12" fill="rgba(236,72,153,0.15)" stroke="#ec4899" strokeWidth="2"/>
+    <rect x="22.5" y="36" width="5" height="29" rx="2.5" fill="#ec4899"/>
+    <circle cx="25" cy="65" r="8" fill="#ec4899"/>
+    <line x1="20" y1="22" x2="14" y2="22" stroke="#ec4899" strokeWidth="1.5" strokeOpacity="0.5"/>
+    <line x1="20" y1="34" x2="17" y2="34" stroke="#ec4899" strokeWidth="1.5" strokeOpacity="0.5"/>
+    <line x1="20" y1="46" x2="14" y2="46" stroke="#ec4899" strokeWidth="1.5" strokeOpacity="0.5"/>
+    <rect x="46" y="52" width="8" height="16" rx="2" fill="rgba(236,72,153,0.25)" stroke="#ec4899" strokeWidth="1.5"/>
+    <rect x="58" y="36" width="8" height="32" rx="2" fill="rgba(236,72,153,0.5)" stroke="#ec4899" strokeWidth="1.5"/>
+    <rect x="70" y="44" width="8" height="24" rx="2" fill="rgba(236,72,153,0.35)" stroke="#ec4899" strokeWidth="1.5"/>
+  </svg>
+)
+
+const VectorEmbeddingsIcon = () => (
+  <svg width="30" height="30" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="42" cy="52" r="3" fill="#f97316"/>
+    <line x1="42" y1="52" x2="78" y2="52" stroke="#f97316" strokeWidth="2" strokeOpacity="0.7"/>
+    <polygon points="78,49 85,52 78,55" fill="#f97316" opacity="0.7"/>
+    <line x1="42" y1="52" x2="42" y2="10" stroke="#f97316" strokeWidth="2" strokeOpacity="0.7"/>
+    <polygon points="39,10 42,3 45,10" fill="#f97316" opacity="0.7"/>
+    <line x1="42" y1="52" x2="16" y2="72" stroke="#f97316" strokeWidth="2" strokeOpacity="0.45"/>
+    <polygon points="14,74 9,81 18,79" fill="#f97316" opacity="0.45"/>
+    <circle cx="66" cy="26" r="4.5" fill="#f97316" fillOpacity="0.85"/>
+    <circle cx="28" cy="32" r="3.5" fill="#f97316" fillOpacity="0.6"/>
+    <circle cx="62" cy="40" r="3.5" fill="#f97316" fillOpacity="0.7"/>
+    <circle cx="32" cy="46" r="3" fill="#f97316" fillOpacity="0.5"/>
+  </svg>
+)
+
 const ICON_MAP = {
   'token-optimization': TokenIcon,
   'agents-tools': AgentLoopIcon,
+  'temperature-sampling': TemperatureIcon,
+  'vector-embeddings': VectorEmbeddingsIcon,
 }
 
 const VISUALIZATIONS = [

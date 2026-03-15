@@ -8,22 +8,22 @@ const css = `
 
 .ve-hero { text-align: center; padding: 48px 24px 28px; position: relative; }
 .ve-hero::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 700px; height: 320px; background: radial-gradient(ellipse at 50% 0%, rgba(249,115,22,0.09) 0%, transparent 70%); pointer-events: none; }
-.ve-eyebrow { font-size: 11px; letter-spacing: 0.22em; color: #f97316; text-transform: uppercase; margin-bottom: 14px; }
+.ve-eyebrow { font-size: 16px; letter-spacing: 0.22em; color: #f97316; text-transform: uppercase; margin-bottom: 14px; }
 .ve-title { font-family: 'IBM Plex Sans', sans-serif; font-size: clamp(28px, 5vw, 52px); font-weight: 800; letter-spacing: -0.02em; color: #fff; line-height: 1.05; margin-bottom: 12px; }
 .ve-title span { color: #f97316; }
-.ve-subtitle { font-size: 14px; color: #7a6a5a; max-width: 540px; margin: 0 auto 32px; line-height: 1.8; }
+.ve-subtitle { font-size: 16px; color: #7a6a5a; max-width: 540px; margin: 0 auto 32px; line-height: 1.8; }
 
 .ve-tabs { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; padding: 0 16px 32px; }
-.ve-tab { background: transparent; border: 1px solid #2a1e12; color: #7a6a5a; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: all 0.18s; text-transform: uppercase; }
+.ve-tab { background: transparent; border: 1px solid #2a1e12; color: #7a6a5a; font-family: 'IBM Plex Mono', monospace; font-size: 16px; letter-spacing: 0.1em; padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: all 0.18s; text-transform: uppercase; }
 .ve-tab:hover { border-color: #f97316; color: #f97316; }
 .ve-tab.active { background: rgba(249,115,22,0.1); border-color: #f97316; color: #f97316; }
 
 .ve-panel { max-width: 920px; margin: 0 auto; padding: 0 20px 80px; }
 .ve-section-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 8px; }
-.ve-section-sub { font-size: 14px; color: #7a6a5a; margin-bottom: 28px; line-height: 1.8; }
+.ve-section-sub { font-size: 16px; color: #7a6a5a; margin-bottom: 28px; line-height: 1.8; }
 
 .ve-card { background: #0a0c10; border: 1px solid #1e1408; border-radius: 14px; padding: 24px; margin-bottom: 20px; }
-.ve-card-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; font-weight: 700; color: #f97316; margin-bottom: 16px; }
+.ve-card-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #f97316; margin-bottom: 16px; }
 
 /* ── What are embeddings ── */
 .word-to-vec { display: flex; align-items: center; gap: 0; flex-wrap: wrap; justify-content: center; margin: 20px 0; }
@@ -35,7 +35,7 @@ const css = `
 .analogy-box { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr; gap: 8px; align-items: center; margin: 16px 0; }
 @media (max-width: 600px) { .analogy-box { grid-template-columns: 1fr auto 1fr; } }
 .analogy-word { background: rgba(249,115,22,0.08); border: 1px solid rgba(249,115,22,0.2); border-radius: 8px; padding: 10px; text-align: center; }
-.analogy-word .aw-word { font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; font-weight: 700; color: #f97316; }
+.analogy-word .aw-word { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #f97316; }
 .analogy-word .aw-vec { font-size: 10px; color: #5a4a3a; margin-top: 4px; }
 .analogy-op { font-size: 18px; color: #5a4a3a; text-align: center; font-weight: 700; }
 .analogy-result { background: rgba(52,211,153,0.08); border: 2px solid rgba(52,211,153,0.3); border-radius: 8px; padding: 10px; text-align: center; }
@@ -67,14 +67,14 @@ const css = `
 
 /* ── Semantic Search ── */
 .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
-.search-input { flex: 1; background: #06080c; border: 1px solid #1e1408; border-radius: 8px; color: #e0e8f0; font-family: 'IBM Plex Mono', monospace; font-size: 14px; padding: 12px 16px; outline: none; transition: border-color 0.2s; }
+.search-input { flex: 1; background: #06080c; border: 1px solid #1e1408; border-radius: 8px; color: #e0e8f0; font-family: 'IBM Plex Mono', monospace; font-size: 16px; padding: 12px 16px; outline: none; transition: border-color 0.2s; }
 .search-input:focus { border-color: #f97316; }
 .search-btn { background: rgba(249,115,22,0.15); border: 1px solid #f97316; color: #f97316; font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 12px 20px; border-radius: 8px; cursor: pointer; white-space: nowrap; transition: all 0.18s; letter-spacing: 0.08em; text-transform: uppercase; }
 .search-btn:hover { background: rgba(249,115,22,0.25); }
 .search-result { display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: #06080c; border: 1px solid #1e1408; border-radius: 8px; margin-bottom: 8px; transition: all 0.3s; }
 .search-result.top { border-color: rgba(249,115,22,0.4); background: rgba(249,115,22,0.04); }
 .sr-rank { font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 700; color: #3a2a1a; width: 24px; flex-shrink: 0; }
-.sr-text { flex: 1; font-size: 13px; color: #b0a898; line-height: 1.5; }
+.sr-text { flex: 1; font-size: 16px; color: #b0a898; line-height: 1.5; }
 .sr-score-bar { width: 80px; flex-shrink: 0; }
 .sr-score-val { font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; font-weight: 700; color: #f97316; text-align: right; margin-bottom: 3px; }
 .sr-bar-bg { background: #1e1408; border-radius: 100px; height: 4px; overflow: hidden; }
@@ -90,19 +90,19 @@ const css = `
 .rag-dot { width: 40px; height: 40px; border-radius: 50%; border: 2px solid; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; margin-top: 2px; }
 .rag-body { flex: 1; padding-bottom: 20px; }
 .rag-type { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 6px; font-weight: 500; }
-.rag-content { background: #06080c; border: 1px solid #1e1408; border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #9a8878; line-height: 1.7; }
+.rag-content { background: #06080c; border: 1px solid #1e1408; border-radius: 8px; padding: 12px 16px; font-size: 16px; color: #9a8878; line-height: 1.7; }
 .rag-content strong { color: #e0e8f0; }
 .rag-connector { width: 2px; height: 24px; background: linear-gradient(#1e1408, #1e1408); margin-left: 19px; margin-bottom: 0; }
 
 /* ── Quiz ── */
 .ve-quiz-q { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 16px; line-height: 1.4; }
 .ve-quiz-opts { display: flex; flex-direction: column; gap: 8px; }
-.ve-quiz-opt { background: #06080c; border: 1px solid #1e1408; border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #9a8878; cursor: pointer; text-align: left; font-family: 'IBM Plex Mono', monospace; transition: all 0.18s; }
+.ve-quiz-opt { background: #06080c; border: 1px solid #1e1408; border-radius: 8px; padding: 12px 16px; font-size: 16px; color: #9a8878; cursor: pointer; text-align: left; font-family: 'IBM Plex Mono', monospace; transition: all 0.18s; }
 .ve-quiz-opt:hover:not(:disabled) { border-color: #f97316; color: #e0e8f0; }
 .ve-quiz-opt.correct { border-color: #34d399; background: rgba(52,211,153,0.08); color: #34d399; }
 .ve-quiz-opt.wrong   { border-color: #ef4444; background: rgba(239,68,68,0.06); color: #f87171; }
-.ve-quiz-exp { margin-top: 14px; padding: 12px; background: rgba(249,115,22,0.05); border: 1px solid rgba(249,115,22,0.18); border-radius: 8px; font-size: 13px; color: #b08060; line-height: 1.7; }
-.ve-quiz-next { margin-top: 12px; background: rgba(249,115,22,0.1); border: 1px solid #f97316; color: #f97316; font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 9px 18px; border-radius: 6px; cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.18s; }
+.ve-quiz-exp { margin-top: 14px; padding: 12px; background: rgba(249,115,22,0.05); border: 1px solid rgba(249,115,22,0.18); border-radius: 8px; font-size: 16px; color: #b08060; line-height: 1.7; }
+.ve-quiz-next { margin-top: 12px; background: rgba(249,115,22,0.1); border: 1px solid #f97316; color: #f97316; font-family: 'IBM Plex Mono', monospace; font-size: 16px; padding: 9px 18px; border-radius: 6px; cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.18s; }
 .ve-quiz-next:hover { background: rgba(249,115,22,0.2); }
 .ve-progress { background: #0a0c10; border-radius: 100px; height: 4px; margin-bottom: 20px; overflow: hidden; }
 .ve-progress-fill { height: 100%; background: linear-gradient(90deg, #f97316, #fbbf24); border-radius: 100px; transition: width 0.4s; }
