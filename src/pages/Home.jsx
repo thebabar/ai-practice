@@ -2,26 +2,26 @@ import { Link } from 'react-router-dom'
 import NavBar from '../components/NavBar.jsx'
 
 const css = `
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Cabinet+Grotesk:wght@400;500;700;800;900&display=swap');
 
-.home { min-height: 100vh; background: #050810; color: #e0e8f0; font-family: 'IBM Plex Mono', monospace; }
+.home { min-height: 100vh; background: #050810; color: #e0e8f0; font-family: 'DM Mono', monospace; }
 
 .hero { position: relative; padding: 80px 24px 64px; text-align: center; overflow: hidden; }
 .hero-glow { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 40% at 50% -10%, rgba(56,189,248,0.12) 0%, transparent 60%), radial-gradient(ellipse 40% 30% at 20% 80%, rgba(129,140,248,0.07) 0%, transparent 50%), radial-gradient(ellipse 30% 25% at 80% 70%, rgba(52,211,153,0.06) 0%, transparent 50%); pointer-events: none; }
 .hero-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(56,189,248,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,0.04) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 0%, transparent 80%); }
 
-.hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 16px; letter-spacing: 0.2em; text-transform: uppercase; color: #38bdf8; margin-bottom: 20px; padding: 6px 14px; background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.2); border-radius: 100px; }
-.hero-title { font-family: 'IBM Plex Sans', sans-serif; font-size: clamp(42px, 7vw, 88px); font-weight: 900; letter-spacing: -0.04em; line-height: 0.95; color: #fff; margin-bottom: 24px; }
+.hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #38bdf8; margin-bottom: 20px; padding: 6px 14px; background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.2); border-radius: 100px; }
+.hero-title { font-family: 'Cabinet Grotesk', sans-serif; font-size: clamp(42px, 7vw, 88px); font-weight: 900; letter-spacing: -0.04em; line-height: 0.95; color: #fff; margin-bottom: 24px; }
 .hero-title .line2 { display: block; background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #34d399 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-.hero-desc { font-size: 16px; color: #7a9bbf; max-width: 520px; margin: 0 auto 48px; line-height: 1.8; }
+.hero-desc { font-size: 14px; color: #7a9bbf; max-width: 520px; margin: 0 auto 48px; line-height: 1.8; }
 
 .hero-stats { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; }
-.hero-stat-num { font-family: 'IBM Plex Sans', sans-serif; font-size: 28px; font-weight: 900; color: #38bdf8; line-height: 1; }
-.hero-stat-lbl { font-size: 12px; color: #4a6a8a; letter-spacing: 0.12em; text-transform: uppercase; margin-top: 4px; }
+.hero-stat-num { font-family: 'Cabinet Grotesk', sans-serif; font-size: 28px; font-weight: 900; color: #38bdf8; line-height: 1; }
+.hero-stat-lbl { font-size: 10px; color: #4a6a8a; letter-spacing: 0.12em; text-transform: uppercase; margin-top: 4px; }
 
 .lab-section { max-width: 1100px; margin: 0 auto; padding: 0 24px 100px; }
 .section-header { display: flex; align-items: baseline; gap: 14px; margin-bottom: 28px; }
-.section-label { font-size: 16px; letter-spacing: 0.18em; text-transform: uppercase; color: #38bdf8; }
+.section-label { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #38bdf8; }
 .section-line { flex: 1; height: 1px; background: linear-gradient(90deg, rgba(56,189,248,0.3), transparent); }
 
 .viz-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
@@ -34,21 +34,57 @@ const css = `
 
 .card-icon-wrap { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 18px; background: var(--card-icon-bg); border: 1px solid var(--card-accent-dim); position: relative; z-index: 1; }
 .card-tag { display: inline-block; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; margin-bottom: 10px; background: var(--card-tag-bg); color: var(--card-accent); border: 1px solid var(--card-accent-dim); position: relative; z-index: 1; }
-.card-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 8px; letter-spacing: -0.02em; position: relative; z-index: 1; }
-.card-desc { font-size: 16px; color: #5a7a9a; line-height: 1.7; margin-bottom: 20px; position: relative; z-index: 1; }
+.card-title { font-family: 'Cabinet Grotesk', sans-serif; font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 8px; letter-spacing: -0.02em; position: relative; z-index: 1; }
+.card-desc { font-size: 12px; color: #5a7a9a; line-height: 1.7; margin-bottom: 20px; position: relative; z-index: 1; }
 .card-pills { display: flex; flex-wrap: wrap; gap: 6px; position: relative; z-index: 1; }
-.card-pill { font-size: 12px; color: #3a5a7a; background: rgba(255,255,255,0.03); border: 1px solid #141e35; padding: 3px 8px; border-radius: 4px; }
+.card-pill { font-size: 10px; color: #3a5a7a; background: rgba(255,255,255,0.03); border: 1px solid #141e35; padding: 3px 8px; border-radius: 4px; }
 .card-arrow { position: absolute; bottom: 24px; right: 24px; font-size: 18px; color: var(--card-accent); opacity: 0; transform: translateX(-6px); transition: all 0.2s; z-index: 1; }
 .viz-card:hover .card-arrow { opacity: 1; transform: translateX(0); }
 .coming-label { position: absolute; top: 16px; right: 16px; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: #3a5a7a; background: rgba(255,255,255,0.04); border: 1px solid #1a2744; padding: 4px 8px; border-radius: 4px; }
 
-.lab-footer { border-top: 1px solid #0d1828; padding: 28px 24px; text-align: center; font-size: 16px; color: #2a4060; letter-spacing: 0.06em; }
+.lab-footer { border-top: 1px solid #0d1828; padding: 28px 24px; text-align: center; font-size: 11px; color: #2a4060; letter-spacing: 0.06em; }
 `
 
-const VISUALIZATIONS = [
+const TokenIcon = () => (
+  <svg width="32" height="32" viewBox="0 0 160 120" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0"  y="0"  width="36" height="22" rx="4" fill="rgba(56,189,248,0.15)"  stroke="#38bdf8" strokeWidth="2"/>
+    <rect x="40" y="0"  width="28" height="22" rx="4" fill="rgba(129,140,248,0.15)" stroke="#818cf8" strokeWidth="2"/>
+    <rect x="72" y="0"  width="44" height="22" rx="4" fill="rgba(52,211,153,0.15)"  stroke="#34d399" strokeWidth="2"/>
+    <rect x="120" y="0" width="22" height="22" rx="4" fill="rgba(251,191,36,0.15)"  stroke="#fbbf24" strokeWidth="2"/>
+    <rect x="0"  y="30" width="50" height="22" rx="4" fill="rgba(249,115,22,0.15)"  stroke="#f97316" strokeWidth="2"/>
+    <rect x="54" y="30" width="30" height="22" rx="4" fill="rgba(56,189,248,0.15)"  stroke="#38bdf8" strokeWidth="2"/>
+    <rect x="88" y="30" width="52" height="22" rx="4" fill="rgba(129,140,248,0.15)" stroke="#818cf8" strokeWidth="2"/>
+    <line x1="70" y1="58" x2="70" y2="72" stroke="#38bdf8" strokeWidth="2" strokeOpacity="0.5"/>
+    <polygon points="62,72 78,72 70,82" fill="#38bdf8" opacity="0.5"/>
+    <rect x="0"  y="88" width="22" height="14" rx="3" fill="rgba(56,189,248,0.25)"  stroke="#38bdf8" strokeWidth="2"/>
+    <rect x="26" y="88" width="16" height="14" rx="3" fill="rgba(129,140,248,0.25)" stroke="#818cf8" strokeWidth="2"/>
+    <rect x="46" y="88" width="28" height="14" rx="3" fill="rgba(52,211,153,0.25)"  stroke="#34d399" strokeWidth="2"/>
+    <rect x="78" y="88" width="14" height="14" rx="3" fill="rgba(251,191,36,0.25)"  stroke="#fbbf24" strokeWidth="2"/>
+    <rect x="96" y="88" width="20" height="14" rx="3" fill="rgba(249,115,22,0.25)"  stroke="#f97316" strokeWidth="2"/>
+  </svg>
+)
+
+const AgentLoopIcon = () => (
+  <svg width="28" height="28" viewBox="-80 -80 160 160" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="ag-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+        <path d="M2 1L8 5L2 9" fill="none" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </marker>
+    </defs>
+    <path d="M 0 -68 A 68 68 0 1 1 -48 48" fill="none" stroke="#34d399" strokeWidth="7" strokeLinecap="round" markerEnd="url(#ag-arrow)"/>
+    <path d="M 0 40 A 40 40 0 1 0 28 -28" fill="none" stroke="#34d399" strokeWidth="4" strokeLinecap="round" strokeOpacity="0.4" markerEnd="url(#ag-arrow)"/>
+    <circle cx="0" cy="0" r="10" fill="#34d399" fillOpacity="0.15" stroke="#34d399" strokeWidth="2"/>
+    <circle cx="0" cy="0" r="4" fill="#34d399"/>
+  </svg>
+)
+
+const ICON_MAP = {
+  '/token-optimization': <TokenIcon />,
+  '/agents-tools': <AgentLoopIcon />,
+}
   {
     path: '/token-optimization',
-    icon: '⚡',
+    icon: null,
     tag: 'LLM Fundamentals',
     title: 'Token Optimization',
     desc: 'Understand how LLMs tokenize text, what tokens cost, and how to dramatically reduce your API spend.',
@@ -59,7 +95,7 @@ const VISUALIZATIONS = [
   },
   {
     path: '/agents-tools',
-    icon: '🤖',
+    icon: null,
     tag: 'Agentic AI',
     title: 'Agents, Tools & Context',
     desc: 'See how AI agents think in loops, call tools, and how context engineering shapes every decision they make.',
@@ -75,14 +111,6 @@ const VISUALIZATIONS = [
     accent: '#818cf8', accentDim: 'rgba(129,140,248,0.2)', iconBg: 'rgba(129,140,248,0.1)',
     glow: 'radial-gradient(ellipse at 0% 0%, rgba(129,140,248,0.08) 0%, transparent 60%)',
     glowColor: 'rgba(129,140,248,0.08)', ready: false,
-  },
-  {
-    path: null, icon: '🎯', tag: 'Transformers', title: 'Attention Mechanism',
-    desc: 'Visualize how transformer attention works — see which tokens attend to which, and why it matters.',
-    pills: ['Self-Attention', 'Multi-Head', 'Q/K/V Matrices', 'Positional Encoding'],
-    accent: '#fbbf24', accentDim: 'rgba(251,191,36,0.2)', iconBg: 'rgba(251,191,36,0.1)',
-    glow: 'radial-gradient(ellipse at 0% 0%, rgba(251,191,36,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(251,191,36,0.08)', ready: false,
   },
   {
     path: null, icon: '🔢', tag: 'Embeddings', title: 'Vector Embeddings',
@@ -135,7 +163,7 @@ export default function Home() {
           {ready.map(v => (
             <Link key={v.title} to={v.path} className="viz-card"
               style={{ '--card-accent': v.accent, '--card-accent-dim': v.accentDim, '--card-icon-bg': v.iconBg, '--card-glow': v.glow, '--card-glow-color': v.glowColor, '--card-tag-bg': v.iconBg }}>
-              <div className="card-icon-wrap">{v.icon}</div>
+              <div className="card-icon-wrap">{ICON_MAP[v.path] || v.icon}</div>
               <div className="card-tag">{v.tag}</div>
               <div className="card-title">{v.title}</div>
               <div className="card-desc">{v.desc}</div>
@@ -154,7 +182,7 @@ export default function Home() {
             <div key={v.title} className="viz-card coming-soon"
               style={{ '--card-accent': v.accent, '--card-accent-dim': v.accentDim, '--card-icon-bg': v.iconBg, '--card-glow': v.glow, '--card-glow-color': v.glowColor, '--card-tag-bg': v.iconBg }}>
               <div className="coming-label">Coming Soon</div>
-              <div className="card-icon-wrap">{v.icon}</div>
+              <div className="card-icon-wrap">{ICON_MAP[v.path] || v.icon}</div>
               <div className="card-tag">{v.tag}</div>
               <div className="card-title">{v.title}</div>
               <div className="card-desc">{v.desc}</div>
