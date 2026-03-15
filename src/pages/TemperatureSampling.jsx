@@ -85,6 +85,11 @@ const css = `
 .ts-progress { background: #0a080e; border-radius: 100px; height: 4px; margin-bottom: 20px; overflow: hidden; }
 .ts-progress-fill { height: 100%; background: linear-gradient(90deg, #ec4899, #f97316); border-radius: 100px; transition: width 0.4s; }
 .ts-score-num { font-family: 'IBM Plex Sans', sans-serif; font-size: 64px; font-weight: 800; color: #ec4899; text-align: center; }
+
+.ts-diff-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 100px; border: 1px solid; margin-bottom: 14px; font-weight: 500; }
+.ts-diff-badge.easy   { color: #34d399; border-color: rgba(52,211,153,0.35);  background: rgba(52,211,153,0.08); }
+.ts-diff-badge.medium { color: #fbbf24; border-color: rgba(251,191,36,0.35);  background: rgba(251,191,36,0.08); }
+.ts-diff-badge.hard   { color: #f87171; border-color: rgba(248,113,113,0.35); background: rgba(239,68,68,0.08); }
 `
 
 // ── Token vocabulary with base logits ─────────────────────────────────────────
@@ -189,31 +194,116 @@ const TEMP_EXAMPLES = [
 
 // ── Quiz ──────────────────────────────────────────────────────────────────────
 const QUIZ = [
+  // easy
   {
+    id: 0, difficulty: 'easy',
     q: 'What happens to an LLM\'s output when you set temperature to 0?',
     opts: ['The model refuses to generate text', 'The model always picks the highest-probability token — output becomes deterministic', 'The model generates completely random text', 'The model shortens its responses'],
     correct: 1,
     explanation: 'At temperature=0, the model always picks the single most likely next token (greedy decoding). The output is deterministic — you\'ll get the same result every time. Useful for factual tasks, but produces repetitive, predictable text.',
   },
   {
+    id: 1, difficulty: 'easy',
     q: 'Top-K sampling with K=3 means:',
     opts: ['The model only generates 3 tokens total', 'Only the 3 most probable tokens are considered at each step', 'The temperature is divided by 3', 'The model runs 3 sampling passes and picks the best'],
     correct: 1,
     explanation: 'Top-K restricts sampling to the K highest-probability tokens at each step, zeroing out all others. This prevents the model from ever picking very unlikely tokens, while still allowing some variety among the top candidates.',
   },
   {
+    id: 2, difficulty: 'easy',
     q: 'What does Top-P (nucleus) sampling do differently than Top-K?',
     opts: ['It uses probability instead of logits', 'It selects the smallest set of tokens whose cumulative probability exceeds P', 'It always includes exactly P tokens', 'It multiplies all probabilities by P'],
     correct: 1,
     explanation: 'Top-P (nucleus) sampling dynamically picks the smallest group of tokens that together account for P% of the probability mass. Unlike Top-K which uses a fixed count, Top-P adapts — using more tokens when the distribution is flat, fewer when one token dominates.',
   },
   {
+    id: 3, difficulty: 'easy',
     q: 'You\'re building a customer support bot that needs consistent, accurate answers. What settings would you choose?',
     opts: ['Temperature=2.0, Top-P=0.99 for maximum creativity', 'Temperature=0.1–0.3, Top-K=10–20 for predictable, accurate responses', 'Temperature=1.0, no Top-K or Top-P constraints', 'Temperature=0.7, Top-P=0.95 for creative storytelling'],
     correct: 1,
     explanation: 'For factual, consistent outputs like customer support, use low temperature (0.1–0.3) to keep responses predictable and accurate. Adding a low Top-K further limits the token pool to safe, high-probability choices — reducing hallucination risk.',
   },
+  // medium
+  {
+    id: 4, difficulty: 'medium',
+    q: 'What is the mathematical effect of dividing logits by a temperature value less than 1.0?',
+    opts: ['It makes all logits equal, flattening the distribution', 'It amplifies differences between logits, sharpening the distribution so high-probability tokens dominate more', 'It randomly shuffles the logit values', 'It adds noise to prevent repetitive outputs'],
+    correct: 1,
+    explanation: 'Dividing by a small temperature (e.g., 0.3) makes logit differences larger. After softmax, the token with the highest logit gets an even larger probability share while lower-ranked tokens shrink toward zero. Conversely, high temperature (e.g., 2.0) compresses differences, flattening the distribution toward uniform.',
+  },
+  {
+    id: 5, difficulty: 'medium',
+    q: 'You set Top-P=0.9 and the model\'s distribution is very peaked (one token has 95% probability). How many tokens will be in the nucleus?',
+    opts: ['All tokens, because the distribution is peaked', 'Just 1 token — it already covers 95% > 90% of probability mass', 'Exactly 9 tokens (10% of a typical 90-token vocabulary)', 'The nucleus size cannot be predicted without more information'],
+    correct: 1,
+    explanation: 'Top-P takes the smallest set of tokens that together exceed the threshold P. If the top token has 95% probability and P=0.9, then one token already exceeds 90% — so the nucleus contains only that single token. Top-P dynamically adapts to the distribution shape.',
+  },
+  {
+    id: 6, difficulty: 'medium',
+    q: 'A colleague reports that their LLM responses are highly varied but sometimes incoherent. They\'re using temp=1.8, top_k=50, top_p=0.98. What is the MOST impactful change to improve coherence while keeping variety?',
+    opts: ['Increase top_k to 100', 'Lower temperature to 0.9–1.1 — it\'s the primary driver of incoherence at 1.8', 'Set top_p to 1.0 to use all tokens', 'Switch to a smaller model'],
+    correct: 1,
+    explanation: 'Temperature 1.8 is very high — it nearly flattens the distribution, giving roughly equal probability to many tokens including low-quality ones. Reducing to 0.9–1.1 is the single most impactful change. Top-K and Top-P are secondary controls that refine the distribution after temperature is set.',
+  },
+  {
+    id: 7, difficulty: 'medium',
+    q: 'What does it mean for sampling to be "stochastic" vs "deterministic"?',
+    opts: ['Stochastic uses a random number generator; deterministic always produces the same output given the same input', 'Stochastic is faster; deterministic is slower', 'Stochastic works only with Top-P; deterministic works only with Top-K', 'Stochastic models are fine-tuned; deterministic models are base models'],
+    correct: 0,
+    explanation: 'Deterministic decoding (temperature=0, greedy) always picks the argmax token, so the same prompt always produces the same output. Stochastic sampling (temperature > 0) introduces a random draw from the probability distribution — the same prompt can produce different outputs each run. This is why setting a random seed ensures reproducibility in stochastic settings.',
+  },
+  // hard
+  {
+    id: 8, difficulty: 'hard',
+    q: 'You apply Top-K=5 and Top-P=0.8 together. The top-5 tokens cover 60% of probability mass. Which tokens form the actual sampling pool?',
+    opts: ['The top-5 tokens (Top-K takes precedence)', 'The top-5 tokens, but they are renormalized before sampling — Top-P then has no further effect since 60% < 80%', 'The smallest set of top-5 tokens that covers 80% — but since 60% < 80%, all 5 tokens are kept', 'Additional tokens beyond top-5 are added until 80% is reached'],
+    correct: 2,
+    explanation: 'When both are applied, Top-K first restricts to K tokens. Then Top-P checks if those K tokens already cover P% of mass — if not, all K tokens are kept (you can\'t go below what Top-K already selected). Since 60% < 80%, Top-P doesn\'t further reduce the pool — all 5 tokens are kept and renormalized. Top-P only reduces the pool further if it would include fewer than K tokens.',
+  },
+  {
+    id: 9, difficulty: 'hard',
+    q: 'What is "repetition penalty" and what problem does it solve that temperature alone cannot?',
+    opts: ['It penalizes long responses to save tokens', 'It reduces the probability of tokens that already appeared in the output, preventing looping and repetitive text patterns', 'It increases temperature for already-generated tokens', 'It prevents the model from repeating the user\'s prompt verbatim'],
+    correct: 1,
+    explanation: 'Even at moderate temperatures, LLMs can fall into "degenerate loops" — repeating the same phrase or sentence. Temperature alone doesn\'t prevent this because the repeated token may still have the highest probability. Repetition penalty (or presence/frequency penalties in OpenAI\'s API) explicitly reduces the logit of any token that already appeared in the output, breaking the loop.',
+  },
+  {
+    id: 10, difficulty: 'hard',
+    q: 'An LLM with temperature=1.0 produces probabilities [0.5, 0.3, 0.15, 0.05] for tokens [A, B, C, D]. You sample 1000 times. Approximately how many times would token C be selected?',
+    opts: ['Always 0 times — only the top token is sampled', 'About 150 times', 'About 500 times', 'Exactly 15 times'],
+    correct: 1,
+    explanation: 'At temperature=1.0 sampling uses the raw probabilities directly. Token C has probability 0.15, so in 1000 samples it appears ~150 times. This demonstrates that low-probability tokens are selected regularly at temperature=1.0 — not eliminated like in Top-K. In 1000 trials: A≈500, B≈300, C≈150, D≈50.',
+  },
+  {
+    id: 11, difficulty: 'hard',
+    q: 'In beam search decoding (an alternative to sampling), the model maintains B candidate sequences and expands each at every step. What is the main trade-off vs. temperature sampling?',
+    opts: ['Beam search is always worse than sampling', 'Beam search finds higher-probability (more "optimal") sequences but is computationally expensive (O(B×V) per step) and tends to produce generic, safe outputs', 'Beam search uses temperature internally', 'Beam search works only for classification tasks'],
+    correct: 1,
+    explanation: 'Beam search systematically explores the B most probable continuations at each step, producing sequences with higher log-probability than greedy. But it is B times more expensive, scales poorly to long sequences, and tends to produce short, generic, high-probability outputs — lacking the diversity of sampling. Modern LLMs usually prefer sampling + temperature over beam search for open-ended generation.',
+  },
 ]
+
+const DIFFICULTY_ORDER = ['easy', 'medium', 'hard']
+const SESSION_SIZE = 6
+
+function bumpDifficulty(current, correct) {
+  const idx = DIFFICULTY_ORDER.indexOf(current)
+  return correct ? DIFFICULTY_ORDER[Math.min(idx + 1, 2)]
+                 : DIFFICULTY_ORDER[Math.max(idx - 1, 0)]
+}
+
+function pickQuestion(targetDiff, usedIds, quiz) {
+  let pool = quiz.filter(q => q.difficulty === targetDiff && !usedIds.has(q.id))
+  if (!pool.length) {
+    const idx = DIFFICULTY_ORDER.indexOf(targetDiff)
+    for (const alt of [DIFFICULTY_ORDER[idx+1], DIFFICULTY_ORDER[idx-1]].filter(Boolean)) {
+      pool = quiz.filter(q => q.difficulty === alt && !usedIds.has(q.id))
+      if (pool.length) break
+    }
+  }
+  if (!pool.length) pool = quiz.filter(q => q.difficulty === targetDiff)
+  return pool[Math.floor(Math.random() * pool.length)]
+}
 
 // ═════════════════════════════════════════════════════════════════════════════
 export default function TemperatureSampling() {
@@ -245,10 +335,14 @@ export default function TemperatureSampling() {
   const samplerRef = useRef(null)
 
   // Quiz
-  const [qIdx, setQIdx] = useState(0)
+  const nextDiffRef = useRef('easy')
+  const [currentQ, setCurrentQ] = useState(null)
+  const [qNum, setQNum] = useState(0)
   const [chosen, setChosen] = useState(null)
   const [score, setScore] = useState(0)
   const [done, setDone] = useState(false)
+  const [difficulty, setDifficulty] = useState('easy')
+  const [usedIds, setUsedIds] = useState(new Set())
 
   const PROMPTS = ['Once upon a time in', 'The scientist discovered that', 'In the distant future,', 'The old castle stood']
   const [promptIdx, setPromptIdx] = useState(0)
@@ -273,14 +367,41 @@ export default function TemperatureSampling() {
 
   useEffect(() => () => clearTimeout(samplerRef.current), [])
 
+  useEffect(() => {
+    const q = pickQuestion('easy', new Set(), QUIZ)
+    setCurrentQ(q)
+    setUsedIds(new Set([q.id]))
+  }, [])
+
   function handleQuiz(idx) {
     if (chosen !== null) return
     setChosen(idx)
-    if (idx === QUIZ[qIdx].correct) setScore(s => s + 1)
+    const correct = idx === currentQ.correct
+    if (correct) setScore(s => s + 1)
+    const newDiff = bumpDifficulty(currentQ.difficulty, correct)
+    nextDiffRef.current = newDiff
+    setDifficulty(newDiff)
   }
+
   function nextQ() {
-    if (qIdx + 1 >= QUIZ.length) { setDone(true); return }
-    setQIdx(q => q + 1); setChosen(null)
+    if (qNum + 1 >= SESSION_SIZE) { setDone(true); return }
+    const next = pickQuestion(nextDiffRef.current, usedIds, QUIZ)
+    setUsedIds(prev => new Set([...prev, next.id]))
+    setCurrentQ(next)
+    setQNum(n => n + 1)
+    setChosen(null)
+  }
+
+  function retake() {
+    nextDiffRef.current = 'easy'
+    const q = pickQuestion('easy', new Set(), QUIZ)
+    setCurrentQ(q)
+    setUsedIds(new Set([q.id]))
+    setQNum(0)
+    setChosen(null)
+    setScore(0)
+    setDone(false)
+    setDifficulty('easy')
   }
 
   // nucleus cumulative breakdown
@@ -678,33 +799,38 @@ export default function TemperatureSampling() {
           <p className="ts-section-sub">Test your understanding of temperature and sampling strategies.</p>
           {!done ? (
             <div className="ts-card">
-              <div className="ts-progress"><div className="ts-progress-fill" style={{ width: `${(qIdx / QUIZ.length) * 100}%` }} /></div>
-              <div style={{ fontSize: 12, color: '#5a4a5a', marginBottom: 16 }}>QUESTION {qIdx + 1} / {QUIZ.length}</div>
-              <div className="ts-quiz-q">{QUIZ[qIdx].q}</div>
-              <div className="ts-quiz-opts">
-                {QUIZ[qIdx].opts.map((opt, i) => (
-                  <button key={i} disabled={chosen !== null}
-                    className={`ts-quiz-opt${chosen !== null && i === QUIZ[qIdx].correct ? ' correct' : ''}${chosen === i && i !== QUIZ[qIdx].correct ? ' wrong' : ''}`}
-                    onClick={() => handleQuiz(i)}>
-                    {['A','B','C','D'][i]}. {opt}
-                  </button>
-                ))}
-              </div>
-              {chosen !== null && (
+              {currentQ && (
                 <>
-                  <div className="ts-quiz-exp">{QUIZ[qIdx].explanation}</div>
-                  <button className="ts-quiz-next" onClick={nextQ}>{qIdx + 1 < QUIZ.length ? 'Next Question →' : 'See Results →'}</button>
+                  <div className="ts-progress"><div className="ts-progress-fill" style={{ width: `${(qNum / SESSION_SIZE) * 100}%` }} /></div>
+                  <div style={{ fontSize: 12, color: '#5a4a5a', marginBottom: 16 }}>QUESTION {qNum + 1} / {SESSION_SIZE}</div>
+                  <span className={`ts-diff-badge ${currentQ.difficulty}`}>⬤ {currentQ.difficulty}</span>
+                  <div className="ts-quiz-q">{currentQ.q}</div>
+                  <div className="ts-quiz-opts">
+                    {currentQ.opts.map((opt, i) => (
+                      <button key={i} disabled={chosen !== null}
+                        className={`ts-quiz-opt${chosen !== null && i === currentQ.correct ? ' correct' : ''}${chosen === i && i !== currentQ.correct ? ' wrong' : ''}`}
+                        onClick={() => handleQuiz(i)}>
+                        {['A','B','C','D'][i]}. {opt}
+                      </button>
+                    ))}
+                  </div>
+                  {chosen !== null && (
+                    <>
+                      <div className="ts-quiz-exp">{currentQ.explanation}</div>
+                      <button className="ts-quiz-next" onClick={nextQ}>{qNum + 1 < SESSION_SIZE ? 'Next Question →' : 'See Results →'}</button>
+                    </>
+                  )}
                 </>
               )}
             </div>
           ) : (
             <div className="ts-card" style={{ textAlign: 'center', padding: 40 }}>
               <div style={{ fontSize: 12, color: '#5a4a5a', marginBottom: 12, letterSpacing: '0.12em' }}>FINAL SCORE</div>
-              <div className="ts-score-num">{score}/{QUIZ.length}</div>
+              <div className="ts-score-num">{score}/{SESSION_SIZE}</div>
               <div style={{ fontSize: 14, color: '#7a5a6a', marginTop: 8 }}>
-                {score === QUIZ.length ? 'Perfect! You understand sampling deeply. 🎉' : score >= 2 ? 'Good work! Review the tricky sections. 📚' : 'Keep exploring — sampling strategies take time to click. 💪'}
+                {score >= SESSION_SIZE ? 'Perfect! You understand sampling deeply. 🎉' : score >= SESSION_SIZE / 2 ? 'Good work! Review the tricky sections. 📚' : 'Keep exploring — sampling strategies take time to click. 💪'}
               </div>
-              <button className="ts-quiz-next" style={{ marginTop: 24 }} onClick={() => { setQIdx(0); setChosen(null); setScore(0); setDone(false) }}>Retake Quiz ↺</button>
+              <button className="ts-quiz-next" style={{ marginTop: 24 }} onClick={retake}>Retake Quiz ↺</button>
             </div>
           )}
         </div>

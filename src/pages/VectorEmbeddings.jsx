@@ -107,6 +107,11 @@ const css = `
 .ve-progress { background: #0a0c10; border-radius: 100px; height: 4px; margin-bottom: 20px; overflow: hidden; }
 .ve-progress-fill { height: 100%; background: linear-gradient(90deg, #f97316, #fbbf24); border-radius: 100px; transition: width 0.4s; }
 .ve-score-num { font-family: 'IBM Plex Sans', sans-serif; font-size: 64px; font-weight: 800; color: #f97316; text-align: center; }
+
+.ve-diff-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 100px; border: 1px solid; margin-bottom: 14px; font-weight: 500; }
+.ve-diff-badge.easy   { color: #34d399; border-color: rgba(52,211,153,0.35);  background: rgba(52,211,153,0.08); }
+.ve-diff-badge.medium { color: #fbbf24; border-color: rgba(251,191,36,0.35);  background: rgba(251,191,36,0.08); }
+.ve-diff-badge.hard   { color: #f87171; border-color: rgba(248,113,113,0.35); background: rgba(239,68,68,0.08); }
 `
 
 // ── Word vectors (simplified 8-dim) ──────────────────────────────────────────
@@ -211,31 +216,116 @@ const RAG_STEPS = [
 
 // ── Quiz ──────────────────────────────────────────────────────────────────────
 const QUIZ = [
+  // easy
   {
+    id: 0, difficulty: 'easy',
     q: 'What is a vector embedding?',
     opts: ['A compressed image format used in AI', 'A numerical representation of data that captures semantic meaning', 'A type of neural network layer', 'A method for encrypting text data'],
     correct: 1,
     explanation: 'An embedding is a dense vector of numbers that represents data (text, images, etc.) in a way that captures semantic meaning. Similar concepts end up close together in this vector space.',
   },
   {
+    id: 1, difficulty: 'easy',
     q: 'What does "king − man + woman ≈ queen" demonstrate?',
     opts: ['That embeddings are just random numbers', 'That vector arithmetic can capture semantic relationships and analogies', 'That all royal words are stored near each other by coincidence', 'That LLMs memorize every word combination'],
     correct: 1,
     explanation: 'This famous example shows that embedding spaces encode semantic relationships as geometric directions. The "royalty" direction is consistent across genders — so subtracting "man" and adding "woman" navigates to "queen".',
   },
   {
+    id: 2, difficulty: 'easy',
     q: 'What is cosine similarity used for in embeddings?',
     opts: ['Measuring how long a vector is', 'Measuring the angle between two vectors to determine semantic similarity', 'Compressing vectors to save storage space', 'Training the embedding model on new data'],
     correct: 1,
     explanation: 'Cosine similarity measures the cosine of the angle between two vectors, ranging from -1 to 1. A score near 1 means the vectors point in the same direction — semantically similar. It\'s preferred over Euclidean distance because it\'s length-independent.',
   },
   {
+    id: 3, difficulty: 'easy',
     q: 'In Retrieval-Augmented Generation (RAG), what role do embeddings play?',
     opts: ['They generate the final answer directly', 'They translate the text into another language first', 'They convert queries and documents into vectors for fast similarity search', 'They fine-tune the LLM on new documents'],
     correct: 2,
     explanation: 'In RAG, both the query and all documents are embedded into vectors. At query time, the system finds the most semantically similar document chunks using vector similarity search, then passes them as context to the LLM — grounding its answer in real data.',
   },
+  // medium
+  {
+    id: 4, difficulty: 'medium',
+    q: 'Why is cosine similarity preferred over Euclidean distance for comparing text embeddings?',
+    opts: ['Cosine similarity is faster to compute', 'Cosine similarity is length-independent — a short and long document on the same topic still score high', 'Euclidean distance cannot handle negative numbers', 'Cosine similarity works only in 2D space'],
+    correct: 1,
+    explanation: 'Euclidean distance is affected by vector magnitude — a longer document would have a larger magnitude and appear "far" from a short one even if they discuss the same topic. Cosine similarity measures the angle between vectors, ignoring magnitude, making it robust to length differences.',
+  },
+  {
+    id: 5, difficulty: 'medium',
+    q: 'In a typical production embedding model (e.g., text-embedding-3), how many dimensions does a single vector have?',
+    opts: ['8 dimensions', '64 dimensions', '768–3072 dimensions', '1 million dimensions'],
+    correct: 2,
+    explanation: 'Modern embedding models produce vectors with hundreds to thousands of dimensions (e.g., 768 for BERT, 1536 for OpenAI text-embedding-3-small, 3072 for the large variant). Each dimension captures a different latent feature. Higher dimensions generally mean more expressive embeddings but higher storage and compute costs.',
+  },
+  {
+    id: 6, difficulty: 'medium',
+    q: 'What is a "vector database" and why is it needed for semantic search at scale?',
+    opts: ['A database that stores only numbers, not text', 'A specialized store that indexes high-dimensional vectors for fast approximate nearest-neighbor search', 'A database that converts text to vectors on the fly', 'A distributed file system for storing embedding model weights'],
+    correct: 1,
+    explanation: 'A standard SQL or key-value database cannot efficiently find the most similar vector among millions of candidates — brute-force comparison would take too long. Vector databases (Pinecone, Weaviate, Qdrant, pgvector) use specialized indexes like HNSW or IVF to find approximate nearest neighbors in milliseconds.',
+  },
+  {
+    id: 7, difficulty: 'medium',
+    q: 'What is "semantic chunking" in a RAG pipeline and why does it matter?',
+    opts: ['Compressing embeddings to use less memory', 'Splitting documents into semantically coherent pieces so each chunk represents a complete idea', 'Translating documents before embedding them', 'Filtering out irrelevant documents before embedding'],
+    correct: 1,
+    explanation: 'If you split a document mid-sentence or mid-paragraph, each chunk may lack context and embed poorly. Semantic chunking splits on natural boundaries (paragraphs, sections, sentences) to ensure each chunk represents a complete idea. Better chunks lead to better retrieval relevance.',
+  },
+  // hard
+  {
+    id: 8, difficulty: 'hard',
+    q: 'What problem does "dimensionality reduction" (e.g., PCA, UMAP) solve when working with embeddings?',
+    opts: ['It makes embedding models faster to train', 'It projects high-dimensional vectors into 2D/3D for visualization while preserving local neighborhood structure', 'It increases the accuracy of cosine similarity calculations', 'It removes duplicate embeddings from the vector store'],
+    correct: 1,
+    explanation: 'Humans can\'t visualize 1536-dimensional space. PCA and UMAP reduce dimensions to 2D or 3D while trying to preserve the relative distances between points (local and global structure). The resulting plot lets you visually inspect how concepts cluster — though some information is always lost in the compression.',
+  },
+  {
+    id: 9, difficulty: 'hard',
+    q: 'You embed a query "best Italian food in NYC" and retrieve 5 documents. Document #1 scores 0.97 similarity. What risk should you investigate?',
+    opts: ['The score is too high — something must be wrong with the model', 'The document may be semantically similar but factually outdated or wrong — high similarity doesn\'t guarantee factual accuracy', 'The query was tokenized incorrectly', 'You should use Euclidean distance instead'],
+    correct: 1,
+    explanation: 'High cosine similarity means the document\'s meaning aligns with the query — but it says nothing about the document\'s accuracy, recency, or authority. A high-scoring document could be a 10-year-old blog post or contain incorrect information. RAG systems need metadata filtering and freshness checks alongside similarity scores.',
+  },
+  {
+    id: 10, difficulty: 'hard',
+    q: 'What is "embedding drift" and why does it cause problems in production RAG systems?',
+    opts: ['Embeddings becoming larger over time due to repeated indexing', 'When a newer embedding model produces vectors in a different space than the model used to index existing documents', 'CPU/GPU memory issues when storing large numbers of vectors', 'Gradual degradation of the vector database index'],
+    correct: 1,
+    explanation: 'When you upgrade your embedding model, the new model lives in a fundamentally different vector space — a query embedded by model v2 cannot be meaningfully compared to documents embedded by model v1. You must re-embed all documents with the new model before switching. Mixing embeddings from different models silently destroys retrieval quality.',
+  },
+  {
+    id: 11, difficulty: 'hard',
+    q: 'In a RAG system with 1 million documents, you notice the top retrieved chunks are always from the same 100 documents regardless of the query. What is the most likely cause?',
+    opts: ['The vector database is running out of memory', 'Those 100 documents have abnormally long text, giving them larger vector magnitudes that dominate cosine similarity', 'The embedding model was not trained on enough data', 'The query router is caching results'],
+    correct: 1,
+    explanation: 'Although cosine similarity is theoretically length-independent, in practice very long documents that have been chunked into many overlapping segments — or documents with generic, high-frequency language — can dominate retrieval. This is a "retrieval bias" issue. Solutions include max-marginal-relevance reranking, chunk normalization, and filtering by document metadata.',
+  },
 ]
+
+const DIFFICULTY_ORDER = ['easy', 'medium', 'hard']
+const SESSION_SIZE = 6
+
+function bumpDifficulty(current, correct) {
+  const idx = DIFFICULTY_ORDER.indexOf(current)
+  return correct ? DIFFICULTY_ORDER[Math.min(idx + 1, 2)]
+                 : DIFFICULTY_ORDER[Math.max(idx - 1, 0)]
+}
+
+function pickQuestion(targetDiff, usedIds, quiz) {
+  let pool = quiz.filter(q => q.difficulty === targetDiff && !usedIds.has(q.id))
+  if (!pool.length) {
+    const idx = DIFFICULTY_ORDER.indexOf(targetDiff)
+    for (const alt of [DIFFICULTY_ORDER[idx+1], DIFFICULTY_ORDER[idx-1]].filter(Boolean)) {
+      pool = quiz.filter(q => q.difficulty === alt && !usedIds.has(q.id))
+      if (pool.length) break
+    }
+  }
+  if (!pool.length) pool = quiz.filter(q => q.difficulty === targetDiff)
+  return pool[Math.floor(Math.random() * pool.length)]
+}
 
 // ═════════════════════════════════════════════════════════════════════════════
 export default function VectorEmbeddings() {
@@ -256,10 +346,14 @@ export default function VectorEmbeddings() {
   const [searchResults, setSearchResults] = useState([])
 
   // quiz
-  const [qIdx, setQIdx] = useState(0)
+  const nextDiffRef = useRef('easy')
+  const [currentQ, setCurrentQ] = useState(null)
+  const [qNum, setQNum] = useState(0)
   const [chosen, setChosen] = useState(null)
   const [score, setScore] = useState(0)
   const [done, setDone] = useState(false)
+  const [difficulty, setDifficulty] = useState('easy')
+  const [usedIds, setUsedIds] = useState(new Set())
 
   useEffect(() => {
     const order = QUERIES[activeQuery]
@@ -269,14 +363,41 @@ export default function VectorEmbeddings() {
     })))
   }, [activeQuery])
 
+  useEffect(() => {
+    const q = pickQuestion('easy', new Set(), QUIZ)
+    setCurrentQ(q)
+    setUsedIds(new Set([q.id]))
+  }, [])
+
   function handleQuiz(idx) {
     if (chosen !== null) return
     setChosen(idx)
-    if (idx === QUIZ[qIdx].correct) setScore(s => s + 1)
+    const correct = idx === currentQ.correct
+    if (correct) setScore(s => s + 1)
+    const newDiff = bumpDifficulty(currentQ.difficulty, correct)
+    nextDiffRef.current = newDiff
+    setDifficulty(newDiff)
   }
+
   function nextQ() {
-    if (qIdx + 1 >= QUIZ.length) { setDone(true); return }
-    setQIdx(q => q + 1); setChosen(null)
+    if (qNum + 1 >= SESSION_SIZE) { setDone(true); return }
+    const next = pickQuestion(nextDiffRef.current, usedIds, QUIZ)
+    setUsedIds(prev => new Set([...prev, next.id]))
+    setCurrentQ(next)
+    setQNum(n => n + 1)
+    setChosen(null)
+  }
+
+  function retake() {
+    nextDiffRef.current = 'easy'
+    const q = pickQuestion('easy', new Set(), QUIZ)
+    setCurrentQ(q)
+    setUsedIds(new Set([q.id]))
+    setQNum(0)
+    setChosen(null)
+    setScore(0)
+    setDone(false)
+    setDifficulty('easy')
   }
 
   const vec = WORDS[selectedWord] || []
@@ -628,33 +749,38 @@ export default function VectorEmbeddings() {
           <p className="ve-section-sub">Test your understanding of vector embeddings, similarity, and RAG.</p>
           {!done ? (
             <div className="ve-card">
-              <div className="ve-progress"><div className="ve-progress-fill" style={{ width: `${(qIdx / QUIZ.length) * 100}%` }} /></div>
-              <div style={{ fontSize: 12, color: '#5a4a3a', marginBottom: 16 }}>QUESTION {qIdx + 1} / {QUIZ.length}</div>
-              <div className="ve-quiz-q">{QUIZ[qIdx].q}</div>
-              <div className="ve-quiz-opts">
-                {QUIZ[qIdx].opts.map((opt, i) => (
-                  <button key={i} disabled={chosen !== null}
-                    className={`ve-quiz-opt${chosen !== null && i === QUIZ[qIdx].correct ? ' correct' : ''}${chosen === i && i !== QUIZ[qIdx].correct ? ' wrong' : ''}`}
-                    onClick={() => handleQuiz(i)}>
-                    {['A','B','C','D'][i]}. {opt}
-                  </button>
-                ))}
-              </div>
-              {chosen !== null && (
+              {currentQ && (
                 <>
-                  <div className="ve-quiz-exp">{QUIZ[qIdx].explanation}</div>
-                  <button className="ve-quiz-next" onClick={nextQ}>{qIdx + 1 < QUIZ.length ? 'Next Question →' : 'See Results →'}</button>
+                  <div className="ve-progress"><div className="ve-progress-fill" style={{ width: `${(qNum / SESSION_SIZE) * 100}%` }} /></div>
+                  <div style={{ fontSize: 12, color: '#5a4a3a', marginBottom: 16 }}>QUESTION {qNum + 1} / {SESSION_SIZE}</div>
+                  <span className={`ve-diff-badge ${currentQ.difficulty}`}>⬤ {currentQ.difficulty}</span>
+                  <div className="ve-quiz-q">{currentQ.q}</div>
+                  <div className="ve-quiz-opts">
+                    {currentQ.opts.map((opt, i) => (
+                      <button key={i} disabled={chosen !== null}
+                        className={`ve-quiz-opt${chosen !== null && i === currentQ.correct ? ' correct' : ''}${chosen === i && i !== currentQ.correct ? ' wrong' : ''}`}
+                        onClick={() => handleQuiz(i)}>
+                        {['A','B','C','D'][i]}. {opt}
+                      </button>
+                    ))}
+                  </div>
+                  {chosen !== null && (
+                    <>
+                      <div className="ve-quiz-exp">{currentQ.explanation}</div>
+                      <button className="ve-quiz-next" onClick={nextQ}>{qNum + 1 < SESSION_SIZE ? 'Next Question →' : 'See Results →'}</button>
+                    </>
+                  )}
                 </>
               )}
             </div>
           ) : (
             <div className="ve-card" style={{ textAlign: 'center', padding: 40 }}>
               <div style={{ fontSize: 12, color: '#5a4a3a', marginBottom: 12, letterSpacing: '0.12em' }}>FINAL SCORE</div>
-              <div className="ve-score-num">{score}/{QUIZ.length}</div>
+              <div className="ve-score-num">{score}/{SESSION_SIZE}</div>
               <div style={{ fontSize: 14, color: '#7a6a5a', marginTop: 8 }}>
-                {score === QUIZ.length ? 'Perfect! You understand embeddings deeply. 🎉' : score >= 2 ? 'Good work! Review the sections you found tricky. 📚' : 'Keep exploring — embeddings take time to click. 💪'}
+                {score >= SESSION_SIZE ? 'Perfect! You understand embeddings deeply. 🎉' : score >= SESSION_SIZE / 2 ? 'Good work! Review the sections you found tricky. 📚' : 'Keep exploring — embeddings take time to click. 💪'}
               </div>
-              <button className="ve-quiz-next" style={{ marginTop: 24 }} onClick={() => { setQIdx(0); setChosen(null); setScore(0); setDone(false) }}>Retake Quiz ↺</button>
+              <button className="ve-quiz-next" style={{ marginTop: 24 }} onClick={retake}>Retake Quiz ↺</button>
             </div>
           )}
         </div>

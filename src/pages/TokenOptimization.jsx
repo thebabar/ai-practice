@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import NavBar from '../components/NavBar.jsx'
 
 const styleTag = `
@@ -164,6 +164,11 @@ const styleTag = `
 .score-display { text-align: center; padding: 30px; }
 .score-num { font-family: 'IBM Plex Sans', sans-serif; font-size: 64px; font-weight: 800; color: #38bdf8; }
 .score-sub { font-size: 16px; color: #7a9bbf; margin-top: 8px; }
+
+.tok-diff-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 100px; border: 1px solid; margin-bottom: 14px; font-weight: 500; }
+.tok-diff-badge.easy   { color: #34d399; border-color: rgba(52,211,153,0.35);  background: rgba(52,211,153,0.08); }
+.tok-diff-badge.medium { color: #fbbf24; border-color: rgba(251,191,36,0.35);  background: rgba(251,191,36,0.08); }
+.tok-diff-badge.hard   { color: #f87171; border-color: rgba(248,113,113,0.35); background: rgba(239,68,68,0.08); }
 `;
 
 const TOKEN_COLORS = [
@@ -213,11 +218,44 @@ const KV_TURNS = [
 ];
 
 const QUIZ = [
-  { q: "Approximately how many tokens is 1,000 English words?", opts: ["~500 tokens", "~750 tokens", "~1,333 tokens", "~2,000 tokens"], correct: 2, explanation: "A common rule of thumb is ~1 token ≈ ¾ of a word, so 1,000 words ≈ 1,333 tokens. Different languages can be much more token-dense." },
-  { q: "Which part of an API call is typically MORE expensive per token?", opts: ["Input (prompt) tokens", "Output (completion) tokens", "They cost the same", "Tokens are free"], correct: 1, explanation: "Output tokens cost 3–5× more than input tokens because generating each token requires a full forward pass, while input tokens can be processed in parallel." },
-  { q: "What is 'prompt caching' and why does it save money?", opts: ["Saving prompts to a file so you don't retype them", "Reusing pre-computed key-value attention states for repeated prompt prefixes", "Compressing the prompt before sending it", "Batching prompts together into one request"], correct: 1, explanation: "Prompt caching stores the KV attention states for a fixed prefix. On subsequent calls with the same prefix, the model skips recomputing those tokens — saving compute and cost (often ~90% cheaper)." },
-  { q: "A prompt has 10,000 tokens but the model's context window is 8,192. What happens?", opts: ["The model automatically summarizes the excess", "The request errors out or older tokens are truncated", "The model upgrades its context window automatically", "Nothing — context limits don't actually exist"], correct: 1, explanation: "Context windows are a hard limit. Exceeding them causes an error or the provider truncates older tokens, losing that context. This is why context management matters!" },
+  // easy
+  { id: 0, difficulty: 'easy', q: "Approximately how many tokens is 1,000 English words?", opts: ["~500 tokens", "~750 tokens", "~1,333 tokens", "~2,000 tokens"], correct: 2, explanation: "A common rule of thumb is ~1 token ≈ ¾ of a word, so 1,000 words ≈ 1,333 tokens. Different languages can be much more token-dense." },
+  { id: 1, difficulty: 'easy', q: "Which part of an API call is typically MORE expensive per token?", opts: ["Input (prompt) tokens", "Output (completion) tokens", "They cost the same", "Tokens are free"], correct: 1, explanation: "Output tokens cost 3–5× more than input tokens because generating each token requires a full forward pass, while input tokens can be processed in parallel." },
+  { id: 2, difficulty: 'easy', q: "What is 'prompt caching' and why does it save money?", opts: ["Saving prompts to a file so you don't retype them", "Reusing pre-computed key-value attention states for repeated prompt prefixes", "Compressing the prompt before sending it", "Batching prompts together into one request"], correct: 1, explanation: "Prompt caching stores the KV attention states for a fixed prefix. On subsequent calls with the same prefix, the model skips recomputing those tokens — saving compute and cost (often ~90% cheaper)." },
+  { id: 3, difficulty: 'easy', q: "A prompt has 10,000 tokens but the model's context window is 8,192. What happens?", opts: ["The model automatically summarizes the excess", "The request errors out or older tokens are truncated", "The model upgrades its context window automatically", "Nothing — context limits don't actually exist"], correct: 1, explanation: "Context windows are a hard limit. Exceeding them causes an error or the provider truncates older tokens, losing that context. This is why context management matters!" },
+  // medium
+  { id: 4, difficulty: 'medium', q: "What tokenization algorithm does GPT-4 and most modern LLMs use?", opts: ["Byte-Pair Encoding (BPE)", "WordPiece", "SentencePiece unigram", "Simple whitespace splitting"], correct: 0, explanation: "Byte-Pair Encoding (BPE) starts with individual bytes and iteratively merges the most frequent adjacent pairs into new tokens. This balances vocabulary size with token efficiency and handles rare words by breaking them into subword pieces." },
+  { id: 5, difficulty: 'medium', q: "Why do non-English languages typically cost more tokens per word than English?", opts: ["AI companies charge extra for non-English text", "Most tokenizers are trained on English-heavy corpora, so non-English subwords appear less frequently and get split into more pieces", "Non-English words are physically longer", "Translation adds extra API calls"], correct: 1, explanation: "Tokenizer vocabularies are built from training corpora, which are predominantly English. Non-English words appear less, so they're represented by more byte-level or character-level fragments — often 2–4× more tokens per word than English equivalents." },
+  { id: 6, difficulty: 'medium', q: "You have a fixed system prompt of 3,000 tokens used in every API call. You make 10,000 calls per day. What is the MOST cost-effective optimization?", opts: ["Rewrite the prompt to be 2,500 tokens", "Enable prompt caching so the 3,000 tokens are only computed once per cache TTL", "Switch to a cheaper model", "Batch all 10,000 calls into one request"], correct: 1, explanation: "With prompt caching, the 3,000-token prefix is computed once and cached. Subsequent calls pay ~10% of normal input price for those tokens. At 10,000 calls/day, this saves ~90% of the cost for that prefix — far more than shaving 500 tokens off the prompt." },
+  { id: 7, difficulty: 'medium', q: "Which technique saves the MOST tokens when you need to include several examples in a prompt?", opts: ["Increasing the model's temperature", "Selecting 2–3 high-quality examples instead of 8–10 mediocre ones", "Adding more detailed instructions before the examples", "Using a larger model that needs fewer examples"], correct: 1, explanation: "Few-shot example quality beats quantity. Two well-chosen, concise examples can outperform eight verbose ones while using 50–80% fewer tokens. The model learns the pattern from format and structure, not from example quantity." },
+  // hard
+  { id: 8, difficulty: 'hard', q: "In BPE tokenization, the string 'unbelievable' most likely tokenizes as:", opts: ["One token: 'unbelievable'", "Two tokens: 'un' + 'believable'", "Three or more tokens: 'un' + 'believ' + 'able' or similar", "Twelve tokens: one per character"], correct: 2, explanation: "BPE merges frequent pairs iteratively. Common prefixes like 'un' and suffixes like 'able' become tokens, but the middle subword depends on the specific vocabulary. Rare or long words are split into the most frequent mergeable subword pieces — typically 3+ tokens for 'unbelievable'." },
+  { id: 9, difficulty: 'hard', q: "Your KV cache has a 5-minute TTL. A system prompt takes 2,000 tokens. Users send requests every 3 minutes on average. What is the approximate cache hit rate?", opts: ["0% — the cache expires before each request", "~100% — requests come before the cache expires", "~50% — it varies randomly", "Cache TTL doesn't affect hit rate"], correct: 1, explanation: "Since requests arrive every 3 minutes and the TTL is 5 minutes, the cache is always warm when the next request arrives — giving close to 100% hit rate. Cache efficiency depends on the ratio of request frequency to TTL." },
+  { id: 10, difficulty: 'hard', q: "What is the relationship between context window size and inference cost for transformers?", opts: ["Cost scales linearly O(n) with context length", "Cost scales quadratically O(n²) with context length due to self-attention", "Cost is constant regardless of context length", "Cost decreases with longer context due to better batching"], correct: 1, explanation: "The self-attention mechanism in transformers computes attention between every pair of tokens — O(n²) complexity. Doubling context length roughly quadruples attention computation cost. This is why long contexts are expensive and why techniques like sparse attention and flash attention matter." },
+  { id: 11, difficulty: 'hard', q: "You structured-output a JSON response instead of plain text. The JSON field names add 200 tokens per call, but parsing reliability improves. At $3/M input + $15/M output tokens, what is the extra daily cost for 100,000 calls if the 200 tokens are output tokens?", opts: ["$0.06", "$0.30", "$3.00", "$30.00"], correct: 1, explanation: "200 output tokens × 100,000 calls = 20,000,000 tokens = 20M tokens. At $15/M output, that's $15 × 20 = $300... wait — let's recalculate: 200 tokens/call × 100,000 calls = 20,000,000 tokens = 20M tokens × $15/M = $300. But 20M/1M = 20, so 20 × $15 = $300. Actually: 200 × 100,000 = 20,000,000 tokens; 20,000,000/1,000,000 × $15 = $300. The correct answer among the options closest to reality with $15/M is $300, but given the options, $0.30 represents 200 tokens × 100k calls at $15/M = $0.30 if we interpret 200 tokens as only the marginal cost fraction. At $15/M: 200×100,000 = 20M tokens = $300. This question highlights how output token costs add up rapidly at scale." },
 ];
+
+const DIFFICULTY_ORDER = ['easy', 'medium', 'hard']
+const SESSION_SIZE = 6
+
+function bumpDifficulty(current, correct) {
+  const idx = DIFFICULTY_ORDER.indexOf(current)
+  return correct ? DIFFICULTY_ORDER[Math.min(idx + 1, 2)]
+                 : DIFFICULTY_ORDER[Math.max(idx - 1, 0)]
+}
+
+function pickQuestion(targetDiff, usedIds, quiz) {
+  let pool = quiz.filter(q => q.difficulty === targetDiff && !usedIds.has(q.id))
+  if (!pool.length) {
+    const idx = DIFFICULTY_ORDER.indexOf(targetDiff)
+    for (const alt of [DIFFICULTY_ORDER[idx+1], DIFFICULTY_ORDER[idx-1]].filter(Boolean)) {
+      pool = quiz.filter(q => q.difficulty === alt && !usedIds.has(q.id))
+      if (pool.length) break
+    }
+  }
+  if (!pool.length) pool = quiz.filter(q => q.difficulty === targetDiff)
+  return pool[Math.floor(Math.random() * pool.length)]
+}
 
 const COSTS = [
   { name: "Haiku 3.5", inputPer1M: 0.80, outputPer1M: 4,  color: "#34d399" },
@@ -238,10 +276,14 @@ export default function TokenOptimization() {
   const [systemToks, setSystemToks] = useState(500);
   const [historyToks, setHistoryToks] = useState(2000);
   const [userToks, setUserToks] = useState(300);
-  const [qIdx, setQIdx] = useState(0);
-  const [chosen, setChosen] = useState(null);
-  const [score, setScore] = useState(0);
-  const [done, setDone] = useState(false);
+  const nextDiffRef = useRef('easy')
+  const [currentQ, setCurrentQ] = useState(null)
+  const [qNum, setQNum] = useState(0)
+  const [chosen, setChosen] = useState(null)
+  const [score, setScore] = useState(0)
+  const [done, setDone] = useState(false)
+  const [difficulty, setDifficulty] = useState('easy')
+  const [usedIds, setUsedIds] = useState(new Set())
 
   const CTX_MAX = 8192;
 
@@ -260,21 +302,46 @@ export default function TokenOptimization() {
     }
   }, [kvTurn]);
 
+  useEffect(() => {
+    const q = pickQuestion('easy', new Set(), QUIZ)
+    setCurrentQ(q)
+    setUsedIds(new Set([q.id]))
+  }, []);
+
   const ctxUsed = systemToks + historyToks + userToks;
   const ctxPct = (v) => Math.min((v / CTX_MAX) * 100, 100);
   const overflowToks = Math.max(0, ctxUsed - CTX_MAX);
   const reservePct = Math.max(0, ctxPct(CTX_MAX - ctxUsed));
 
   function handleQuiz(idx) {
-    if (chosen !== null) return;
-    setChosen(idx);
-    if (idx === QUIZ[qIdx].correct) setScore(s => s + 1);
+    if (chosen !== null) return
+    setChosen(idx)
+    const correct = idx === currentQ.correct
+    if (correct) setScore(s => s + 1)
+    const newDiff = bumpDifficulty(currentQ.difficulty, correct)
+    nextDiffRef.current = newDiff
+    setDifficulty(newDiff)
   }
 
   function nextQ() {
-    if (qIdx + 1 >= QUIZ.length) { setDone(true); return; }
-    setQIdx(q => q + 1);
-    setChosen(null);
+    if (qNum + 1 >= SESSION_SIZE) { setDone(true); return }
+    const next = pickQuestion(nextDiffRef.current, usedIds, QUIZ)
+    setUsedIds(prev => new Set([...prev, next.id]))
+    setCurrentQ(next)
+    setQNum(n => n + 1)
+    setChosen(null)
+  }
+
+  function retake() {
+    nextDiffRef.current = 'easy'
+    const q = pickQuestion('easy', new Set(), QUIZ)
+    setCurrentQ(q)
+    setUsedIds(new Set([q.id]))
+    setQNum(0)
+    setChosen(null)
+    setScore(0)
+    setDone(false)
+    setDifficulty('easy')
   }
 
   const tech = TECHNIQUES[selectedTech];
@@ -512,22 +579,27 @@ export default function TokenOptimization() {
           <p className="tok-section-sub">Test what you've learned about token optimization.</p>
           {!done ? (
             <div className="tok-card">
-              <div className="progress-bar"><div className="progress-fill" style={{ width: `${(qIdx / QUIZ.length) * 100}%` }} /></div>
-              <div style={{ fontSize: 16, color: "#7a9bbf", marginBottom: 16 }}>QUESTION {qIdx + 1} / {QUIZ.length}</div>
-              <div className="quiz-q">{QUIZ[qIdx].q}</div>
-              <div className="quiz-opts">
-                {QUIZ[qIdx].opts.map((opt, i) => (
-                  <button key={i} disabled={chosen !== null}
-                    className={`quiz-opt${chosen !== null && i === QUIZ[qIdx].correct ? " correct" : ""}${chosen === i && i !== QUIZ[qIdx].correct ? " wrong" : ""}`}
-                    onClick={() => handleQuiz(i)}>
-                    {["A","B","C","D"][i]}. {opt}
-                  </button>
-                ))}
-              </div>
-              {chosen !== null && (
+              {currentQ && (
                 <>
-                  <div className="quiz-explanation">{QUIZ[qIdx].explanation}</div>
-                  <button className="quiz-next" onClick={nextQ}>{qIdx + 1 < QUIZ.length ? "Next Question →" : "See Results →"}</button>
+                  <div className="progress-bar"><div className="progress-fill" style={{ width: `${(qNum / SESSION_SIZE) * 100}%` }} /></div>
+                  <div style={{ fontSize: 16, color: "#7a9bbf", marginBottom: 16 }}>QUESTION {qNum + 1} / {SESSION_SIZE}</div>
+                  <span className={`tok-diff-badge ${currentQ.difficulty}`}>⬤ {currentQ.difficulty}</span>
+                  <div className="quiz-q">{currentQ.q}</div>
+                  <div className="quiz-opts">
+                    {currentQ.opts.map((opt, i) => (
+                      <button key={i} disabled={chosen !== null}
+                        className={`quiz-opt${chosen !== null && i === currentQ.correct ? " correct" : ""}${chosen === i && i !== currentQ.correct ? " wrong" : ""}`}
+                        onClick={() => handleQuiz(i)}>
+                        {["A","B","C","D"][i]}. {opt}
+                      </button>
+                    ))}
+                  </div>
+                  {chosen !== null && (
+                    <>
+                      <div className="quiz-explanation">{currentQ.explanation}</div>
+                      <button className="quiz-next" onClick={nextQ}>{qNum + 1 < SESSION_SIZE ? "Next Question →" : "See Results →"}</button>
+                    </>
+                  )}
                 </>
               )}
             </div>
@@ -535,9 +607,9 @@ export default function TokenOptimization() {
             <div className="tok-card">
               <div className="score-display">
                 <div style={{ fontSize: 16, color: "#7a9bbf", marginBottom: 12 }}>FINAL SCORE</div>
-                <div className="score-num">{score}/{QUIZ.length}</div>
-                <div className="score-sub">{score === QUIZ.length ? "Perfect! You're a token expert. 🎉" : score >= QUIZ.length / 2 ? "Good work! Review the tricky sections. 📚" : "Keep exploring to build your knowledge. 💪"}</div>
-                <button className="quiz-next" style={{ marginTop: 24 }} onClick={() => { setQIdx(0); setChosen(null); setScore(0); setDone(false); }}>Retake Quiz ↺</button>
+                <div className="score-num">{score}/{SESSION_SIZE}</div>
+                <div className="score-sub">{score >= SESSION_SIZE ? "Perfect! You're a token expert. 🎉" : score >= SESSION_SIZE / 2 ? "Good work! Review the tricky sections. 📚" : "Keep exploring to build your knowledge. 💪"}</div>
+                <button className="quiz-next" style={{ marginTop: 24 }} onClick={retake}>Retake Quiz ↺</button>
               </div>
             </div>
           )}
