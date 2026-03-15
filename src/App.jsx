@@ -1,0 +1,12 @@
+import { Routes, Route } from 'react-router-dom'
+import Home from './pages/Home.jsx'
+import TokenOptimization from './pages/TokenOptimization.jsx'
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/token-optimization" element={<TokenOptimization />} />
+    </Routes>
+  )
+}
