@@ -4,290 +4,45 @@ import NavBar from '../components/NavBar.jsx'
 const css = `
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Cabinet+Grotesk:wght@400;500;700;800;900&display=swap');
 
-.home {
-  min-height: 100vh;
-  background: #050810;
-  color: #e0e8f0;
-  font-family: 'DM Mono', monospace;
-}
+.home { min-height: 100vh; background: #050810; color: #e0e8f0; font-family: 'DM Mono', monospace; }
 
-/* ── hero ── */
-.hero {
-  position: relative;
-  padding: 80px 24px 64px;
-  text-align: center;
-  overflow: hidden;
-}
+.hero { position: relative; padding: 80px 24px 64px; text-align: center; overflow: hidden; }
+.hero-glow { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 40% at 50% -10%, rgba(56,189,248,0.12) 0%, transparent 60%), radial-gradient(ellipse 40% 30% at 20% 80%, rgba(129,140,248,0.07) 0%, transparent 50%), radial-gradient(ellipse 30% 25% at 80% 70%, rgba(52,211,153,0.06) 0%, transparent 50%); pointer-events: none; }
+.hero-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(56,189,248,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,0.04) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 0%, transparent 80%); }
 
-.hero-glow {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 80% 40% at 50% -10%, rgba(56,189,248,0.12) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 30% at 20% 80%, rgba(129,140,248,0.07) 0%, transparent 50%),
-    radial-gradient(ellipse 30% 25% at 80% 70%, rgba(52,211,153,0.06) 0%, transparent 50%);
-  pointer-events: none;
-}
+.hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #38bdf8; margin-bottom: 20px; padding: 6px 14px; background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.2); border-radius: 100px; }
+.hero-title { font-family: 'Cabinet Grotesk', sans-serif; font-size: clamp(42px, 7vw, 88px); font-weight: 900; letter-spacing: -0.04em; line-height: 0.95; color: #fff; margin-bottom: 24px; }
+.hero-title .line2 { display: block; background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #34d399 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero-desc { font-size: 14px; color: #7a9bbf; max-width: 520px; margin: 0 auto 48px; line-height: 1.8; }
 
-.hero-grid {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(56,189,248,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(56,189,248,0.04) 1px, transparent 1px);
-  background-size: 48px 48px;
-  pointer-events: none;
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 0%, transparent 80%);
-}
+.hero-stats { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; }
+.hero-stat-num { font-family: 'Cabinet Grotesk', sans-serif; font-size: 28px; font-weight: 900; color: #38bdf8; line-height: 1; }
+.hero-stat-lbl { font-size: 10px; color: #4a6a8a; letter-spacing: 0.12em; text-transform: uppercase; margin-top: 4px; }
 
-.hero-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 11px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #38bdf8;
-  margin-bottom: 20px;
-  padding: 6px 14px;
-  background: rgba(56,189,248,0.08);
-  border: 1px solid rgba(56,189,248,0.2);
-  border-radius: 100px;
-}
+.lab-section { max-width: 1100px; margin: 0 auto; padding: 0 24px 100px; }
+.section-header { display: flex; align-items: baseline; gap: 14px; margin-bottom: 28px; }
+.section-label { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #38bdf8; }
+.section-line { flex: 1; height: 1px; background: linear-gradient(90deg, rgba(56,189,248,0.3), transparent); }
 
-.hero-title {
-  font-family: 'Cabinet Grotesk', sans-serif;
-  font-size: clamp(42px, 7vw, 88px);
-  font-weight: 900;
-  letter-spacing: -0.04em;
-  line-height: 0.95;
-  color: #fff;
-  margin-bottom: 24px;
-}
+.viz-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
 
-.hero-title .line2 {
-  display: block;
-  background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #34d399 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.hero-desc {
-  font-size: 14px;
-  color: #7a9bbf;
-  max-width: 520px;
-  margin: 0 auto 48px;
-  line-height: 1.8;
-}
-
-.hero-stats {
-  display: flex;
-  justify-content: center;
-  gap: 32px;
-  flex-wrap: wrap;
-}
-
-.hero-stat {
-  text-align: center;
-}
-
-.hero-stat-num {
-  font-family: 'Cabinet Grotesk', sans-serif;
-  font-size: 28px;
-  font-weight: 900;
-  color: #38bdf8;
-  line-height: 1;
-}
-
-.hero-stat-lbl {
-  font-size: 10px;
-  color: #4a6a8a;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-top: 4px;
-}
-
-/* ── grid ── */
-.lab-section {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 24px 100px;
-}
-
-.section-header {
-  display: flex;
-  align-items: baseline;
-  gap: 14px;
-  margin-bottom: 28px;
-}
-
-.section-label {
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #38bdf8;
-}
-
-.section-line {
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, rgba(56,189,248,0.3), transparent);
-}
-
-.viz-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
-}
-
-/* ── card ── */
-.viz-card {
-  position: relative;
-  background: #0a1020;
-  border: 1px solid #141e35;
-  border-radius: 16px;
-  padding: 28px;
-  text-decoration: none;
-  display: block;
-  overflow: hidden;
-  transition: all 0.25s cubic-bezier(.4,0,.2,1);
-  cursor: pointer;
-  group: true;
-}
-
-.viz-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 16px;
-  opacity: 0;
-  transition: opacity 0.25s;
-  background: var(--card-glow);
-}
-
-.viz-card:hover {
-  border-color: var(--card-accent);
-  transform: translateY(-3px);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 40px var(--card-glow-color);
-}
-
+.viz-card { position: relative; background: #0a1020; border: 1px solid #141e35; border-radius: 16px; padding: 28px; text-decoration: none; display: block; overflow: hidden; transition: all 0.25s cubic-bezier(.4,0,.2,1); }
+.viz-card::before { content: ''; position: absolute; inset: 0; border-radius: 16px; opacity: 0; transition: opacity 0.25s; background: var(--card-glow); }
+.viz-card:hover { border-color: var(--card-accent); transform: translateY(-3px); box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 40px var(--card-glow-color); }
 .viz-card:hover::before { opacity: 1; }
+.viz-card.coming-soon { opacity: 0.5; cursor: default; pointer-events: none; }
 
-.viz-card.coming-soon {
-  opacity: 0.5;
-  cursor: default;
-  pointer-events: none;
-}
+.card-icon-wrap { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 18px; background: var(--card-icon-bg); border: 1px solid var(--card-accent-dim); position: relative; z-index: 1; }
+.card-tag { display: inline-block; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; margin-bottom: 10px; background: var(--card-tag-bg); color: var(--card-accent); border: 1px solid var(--card-accent-dim); position: relative; z-index: 1; }
+.card-title { font-family: 'Cabinet Grotesk', sans-serif; font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 8px; letter-spacing: -0.02em; position: relative; z-index: 1; }
+.card-desc { font-size: 12px; color: #5a7a9a; line-height: 1.7; margin-bottom: 20px; position: relative; z-index: 1; }
+.card-pills { display: flex; flex-wrap: wrap; gap: 6px; position: relative; z-index: 1; }
+.card-pill { font-size: 10px; color: #3a5a7a; background: rgba(255,255,255,0.03); border: 1px solid #141e35; padding: 3px 8px; border-radius: 4px; }
+.card-arrow { position: absolute; bottom: 24px; right: 24px; font-size: 18px; color: var(--card-accent); opacity: 0; transform: translateX(-6px); transition: all 0.2s; z-index: 1; }
+.viz-card:hover .card-arrow { opacity: 1; transform: translateX(0); }
+.coming-label { position: absolute; top: 16px; right: 16px; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: #3a5a7a; background: rgba(255,255,255,0.04); border: 1px solid #1a2744; padding: 4px 8px; border-radius: 4px; }
 
-.card-icon-wrap {
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  margin-bottom: 18px;
-  background: var(--card-icon-bg);
-  border: 1px solid var(--card-accent-dim);
-  position: relative;
-  z-index: 1;
-}
-
-.card-tag {
-  display: inline-block;
-  font-size: 9px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  padding: 3px 8px;
-  border-radius: 4px;
-  margin-bottom: 10px;
-  background: var(--card-tag-bg);
-  color: var(--card-accent);
-  border: 1px solid var(--card-accent-dim);
-  position: relative;
-  z-index: 1;
-}
-
-.card-title {
-  font-family: 'Cabinet Grotesk', sans-serif;
-  font-size: 20px;
-  font-weight: 800;
-  color: #fff;
-  margin-bottom: 8px;
-  letter-spacing: -0.02em;
-  position: relative;
-  z-index: 1;
-}
-
-.card-desc {
-  font-size: 12px;
-  color: #5a7a9a;
-  line-height: 1.7;
-  margin-bottom: 20px;
-  position: relative;
-  z-index: 1;
-}
-
-.card-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  position: relative;
-  z-index: 1;
-}
-
-.card-pill {
-  font-size: 10px;
-  color: #3a5a7a;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid #141e35;
-  padding: 3px 8px;
-  border-radius: 4px;
-  letter-spacing: 0.04em;
-}
-
-.card-arrow {
-  position: absolute;
-  bottom: 24px;
-  right: 24px;
-  font-size: 18px;
-  color: var(--card-accent);
-  opacity: 0;
-  transform: translateX(-6px);
-  transition: all 0.2s;
-  z-index: 1;
-}
-
-.viz-card:hover .card-arrow {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.coming-label {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  font-size: 9px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #3a5a7a;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid #1a2744;
-  padding: 4px 8px;
-  border-radius: 4px;
-}
-
-/* ── footer ── */
-.lab-footer {
-  border-top: 1px solid #0d1828;
-  padding: 28px 24px;
-  text-align: center;
-  font-size: 11px;
-  color: #2a4060;
-  letter-spacing: 0.06em;
-}
+.lab-footer { border-top: 1px solid #0d1828; padding: 28px 24px; text-align: center; font-size: 11px; color: #2a4060; letter-spacing: 0.06em; }
 `
 
 const VISUALIZATIONS = [
@@ -298,82 +53,52 @@ const VISUALIZATIONS = [
     title: 'Token Optimization',
     desc: 'Understand how LLMs tokenize text, what tokens cost, and how to dramatically reduce your API spend.',
     pills: ['Live Tokenizer', 'Cost Calculator', 'KV Cache', 'Context Windows', 'Quiz'],
-    accent: '#38bdf8',
-    accentDim: 'rgba(56,189,248,0.2)',
-    iconBg: 'rgba(56,189,248,0.1)',
+    accent: '#38bdf8', accentDim: 'rgba(56,189,248,0.2)', iconBg: 'rgba(56,189,248,0.1)',
     glow: 'radial-gradient(ellipse at 0% 0%, rgba(56,189,248,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(56,189,248,0.08)',
-    ready: true,
+    glowColor: 'rgba(56,189,248,0.08)', ready: true,
   },
   {
-    path: null,
-    icon: '🧠',
-    tag: 'Deep Learning',
-    title: 'Neural Networks',
+    path: '/agents-tools',
+    icon: '🤖',
+    tag: 'Agentic AI',
+    title: 'Agents, Tools & Context',
+    desc: 'See how AI agents think in loops, call tools, and how context engineering shapes every decision they make.',
+    pills: ['Agent Loop', 'Tool Calling', 'ReAct Pattern', 'Context Engineering', 'Multi-Agent'],
+    accent: '#34d399', accentDim: 'rgba(52,211,153,0.2)', iconBg: 'rgba(52,211,153,0.1)',
+    glow: 'radial-gradient(ellipse at 0% 0%, rgba(52,211,153,0.08) 0%, transparent 60%)',
+    glowColor: 'rgba(52,211,153,0.08)', ready: true,
+  },
+  {
+    path: null, icon: '🧠', tag: 'Deep Learning', title: 'Neural Networks',
     desc: 'Watch a neural network learn in real-time. Adjust layers, neurons, and activation functions interactively.',
     pills: ['Forward Pass', 'Backprop', 'Gradient Descent', 'Activations'],
-    accent: '#818cf8',
-    accentDim: 'rgba(129,140,248,0.2)',
-    iconBg: 'rgba(129,140,248,0.1)',
+    accent: '#818cf8', accentDim: 'rgba(129,140,248,0.2)', iconBg: 'rgba(129,140,248,0.1)',
     glow: 'radial-gradient(ellipse at 0% 0%, rgba(129,140,248,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(129,140,248,0.08)',
-    ready: false,
+    glowColor: 'rgba(129,140,248,0.08)', ready: false,
   },
   {
-    path: null,
-    icon: '🎯',
-    tag: 'Transformers',
-    title: 'Attention Mechanism',
+    path: null, icon: '🎯', tag: 'Transformers', title: 'Attention Mechanism',
     desc: 'Visualize how transformer attention works — see which tokens attend to which, and why it matters.',
     pills: ['Self-Attention', 'Multi-Head', 'Q/K/V Matrices', 'Positional Encoding'],
-    accent: '#34d399',
-    accentDim: 'rgba(52,211,153,0.2)',
-    iconBg: 'rgba(52,211,153,0.1)',
-    glow: 'radial-gradient(ellipse at 0% 0%, rgba(52,211,153,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(52,211,153,0.08)',
-    ready: false,
-  },
-  {
-    path: null,
-    icon: '📊',
-    tag: 'ML Concepts',
-    title: 'Bias vs Variance',
-    desc: 'Interact with datasets to build intuition for underfitting, overfitting, and the bias-variance tradeoff.',
-    pills: ['Overfitting', 'Underfitting', 'Regularization', 'Train/Test Split'],
-    accent: '#fbbf24',
-    accentDim: 'rgba(251,191,36,0.2)',
-    iconBg: 'rgba(251,191,36,0.1)',
+    accent: '#fbbf24', accentDim: 'rgba(251,191,36,0.2)', iconBg: 'rgba(251,191,36,0.1)',
     glow: 'radial-gradient(ellipse at 0% 0%, rgba(251,191,36,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(251,191,36,0.08)',
-    ready: false,
+    glowColor: 'rgba(251,191,36,0.08)', ready: false,
   },
   {
-    path: null,
-    icon: '🔢',
-    tag: 'Embeddings',
-    title: 'Vector Embeddings',
+    path: null, icon: '🔢', tag: 'Embeddings', title: 'Vector Embeddings',
     desc: 'Explore how words and concepts map to high-dimensional vectors, and why semantic similarity works.',
     pills: ['Word2Vec', 'Cosine Similarity', 'Dimensionality', 'Semantic Search'],
-    accent: '#f97316',
-    accentDim: 'rgba(249,115,22,0.2)',
-    iconBg: 'rgba(249,115,22,0.1)',
+    accent: '#f97316', accentDim: 'rgba(249,115,22,0.2)', iconBg: 'rgba(249,115,22,0.1)',
     glow: 'radial-gradient(ellipse at 0% 0%, rgba(249,115,22,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(249,115,22,0.08)',
-    ready: false,
+    glowColor: 'rgba(249,115,22,0.08)', ready: false,
   },
   {
-    path: null,
-    icon: '🎲',
-    tag: 'LLM Fundamentals',
-    title: 'Temperature & Sampling',
-    desc: 'See how temperature, top-k and top-p affect LLM output distributions — and why it matters for your use case.',
+    path: null, icon: '🎲', tag: 'LLM Fundamentals', title: 'Temperature & Sampling',
+    desc: 'See how temperature, top-k and top-p affect LLM output distributions.',
     pills: ['Temperature', 'Top-K', 'Top-P', 'Token Distribution'],
-    accent: '#ec4899',
-    accentDim: 'rgba(236,72,153,0.2)',
-    iconBg: 'rgba(236,72,153,0.1)',
+    accent: '#ec4899', accentDim: 'rgba(236,72,153,0.2)', iconBg: 'rgba(236,72,153,0.1)',
     glow: 'radial-gradient(ellipse at 0% 0%, rgba(236,72,153,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(236,72,153,0.08)',
-    ready: false,
+    glowColor: 'rgba(236,72,153,0.08)', ready: false,
   },
 ]
 
@@ -385,27 +110,15 @@ export default function Home() {
     <div className="home">
       <style>{css}</style>
       <NavBar />
-
-      {/* Hero */}
       <section className="hero">
         <div className="hero-glow" />
         <div className="hero-grid" />
         <div className="hero-eyebrow">🧪 Interactive Learning Platform</div>
-        <h1 className="hero-title">
-          Learn AI
-          <span className="line2">Visually</span>
-        </h1>
-        <p className="hero-desc">
-          Stop reading about AI. Start seeing it. Every visualization is interactive,
-          hands-on, and built to give you real intuition — not just theory.
-        </p>
+        <h1 className="hero-title">Learn AI<span className="line2">Visually</span></h1>
+        <p className="hero-desc">Stop reading about AI. Start seeing it. Every visualization is interactive, hands-on, and built to give you real intuition — not just theory.</p>
         <div className="hero-stats">
-          {[
-            ["1", "Live Now"],
-            ["5+", "Coming Soon"],
-            ["100%", "Free & Open"],
-          ].map(([n, l]) => (
-            <div key={l} className="hero-stat">
+          {[["2", "Live Now"], ["4+", "Coming Soon"], ["100%", "Free & Open"]].map(([n, l]) => (
+            <div key={l} style={{ textAlign: "center" }}>
               <div className="hero-stat-num">{n}</div>
               <div className="hero-stat-lbl">{l}</div>
             </div>
@@ -413,76 +126,45 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Cards */}
       <div className="lab-section">
-
-        {/* Live */}
         <div className="section-header">
           <span className="section-label">✦ Live Now</span>
           <div className="section-line" />
         </div>
         <div className="viz-grid" style={{ marginBottom: 56 }}>
           {ready.map(v => (
-            <Link
-              key={v.title}
-              to={v.path}
-              className="viz-card"
-              style={{
-                '--card-accent': v.accent,
-                '--card-accent-dim': v.accentDim,
-                '--card-icon-bg': v.iconBg,
-                '--card-glow': v.glow,
-                '--card-glow-color': v.glowColor,
-                '--card-tag-bg': v.iconBg,
-              }}
-            >
+            <Link key={v.title} to={v.path} className="viz-card"
+              style={{ '--card-accent': v.accent, '--card-accent-dim': v.accentDim, '--card-icon-bg': v.iconBg, '--card-glow': v.glow, '--card-glow-color': v.glowColor, '--card-tag-bg': v.iconBg }}>
               <div className="card-icon-wrap">{v.icon}</div>
               <div className="card-tag">{v.tag}</div>
               <div className="card-title">{v.title}</div>
               <div className="card-desc">{v.desc}</div>
-              <div className="card-pills">
-                {v.pills.map(p => <span key={p} className="card-pill">{p}</span>)}
-              </div>
+              <div className="card-pills">{v.pills.map(p => <span key={p} className="card-pill">{p}</span>)}</div>
               <div className="card-arrow">→</div>
             </Link>
           ))}
         </div>
 
-        {/* Coming soon */}
         <div className="section-header">
           <span className="section-label" style={{ color: '#3a5a7a' }}>◦ Coming Soon</span>
           <div className="section-line" style={{ background: 'linear-gradient(90deg, rgba(58,90,122,0.3), transparent)' }} />
         </div>
         <div className="viz-grid">
           {coming.map(v => (
-            <div
-              key={v.title}
-              className="viz-card coming-soon"
-              style={{
-                '--card-accent': v.accent,
-                '--card-accent-dim': v.accentDim,
-                '--card-icon-bg': v.iconBg,
-                '--card-glow': v.glow,
-                '--card-glow-color': v.glowColor,
-                '--card-tag-bg': v.iconBg,
-              }}
-            >
+            <div key={v.title} className="viz-card coming-soon"
+              style={{ '--card-accent': v.accent, '--card-accent-dim': v.accentDim, '--card-icon-bg': v.iconBg, '--card-glow': v.glow, '--card-glow-color': v.glowColor, '--card-tag-bg': v.iconBg }}>
               <div className="coming-label">Coming Soon</div>
               <div className="card-icon-wrap">{v.icon}</div>
               <div className="card-tag">{v.tag}</div>
               <div className="card-title">{v.title}</div>
               <div className="card-desc">{v.desc}</div>
-              <div className="card-pills">
-                {v.pills.map(p => <span key={p} className="card-pill">{p}</span>)}
-              </div>
+              <div className="card-pills">{v.pills.map(p => <span key={p} className="card-pill">{p}</span>)}</div>
             </div>
           ))}
         </div>
       </div>
 
-      <footer className="lab-footer">
-        Built with React + Vite · Deployed on Vercel · thebabar/ai-practice
-      </footer>
+      <footer className="lab-footer">Built with React + Vite · Deployed on Vercel · thebabar/ai-practice</footer>
     </div>
   )
 }
