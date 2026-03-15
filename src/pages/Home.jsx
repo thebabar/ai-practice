@@ -115,12 +115,14 @@ const VISUALIZATIONS = [
     glowColor: 'rgba(129,140,248,0.08)', ready: false,
   },
   {
-    path: null, icon: '🔢', tag: 'Embeddings', title: 'Vector Embeddings',
+    path: '/vector-embeddings',
+    icon: null,
+    tag: 'Embeddings', title: 'Vector Embeddings',
     desc: 'Explore how words and concepts map to high-dimensional vectors, and why semantic similarity works.',
-    pills: ['Word2Vec', 'Cosine Similarity', 'Dimensionality', 'Semantic Search'],
+    pills: ['Word Vectors', 'Cosine Similarity', 'Semantic Search', 'RAG', 'Quiz'],
     accent: '#f97316', accentDim: 'rgba(249,115,22,0.2)', iconBg: 'rgba(249,115,22,0.1)',
     glow: 'radial-gradient(ellipse at 0% 0%, rgba(249,115,22,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(249,115,22,0.08)', ready: false,
+    glowColor: 'rgba(249,115,22,0.08)', ready: true,
   },
   {
     path: null, icon: '🎲', tag: 'LLM Fundamentals', title: 'Temperature & Sampling',
