@@ -149,7 +149,7 @@ export default function Home() {
         <h1 className="hero-title">Learn AI<span className="line2">Visually</span></h1>
         <p className="hero-desc">Stop reading about AI. Start seeing it. Every visualization is interactive, hands-on, and built to give you real intuition — not just theory.</p>
         <div className="hero-stats">
-          {[["2", "Live Now"], ["4+", "Coming Soon"], ["100%", "Free & Open"]].map(([n, l]) => (
+          {[["3", "Live Now"], ["4+", "Coming Soon"], ["100%", "Free & Open"]].map(([n, l]) => (
             <div key={l} style={{ textAlign: "center" }}>
               <div className="hero-stat-num">{n}</div>
               <div className="hero-stat-lbl">{l}</div>
