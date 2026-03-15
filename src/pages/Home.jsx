@@ -125,12 +125,14 @@ const VISUALIZATIONS = [
     glowColor: 'rgba(249,115,22,0.08)', ready: true,
   },
   {
-    path: null, icon: '🎲', tag: 'LLM Fundamentals', title: 'Temperature & Sampling',
-    desc: 'See how temperature, top-k and top-p affect LLM output distributions.',
-    pills: ['Temperature', 'Top-K', 'Top-P', 'Token Distribution'],
+    path: '/temperature-sampling',
+    icon: null,
+    tag: 'LLM Fundamentals', title: 'Temperature & Sampling',
+    desc: 'See how temperature, top-k and top-p affect LLM output distributions — and why it matters for your use case.',
+    pills: ['Temperature', 'Top-K', 'Top-P Nucleus', 'Comparison', 'Live Sampler', 'Quiz'],
     accent: '#ec4899', accentDim: 'rgba(236,72,153,0.2)', iconBg: 'rgba(236,72,153,0.1)',
     glow: 'radial-gradient(ellipse at 0% 0%, rgba(236,72,153,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(236,72,153,0.08)', ready: false,
+    glowColor: 'rgba(236,72,153,0.08)', ready: true,
   },
 ]
 
@@ -149,7 +151,7 @@ export default function Home() {
         <h1 className="hero-title">Learn AI<span className="line2">Visually</span></h1>
         <p className="hero-desc">Stop reading about AI. Start seeing it. Every visualization is interactive, hands-on, and built to give you real intuition — not just theory.</p>
         <div className="hero-stats">
-          {[["3", "Live Now"], ["4+", "Coming Soon"], ["100%", "Free & Open"]].map(([n, l]) => (
+          {[["2", "Live Now"], ["4+", "Coming Soon"], ["100%", "Free & Open"]].map(([n, l]) => (
             <div key={l} style={{ textAlign: "center" }}>
               <div className="hero-stat-num">{n}</div>
               <div className="hero-stat-lbl">{l}</div>
