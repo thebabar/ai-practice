@@ -120,7 +120,24 @@ const RAGIcon = () => (
   </svg>
 )
 
+function LLMIcon() {
+  return (
+    <svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg" width="30" height="30">
+      <rect x="12" y="20" width="66" height="50" rx="6" stroke="#a78bfa" strokeWidth="2.5"/>
+      <circle cx="30" cy="45" r="6" stroke="#a78bfa" strokeWidth="2.5"/>
+      <circle cx="45" cy="45" r="6" stroke="#a78bfa" strokeWidth="2.5"/>
+      <circle cx="60" cy="45" r="6" stroke="#a78bfa" strokeWidth="2.5"/>
+      <path d="M36 45 L39 45" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M51 45 L54 45" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M30 14 L30 20" stroke="#a78bfa" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M45 14 L45 20" stroke="#a78bfa" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M60 14 L60 20" stroke="#a78bfa" strokeWidth="2.5" strokeLinecap="round"/>
+    </svg>
+  )
+}
+
 const ICON_MAP = {
+  'intro-llms': LLMIcon,
   'token-optimization': TokenIcon,
   'agents-tools': AgentLoopIcon,
   'temperature-sampling': TemperatureIcon,
@@ -129,6 +146,20 @@ const ICON_MAP = {
 }
 
 const VISUALIZATIONS = [
+  {
+    path: '/intro-llms',
+    icon: null,
+    tag: 'Foundations',
+    title: 'Introduction to LLMs',
+    desc: 'Understand how large language models work — from next-token prediction to emergent abilities.',
+    pills: ['What is an LLM?', 'How LLMs Learn', 'Tokens & Context', 'Prompts & Responses', 'Limitations'],
+    accent: '#a78bfa',
+    accentDim: 'rgba(167,139,250,0.15)',
+    iconBg: 'rgba(167,139,250,0.1)',
+    glow: 'radial-gradient(ellipse at 0% 0%, rgba(167,139,250,0.08) 0%, transparent 60%)',
+    glowColor: 'rgba(167,139,250,0.09)',
+    ready: true,
+  },
   {
     path: '/token-optimization',
     icon: null,
