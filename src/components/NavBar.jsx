@@ -57,11 +57,27 @@ const navStyle = `
     border-radius: 100px;
     letter-spacing: 0.1em;
   }
+
+  .nav-glossary {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: #3a5a7a;
+    text-decoration: none;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border: 1px solid #1e3048;
+    border-radius: 6px;
+    transition: all 0.18s;
+  }
+  .nav-glossary:hover { border-color: #94a3b8; color: #94a3b8; }
+  .nav-glossary.active { color: #94a3b8; border-color: #94a3b8; }
 `
 
 export default function NavBar({ title }) {
   const location = useLocation()
   const isHome = location.pathname === '/'
+  const isGlossary = location.pathname === '/glossary'
 
   return (
     <>
@@ -70,12 +86,15 @@ export default function NavBar({ title }) {
         <Link to="/" className="nav-logo">
           🧪 <span>AI</span> Visual Lab
         </Link>
-        {!isHome && (
-          <Link to="/" className="nav-back">← Back</Link>
-        )}
-        {isHome && (
-          <div className="nav-badge">Interactive Learning</div>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Link to="/glossary" className={`nav-glossary${isGlossary ? ' active' : ''}`}>Glossary</Link>
+          {!isHome && !isGlossary && (
+            <Link to="/" className="nav-back">← Back</Link>
+          )}
+          {(isHome || isGlossary) && (
+            <div className="nav-badge">Interactive Learning</div>
+          )}
+        </div>
       </nav>
     </>
   )

@@ -136,6 +136,19 @@ function LLMIcon() {
   )
 }
 
+function GlossaryIcon() {
+  return (
+    <svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg" width="30" height="30">
+      <rect x="18" y="12" width="54" height="66" rx="5" stroke="#94a3b8" strokeWidth="2.5"/>
+      <path d="M18 24 L72 24" stroke="#94a3b8" strokeWidth="2"/>
+      <path d="M30 38 L60 38" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M30 48 L60 48" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M30 58 L50 58" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round"/>
+      <rect x="18" y="12" width="8" height="66" rx="2" fill="rgba(148,163,184,0.15)" stroke="none"/>
+    </svg>
+  )
+}
+
 const ICON_MAP = {
   'intro-llms': LLMIcon,
   'token-optimization': TokenIcon,
@@ -143,6 +156,7 @@ const ICON_MAP = {
   'temperature-sampling': TemperatureIcon,
   'vector-embeddings': VectorEmbeddingsIcon,
   'rag': RAGIcon,
+  'glossary': GlossaryIcon,
 }
 
 const VISUALIZATIONS = [
@@ -222,6 +236,20 @@ const VISUALIZATIONS = [
     iconBg: 'rgba(6,182,212,0.1)',
     glow: 'radial-gradient(ellipse at 0% 0%, rgba(6,182,212,0.08) 0%, transparent 60%)',
     glowColor: 'rgba(6,182,212,0.09)',
+    ready: true,
+  },
+  {
+    path: '/glossary',
+    icon: null,
+    tag: 'Reference',
+    title: 'Glossary',
+    desc: '53 key terms across all topics — searchable and filterable by category.',
+    pills: ['Foundations', 'Tokens', 'Sampling', 'Agents', 'Embeddings', 'RAG'],
+    accent: '#94a3b8',
+    accentDim: 'rgba(148,163,184,0.15)',
+    iconBg: 'rgba(148,163,184,0.1)',
+    glow: 'radial-gradient(ellipse at 0% 0%, rgba(148,163,184,0.08) 0%, transparent 60%)',
+    glowColor: 'rgba(148,163,184,0.07)',
     ready: true,
   },
 ]

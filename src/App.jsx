@@ -6,6 +6,7 @@ import AgentsTools from './pages/AgentsTools.jsx'
 import VectorEmbeddings from './pages/VectorEmbeddings.jsx'
 import TemperatureSampling from './pages/TemperatureSampling.jsx'
 import RAG from './pages/RAG.jsx'
+import Glossary from './pages/Glossary.jsx'
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
       <Route path="/vector-embeddings" element={<VectorEmbeddings />} />
       <Route path="/temperature-sampling" element={<TemperatureSampling />} />
       <Route path="/rag" element={<RAG />} />
+      <Route path="/glossary" element={<Glossary />} />
     </Routes>
   )
 }
