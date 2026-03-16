@@ -7,6 +7,7 @@ import VectorEmbeddings from './pages/VectorEmbeddings.jsx'
 import TemperatureSampling from './pages/TemperatureSampling.jsx'
 import RAG from './pages/RAG.jsx'
 import Glossary from './pages/Glossary.jsx'
+import NeuralNetworks from './pages/NeuralNetworks.jsx'
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
       <Route path="/temperature-sampling" element={<TemperatureSampling />} />
       <Route path="/rag" element={<RAG />} />
       <Route path="/glossary" element={<Glossary />} />
+      <Route path="/neural-networks" element={<NeuralNetworks />} />
     </Routes>
   )
 }

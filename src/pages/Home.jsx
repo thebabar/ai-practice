@@ -144,6 +144,28 @@ function LLMIcon() {
   )
 }
 
+function NeuralNetworksIcon() {
+  return (
+    <svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg" width="30" height="30">
+      <circle cx="18" cy="32" r="5" stroke="#818cf8" strokeWidth="2"/>
+      <circle cx="18" cy="58" r="5" stroke="#818cf8" strokeWidth="2"/>
+      <circle cx="45" cy="22" r="5" stroke="#818cf8" strokeWidth="2"/>
+      <circle cx="45" cy="45" r="5" stroke="#818cf8" strokeWidth="2"/>
+      <circle cx="45" cy="68" r="5" stroke="#818cf8" strokeWidth="2"/>
+      <circle cx="72" cy="45" r="5" stroke="#818cf8" strokeWidth="2"/>
+      <line x1="23" y1="32" x2="40" y2="22" stroke="#818cf8" strokeWidth="1.5" strokeOpacity="0.6"/>
+      <line x1="23" y1="32" x2="40" y2="45" stroke="#818cf8" strokeWidth="1.5" strokeOpacity="0.6"/>
+      <line x1="23" y1="32" x2="40" y2="68" stroke="#818cf8" strokeWidth="1.5" strokeOpacity="0.6"/>
+      <line x1="23" y1="58" x2="40" y2="22" stroke="#818cf8" strokeWidth="1.5" strokeOpacity="0.6"/>
+      <line x1="23" y1="58" x2="40" y2="45" stroke="#818cf8" strokeWidth="1.5" strokeOpacity="0.6"/>
+      <line x1="23" y1="58" x2="40" y2="68" stroke="#818cf8" strokeWidth="1.5" strokeOpacity="0.6"/>
+      <line x1="50" y1="22" x2="67" y2="45" stroke="#818cf8" strokeWidth="1.5" strokeOpacity="0.6"/>
+      <line x1="50" y1="45" x2="67" y2="45" stroke="#818cf8" strokeWidth="1.5" strokeOpacity="0.6"/>
+      <line x1="50" y1="68" x2="67" y2="45" stroke="#818cf8" strokeWidth="1.5" strokeOpacity="0.6"/>
+    </svg>
+  )
+}
+
 function GlossaryIcon() {
   return (
     <svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg" width="30" height="30">
@@ -165,6 +187,7 @@ const ICON_MAP = {
   'vector-embeddings': VectorEmbeddingsIcon,
   'rag': RAGIcon,
   'glossary': GlossaryIcon,
+  'neural-networks': NeuralNetworksIcon,
 }
 
 const VISUALIZATIONS = [
@@ -205,12 +228,18 @@ const VISUALIZATIONS = [
     glowColor: 'rgba(52,211,153,0.08)', ready: true,
   },
   {
-    path: null, icon: '🧠', tag: 'Deep Learning', title: 'Neural Networks',
-    desc: 'Watch a neural network learn in real-time. Adjust layers, neurons, and activation functions interactively.',
-    pills: ['Forward Pass', 'Backprop', 'Gradient Descent', 'Activations'],
-    accent: '#818cf8', accentDim: 'rgba(129,140,248,0.2)', iconBg: 'rgba(129,140,248,0.1)',
+    path: '/neural-networks',
+    icon: null,
+    tag: 'Deep Learning',
+    title: 'Neural Networks',
+    desc: 'Watch signals flow through a network, see activations, and understand how backpropagation trains weights.',
+    pills: ['Overview', 'Forward Pass', 'Activations', 'Backprop', 'Gradient Descent'],
+    accent: '#818cf8',
+    accentDim: 'rgba(129,140,248,0.2)',
+    iconBg: 'rgba(129,140,248,0.1)',
     glow: 'radial-gradient(ellipse at 0% 0%, rgba(129,140,248,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(129,140,248,0.08)', ready: false,
+    glowColor: 'rgba(129,140,248,0.08)',
+    ready: true,
   },
   {
     path: '/vector-embeddings',
@@ -250,7 +279,6 @@ const VISUALIZATIONS = [
 
 export default function Home() {
   const ready = VISUALIZATIONS.filter(v => v.ready)
-  const coming = VISUALIZATIONS.filter(v => !v.ready)
 
   return (
     <div className="home">
@@ -263,7 +291,7 @@ export default function Home() {
         <h1 className="hero-title">Learn AI<span className="line2">Visually</span></h1>
         <p className="hero-desc">Stop reading about AI. Start seeing it. Every visualization is interactive, hands-on, and built to give you real intuition — not just theory.</p>
         <div className="hero-stats">
-          {[["6", "Visualizations"], ["53", "Glossary Terms"], ["100%", "Free & Open"]].map(([n, l]) => (
+          {[["7", "Visualizations"], ["53", "Glossary Terms"], ["100%", "Free & Open"]].map(([n, l]) => (
             <div key={l} style={{ textAlign: "center" }}>
               <div className="hero-stat-num">{n}</div>
               <div className="hero-stat-lbl">{l}</div>
@@ -286,7 +314,7 @@ export default function Home() {
           <span className="section-label">✦ Live Now</span>
           <div className="section-line" />
         </div>
-        <div className="viz-grid" style={{ marginBottom: 56 }}>
+        <div className="viz-grid">
           {ready.map(v => (
             <Link key={v.title} to={v.path} className="viz-card"
               style={{ '--card-accent': v.accent, '--card-accent-dim': v.accentDim, '--card-icon-bg': v.iconBg, '--card-glow': v.glow, '--card-glow-color': v.glowColor, '--card-tag-bg': v.iconBg }}>
@@ -297,24 +325,6 @@ export default function Home() {
               <div className="card-pills">{v.pills.map(p => <span key={p} className="card-pill">{p}</span>)}</div>
               <div className="card-arrow">→</div>
             </Link>
-          ))}
-        </div>
-
-        <div className="section-header">
-          <span className="section-label" style={{ color: '#3a5a7a' }}>◦ Coming Soon</span>
-          <div className="section-line" style={{ background: 'linear-gradient(90deg, rgba(58,90,122,0.3), transparent)' }} />
-        </div>
-        <div className="viz-grid">
-          {coming.map(v => (
-            <div key={v.title} className="viz-card coming-soon"
-              style={{ '--card-accent': v.accent, '--card-accent-dim': v.accentDim, '--card-icon-bg': v.iconBg, '--card-glow': v.glow, '--card-glow-color': v.glowColor, '--card-tag-bg': v.iconBg }}>
-              <div className="coming-label">Coming Soon</div>
-              <div className="card-icon-wrap">{(() => { const IC = v.path && ICON_MAP[v.path.replace('/','')]; return IC ? <IC /> : v.icon })()}</div>
-              <div className="card-tag">{v.tag}</div>
-              <div className="card-title">{v.title}</div>
-              <div className="card-desc">{v.desc}</div>
-              <div className="card-pills">{v.pills.map(p => <span key={p} className="card-pill">{p}</span>)}</div>
-            </div>
           ))}
         </div>
       </div>
