@@ -109,11 +109,23 @@ const VectorEmbeddingsIcon = () => (
   </svg>
 )
 
+const RAGIcon = () => (
+  <svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg" width="30" height="30">
+    <ellipse cx="25" cy="22" rx="15" ry="7" stroke="#06b6d4" strokeWidth="2.5"/>
+    <rect x="10" y="22" width="30" height="28" fill="none" stroke="#06b6d4" strokeWidth="2.5"/>
+    <ellipse cx="25" cy="50" rx="15" ry="7" stroke="#06b6d4" strokeWidth="2.5"/>
+    <path d="M46 45 L58 45" stroke="#06b6d4" strokeWidth="2.5" strokeLinecap="round"/>
+    <path d="M55 39 L63 45 L55 51" stroke="#06b6d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <rect x="64" y="30" width="18" height="30" rx="4" stroke="#06b6d4" strokeWidth="2.5"/>
+  </svg>
+)
+
 const ICON_MAP = {
   'token-optimization': TokenIcon,
   'agents-tools': AgentLoopIcon,
   'temperature-sampling': TemperatureIcon,
   'vector-embeddings': VectorEmbeddingsIcon,
+  'rag': RAGIcon,
 }
 
 const VISUALIZATIONS = [
@@ -166,6 +178,20 @@ const VISUALIZATIONS = [
     accent: '#ec4899', accentDim: 'rgba(236,72,153,0.2)', iconBg: 'rgba(236,72,153,0.1)',
     glow: 'radial-gradient(ellipse at 0% 0%, rgba(236,72,153,0.08) 0%, transparent 60%)',
     glowColor: 'rgba(236,72,153,0.08)', ready: true,
+  },
+  {
+    path: '/rag',
+    icon: null,
+    tag: 'LLM Architecture',
+    title: 'Retrieval-Augmented Generation',
+    desc: 'See how RAG pipelines retrieve, chunk, and inject knowledge into LLM prompts.',
+    pills: ['Pipeline', 'Chunking', 'Retrieval', 'Prompt Assembly', 'RAG vs Fine-Tuning'],
+    accent: '#06b6d4',
+    accentDim: 'rgba(6,182,212,0.15)',
+    iconBg: 'rgba(6,182,212,0.1)',
+    glow: 'radial-gradient(ellipse at 0% 0%, rgba(6,182,212,0.08) 0%, transparent 60%)',
+    glowColor: 'rgba(6,182,212,0.09)',
+    ready: true,
   },
 ]
 

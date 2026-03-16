@@ -4,6 +4,7 @@ import TokenOptimization from './pages/TokenOptimization.jsx'
 import AgentsTools from './pages/AgentsTools.jsx'
 import VectorEmbeddings from './pages/VectorEmbeddings.jsx'
 import TemperatureSampling from './pages/TemperatureSampling.jsx'
+import RAG from './pages/RAG.jsx'
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
       <Route path="/agents-tools" element={<AgentsTools />} />
       <Route path="/vector-embeddings" element={<VectorEmbeddings />} />
       <Route path="/temperature-sampling" element={<TemperatureSampling />} />
+      <Route path="/rag" element={<RAG />} />
     </Routes>
   )
 }
