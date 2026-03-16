@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import NavBar from '../components/NavBar.jsx'
 
 const css = `
@@ -462,27 +463,35 @@ export default function TemperatureSampling() {
               ))}
             </div>
 
-            <div className="dist-container">
-              {BASE_TOKENS.map((t, i) => {
-                const pct = (probs[i] * 100).toFixed(1)
-                const isTop = probs[i] === Math.max(...probs)
-                return (
-                  <div key={t.token} className="dist-row">
-                    <div className="dist-token">"{t.token}"</div>
-                    <div className="dist-bar-bg">
-                      <div className="dist-bar-fill" style={{
-                        width: `${probs[i] * 100}%`,
-                        background: isTop ? t.color : `${t.color}60`,
-                        minWidth: probs[i] > 0.005 ? 4 : 0,
-                      }}>
-                        {probs[i] > 0.08 && <span className="dist-pct">{pct}%</span>}
-                      </div>
-                    </div>
-                    <div className="dist-prob">{(probs[i] * 100).toFixed(1)}%</div>
-                  </div>
-                )
-              })}
-            </div>
+            {(() => {
+              const maxProb = Math.max(...probs)
+              const data = BASE_TOKENS.map((t, i) => ({
+                token: `"${t.token}"`,
+                prob: +(probs[i] * 100).toFixed(1),
+                color: t.color,
+                isTop: probs[i] === maxProb,
+              }))
+              return (
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={data} margin={{ top: 10, right: 10, bottom: 5, left: -10 }} barCategoryGap="25%">
+                    <XAxis dataKey="token" tick={{ fill: '#b0a0b8', fontSize: 12, fontFamily: 'IBM Plex Mono' }} axisLine={{ stroke: '#1e1020' }} tickLine={false} />
+                    <YAxis domain={[0, 100]} tickFormatter={v => `${v}%`} tick={{ fill: '#5a4a5a', fontSize: 11, fontFamily: 'IBM Plex Mono' }} axisLine={false} tickLine={false} width={44} />
+                    <Tooltip
+                      cursor={{ fill: 'rgba(236,72,153,0.06)' }}
+                      contentStyle={{ background: '#0a080e', border: '1px solid #2a1222', borderRadius: 8, fontFamily: 'IBM Plex Mono', fontSize: 12 }}
+                      labelStyle={{ color: '#ec4899', marginBottom: 4 }}
+                      formatter={val => [`${val}%`, 'Probability']}
+                      itemStyle={{ color: '#e0e8f0' }}
+                    />
+                    <Bar dataKey="prob" radius={[4, 4, 0, 0]} isAnimationActive animationDuration={400}>
+                      {data.map((entry, i) => (
+                        <Cell key={i} fill={entry.color} fillOpacity={entry.isTop ? 1 : 0.4} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )
+            })()}
 
             <div style={{ marginTop: 16, padding: '10px 14px', background: 'rgba(236,72,153,0.06)', border: '1px solid rgba(236,72,153,0.2)', borderRadius: 8, fontSize: 13, color: '#b08090', lineHeight: 1.7 }}>
               {temp < 0.3 && '🧊 Very low temperature: one token dominates. Output is nearly deterministic.'}
@@ -531,26 +540,36 @@ export default function TemperatureSampling() {
               <span className="ts-slider-val">{topKTemp.toFixed(1)}</span>
             </div>
 
-            <div className="topk-visual">
-              {BASE_TOKENS.map((t, i) => {
-                const sorted = [...topKBaseProbs].map((p, idx) => ({ p, idx })).sort((a, b) => b.p - a.p)
-                const rank = sorted.findIndex(s => s.idx === i)
-                const inTopK = rank < topK
-                const height = Math.max(topKBaseProbs[i] * 260, 4)
-                return (
-                  <div key={t.token} className="topk-bar-col">
-                    <div className="topk-pct-label">{(topKBaseProbs[i] * 100).toFixed(0)}%</div>
-                    <div className="topk-bar" style={{
-                      height,
-                      background: inTopK ? t.color : '#1e1020',
-                      borderColor: inTopK ? t.color : '#2a1a2a',
-                      opacity: inTopK ? 1 : 0.3,
-                    }} />
-                    <div className="topk-token-label" style={{ color: inTopK ? t.color : '#3a2a3a' }}>"{t.token}"</div>
-                  </div>
-                )
-              })}
-            </div>
+            {(() => {
+              const sorted = [...topKBaseProbs].map((p, idx) => ({ p, idx })).sort((a, b) => b.p - a.p)
+              const topKSet = new Set(sorted.slice(0, topK).map(s => s.idx))
+              const data = BASE_TOKENS.map((t, i) => ({
+                token: `"${t.token}"`,
+                prob: +(topKBaseProbs[i] * 100).toFixed(1),
+                color: t.color,
+                inTopK: topKSet.has(i),
+              }))
+              return (
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={data} margin={{ top: 10, right: 10, bottom: 5, left: -10 }} barCategoryGap="25%">
+                    <XAxis dataKey="token" tick={{ fill: '#b0a0b8', fontSize: 12, fontFamily: 'IBM Plex Mono' }} axisLine={{ stroke: '#1e1020' }} tickLine={false} />
+                    <YAxis domain={[0, 100]} tickFormatter={v => `${v}%`} tick={{ fill: '#5a4a5a', fontSize: 11, fontFamily: 'IBM Plex Mono' }} axisLine={false} tickLine={false} width={44} />
+                    <Tooltip
+                      cursor={{ fill: 'rgba(236,72,153,0.06)' }}
+                      contentStyle={{ background: '#0a080e', border: '1px solid #2a1222', borderRadius: 8, fontFamily: 'IBM Plex Mono', fontSize: 12 }}
+                      labelStyle={{ color: '#ec4899', marginBottom: 4 }}
+                      formatter={(val, _n, props) => [`${val}%`, props.payload.inTopK ? '✓ In top-K' : '✗ Excluded']}
+                      itemStyle={{ color: '#e0e8f0' }}
+                    />
+                    <Bar dataKey="prob" radius={[4, 4, 0, 0]} isAnimationActive animationDuration={350}>
+                      {data.map((entry, i) => (
+                        <Cell key={i} fill={entry.color} fillOpacity={entry.inTopK ? 1 : 0.15} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )
+            })()}
 
             <div style={{ display: 'flex', gap: 16, marginTop: 8, flexWrap: 'wrap', fontSize: 13 }}>
               <div style={{ color: '#ec4899' }}>
