@@ -263,7 +263,7 @@ export default function Home() {
         <h1 className="hero-title">Learn AI<span className="line2">Visually</span></h1>
         <p className="hero-desc">Stop reading about AI. Start seeing it. Every visualization is interactive, hands-on, and built to give you real intuition — not just theory.</p>
         <div className="hero-stats">
-          {[["2", "Live Now"], ["4+", "Coming Soon"], ["100%", "Free & Open"]].map(([n, l]) => (
+          {[["6", "Visualizations"], ["53", "Glossary Terms"], ["100%", "Free & Open"]].map(([n, l]) => (
             <div key={l} style={{ textAlign: "center" }}>
               <div className="hero-stat-num">{n}</div>
               <div className="hero-stat-lbl">{l}</div>
@@ -319,7 +319,10 @@ export default function Home() {
         </div>
       </div>
 
-      <footer className="lab-footer">Built with React + Vite · Deployed on Vercel · thebabar/ai-practice</footer>
+      <footer className="lab-footer">
+        <div style={{ marginBottom: 6 }}>Designed by <span style={{ color: '#7a9bbf' }}>Babar M Bhatti</span> · <span style={{ color: '#4a6a8a' }}>Dallas AI · PrismSkills.ai</span></div>
+        <div>Built with React + Vite · Deployed on Vercel · thebabar/ai-practice</div>
+      </footer>
     </div>
   )
 }
