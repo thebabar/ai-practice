@@ -11,62 +11,62 @@ const css = `
 .il-eyebrow { font-size: 16px; letter-spacing: 0.22em; color: #a78bfa; text-transform: uppercase; margin-bottom: 14px; }
 .il-title { font-family: 'IBM Plex Sans', sans-serif; font-size: clamp(28px, 5vw, 52px); font-weight: 800; letter-spacing: -0.02em; color: #fff; line-height: 1.05; margin-bottom: 12px; }
 .il-title span { color: #a78bfa; }
-.il-subtitle { font-size: 16px; color: #3a3a5a; max-width: 540px; margin: 0 auto 32px; line-height: 1.8; }
+.il-subtitle { font-size: 16px; color: #7a9bbf; max-width: 540px; margin: 0 auto 32px; line-height: 1.8; }
 
 .il-tabs { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; padding: 0 16px 32px; }
-.il-tab { background: transparent; border: 1px solid #0a1530; color: #3a3a5a; font-family: 'IBM Plex Mono', monospace; font-size: 16px; letter-spacing: 0.1em; padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: all 0.18s; text-transform: uppercase; }
+.il-tab { background: transparent; border: 1px solid #1e3048; color: #7a9bbf; font-family: 'IBM Plex Mono', monospace; font-size: 16px; letter-spacing: 0.1em; padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: all 0.18s; text-transform: uppercase; }
 .il-tab:hover { border-color: #a78bfa; color: #a78bfa; }
 .il-tab.active { background: rgba(167,139,250,0.1); border-color: #a78bfa; color: #a78bfa; }
 
 .il-panel { max-width: 920px; margin: 0 auto; padding: 0 20px 80px; }
 
 .il-section-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 8px; }
-.il-section-sub { font-size: 16px; color: #3a3a5a; line-height: 1.7; margin-bottom: 24px; }
+.il-section-sub { font-size: 16px; color: #7a9bbf; line-height: 1.7; margin-bottom: 24px; }
 
 .il-card { background: rgba(167,139,250,0.04); border: 1px solid rgba(167,139,250,0.15); border-radius: 14px; padding: 20px 24px; margin-bottom: 16px; }
-.il-card-plain { background: rgba(255,255,255,0.02); border: 1px solid #0d1428; border-radius: 14px; padding: 20px 24px; margin-bottom: 16px; }
+.il-card-plain { background: rgba(255,255,255,0.02); border: 1px solid #1e3048; border-radius: 14px; padding: 20px 24px; margin-bottom: 16px; }
 
 .il-btn { background: rgba(167,139,250,0.1); border: 1px solid #a78bfa; color: #a78bfa; font-family: 'IBM Plex Mono', monospace; font-size: 14px; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: all 0.18s; letter-spacing: 0.08em; }
 .il-btn:hover { background: rgba(167,139,250,0.18); }
-.il-btn-ghost { background: transparent; border: 1px solid #1a2040; color: #3a3a5a; font-family: 'IBM Plex Mono', monospace; font-size: 14px; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: all 0.18s; letter-spacing: 0.08em; margin-left: 10px; }
-.il-btn-ghost:hover { border-color: #3a3a7a; color: #6a6aaa; }
+.il-btn-ghost { background: transparent; border: 1px solid #1e3048; color: #7a9bbf; font-family: 'IBM Plex Mono', monospace; font-size: 14px; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: all 0.18s; letter-spacing: 0.08em; margin-left: 10px; }
+.il-btn-ghost:hover { border-color: #7a9bbf; color: #9ab8d0; }
 
 .il-stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 32px; }
 .il-stat-card { background: rgba(167,139,250,0.04); border: 1px solid rgba(167,139,250,0.12); border-radius: 12px; padding: 18px 20px; }
 .il-stat-label { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #a78bfa; margin-bottom: 8px; font-weight: 600; }
-.il-stat-value { font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; font-weight: 700; color: #e0e0f8; line-height: 1.4; }
+.il-stat-value { font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; font-weight: 700; color: #e0e8f0; line-height: 1.4; }
 
 .il-prompt-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-.il-chip { background: transparent; border: 1px solid #0d1428; color: #3a3a5a; font-family: 'IBM Plex Mono', monospace; font-size: 13px; padding: 7px 14px; border-radius: 100px; cursor: pointer; transition: all 0.18s; }
+.il-chip { background: transparent; border: 1px solid #1e3048; color: #7a9bbf; font-family: 'IBM Plex Mono', monospace; font-size: 13px; padding: 7px 14px; border-radius: 100px; cursor: pointer; transition: all 0.18s; }
 .il-chip:hover { border-color: #a78bfa; color: #a78bfa; }
 .il-chip.active { background: rgba(167,139,250,0.1); border-color: #a78bfa; color: #a78bfa; }
 
 .il-pred-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
 .il-pred-token { font-family: 'IBM Plex Mono', monospace; font-size: 14px; min-width: 110px; }
-.il-pred-bar-bg { flex: 1; height: 8px; background: #0d1428; border-radius: 4px; overflow: hidden; }
+.il-pred-bar-bg { flex: 1; height: 8px; background: #1e3048; border-radius: 4px; overflow: hidden; }
 .il-pred-bar { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
 .il-pred-pct { font-family: 'IBM Plex Mono', monospace; font-size: 13px; min-width: 42px; text-align: right; }
 
-.il-token-display { display: flex; flex-wrap: wrap; gap: 4px; padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid #0d1428; border-radius: 10px; min-height: 60px; }
+.il-token-display { display: flex; flex-wrap: wrap; gap: 4px; padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid #1e3048; border-radius: 10px; min-height: 60px; }
 .il-token { padding: 3px 8px; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; }
 
 .il-loop-nodes { display: flex; justify-content: center; align-items: center; gap: 0; flex-wrap: wrap; margin: 24px 0; }
-.il-loop-node { background: rgba(255,255,255,0.02); border: 1px solid #0d1428; border-radius: 10px; padding: 14px 16px; text-align: center; width: 140px; transition: all 0.3s; }
+.il-loop-node { background: rgba(255,255,255,0.02); border: 1px solid #1e3048; border-radius: 10px; padding: 14px 16px; text-align: center; width: 140px; transition: all 0.3s; }
 .il-loop-node.active { background: rgba(167,139,250,0.1); border-color: #a78bfa; }
-.il-loop-arrow { color: #1a2040; font-size: 18px; padding: 0 6px; }
+.il-loop-arrow { color: #1e3048; font-size: 18px; padding: 0 6px; }
 .il-loop-icon { font-size: 22px; margin-bottom: 6px; }
 .il-loop-label { font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 4px; }
-.il-loop-desc { font-size: 11px; color: #3a3a5a; line-height: 1.4; }
+.il-loop-desc { font-size: 11px; color: #7a9bbf; line-height: 1.4; }
 .il-loop-node.active .il-loop-label { color: #a78bfa; }
 
-.il-limit-card { border-radius: 12px; border: 1px solid #0d1428; background: rgba(255,255,255,0.02); margin-bottom: 10px; cursor: pointer; transition: border-color 0.18s; overflow: hidden; }
-.il-limit-card:hover { border-color: #1a2040; }
+.il-limit-card { border-radius: 12px; border: 1px solid #1e3048; background: rgba(255,255,255,0.02); margin-bottom: 10px; cursor: pointer; transition: border-color 0.18s; overflow: hidden; }
+.il-limit-card:hover { border-color: #1e3048; }
 .il-limit-card.expanded { border-color: rgba(167,139,250,0.3); background: rgba(167,139,250,0.04); }
 .il-limit-header { display: flex; align-items: center; gap: 12px; padding: 16px 20px; }
 .il-limit-icon { font-size: 22px; }
 .il-limit-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 2px; }
-.il-limit-short { font-size: 13px; color: #4a4a7a; }
-.il-limit-detail { padding: 0 20px 16px 54px; font-size: 13px; color: #3a3a5a; line-height: 1.7; }
+.il-limit-short { font-size: 13px; color: #7a9bbf; }
+.il-limit-detail { padding: 0 20px 16px 54px; font-size: 13px; color: #7a9bbf; line-height: 1.7; }
 .il-severity { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-left: auto; flex-shrink: 0; }
 
 .il-role-box { border-radius: 10px; padding: 14px 18px; margin-bottom: 8px; }
@@ -83,20 +83,20 @@ const css = `
 @media (max-width: 640px) { .il-two-col { grid-template-columns: 1fr; } }
 
 .il-preset-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-.il-preset-btn { background: transparent; border: 1px solid #0d1428; color: #3a3a5a; font-family: 'IBM Plex Mono', monospace; font-size: 13px; padding: 7px 14px; border-radius: 6px; cursor: pointer; transition: all 0.18s; }
+.il-preset-btn { background: transparent; border: 1px solid #1e3048; color: #7a9bbf; font-family: 'IBM Plex Mono', monospace; font-size: 13px; padding: 7px 14px; border-radius: 6px; cursor: pointer; transition: all 0.18s; }
 .il-preset-btn.active { background: rgba(167,139,250,0.1); border-color: #a78bfa; color: #a78bfa; }
-.il-preset-btn:hover:not(.active) { border-color: #2a2050; color: #6a5a9a; }
+.il-preset-btn:hover:not(.active) { border-color: #1e3048; color: #7a9bbf; }
 
-.il-context-btn { background: transparent; border: 1px solid #0d1428; color: #3a3a5a; font-family: 'IBM Plex Mono', monospace; font-size: 13px; padding: 7px 14px; border-radius: 6px; cursor: pointer; transition: all 0.18s; }
+.il-context-btn { background: transparent; border: 1px solid #1e3048; color: #7a9bbf; font-family: 'IBM Plex Mono', monospace; font-size: 13px; padding: 7px 14px; border-radius: 6px; cursor: pointer; transition: all 0.18s; }
 .il-context-btn.active { background: rgba(167,139,250,0.1); border-color: #a78bfa; color: #a78bfa; }
-.il-context-btn:hover:not(.active) { border-color: #2a2050; color: #6a5a9a; }
+.il-context-btn:hover:not(.active) { border-color: #1e3048; color: #7a9bbf; }
 
 /* Quiz */
 .il-quiz-wrap { max-width: 680px; margin: 0 auto; }
 .il-quiz-progress { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
-.il-quiz-progress-bar-bg { flex: 1; height: 4px; background: #0d1428; border-radius: 2px; overflow: hidden; }
+.il-quiz-progress-bar-bg { flex: 1; height: 4px; background: #1e3048; border-radius: 2px; overflow: hidden; }
 .il-quiz-progress-bar { height: 100%; background: #a78bfa; border-radius: 2px; transition: width 0.4s; }
-.il-quiz-progress-label { font-size: 13px; color: #3a3a5a; font-family: 'IBM Plex Mono', monospace; white-space: nowrap; }
+.il-quiz-progress-label { font-size: 13px; color: #7a9bbf; font-family: 'IBM Plex Mono', monospace; white-space: nowrap; }
 
 .il-diff-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 100px; border: 1px solid; margin-bottom: 14px; font-weight: 500; }
 .il-diff-badge.easy   { color: #34d399; border-color: rgba(52,211,153,0.35);  background: rgba(52,211,153,0.08); }
@@ -105,21 +105,21 @@ const css = `
 
 .il-quiz-q { font-family: 'IBM Plex Sans', sans-serif; font-size: 18px; font-weight: 700; color: #fff; line-height: 1.5; margin-bottom: 24px; }
 .il-quiz-opts { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-.il-quiz-opt { background: rgba(255,255,255,0.02); border: 1px solid #0d1428; border-radius: 10px; padding: 14px 18px; cursor: pointer; transition: all 0.18s; text-align: left; font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; color: #a0b0c8; }
-.il-quiz-opt:hover:not(:disabled) { border-color: #a78bfa; color: #c0c0f0; }
+.il-quiz-opt { background: rgba(255,255,255,0.02); border: 1px solid #1e3048; border-radius: 10px; padding: 14px 18px; cursor: pointer; transition: all 0.18s; text-align: left; font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; color: #b0c8e0; }
+.il-quiz-opt:hover:not(:disabled) { border-color: #a78bfa; color: #b0c8e0; }
 .il-quiz-opt.correct { border-color: #34d399; background: rgba(52,211,153,0.08); color: #34d399; }
 .il-quiz-opt.wrong { border-color: #f87171; background: rgba(248,113,113,0.08); color: #f87171; }
 .il-quiz-opt.neutral { opacity: 0.5; }
 .il-quiz-opt:disabled { cursor: default; }
 
-.il-quiz-explanation { background: rgba(167,139,250,0.05); border: 1px solid rgba(167,139,250,0.15); border-radius: 10px; padding: 16px 20px; font-size: 14px; color: #6a5a9a; line-height: 1.7; margin-bottom: 20px; }
+.il-quiz-explanation { background: rgba(167,139,250,0.05); border: 1px solid rgba(167,139,250,0.15); border-radius: 10px; padding: 16px 20px; font-size: 14px; color: #7a9bbf; line-height: 1.7; margin-bottom: 20px; }
 .il-quiz-explanation strong { color: #a78bfa; }
 
 .il-quiz-done { text-align: center; padding: 40px 0; }
 .il-quiz-done-score { font-family: 'IBM Plex Sans', sans-serif; font-size: 56px; font-weight: 900; color: #a78bfa; line-height: 1; margin-bottom: 8px; }
-.il-quiz-done-label { font-size: 16px; color: #3a3a5a; margin-bottom: 32px; }
+.il-quiz-done-label { font-size: 16px; color: #7a9bbf; margin-bottom: 32px; }
 
-.il-textarea { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid #0d1428; border-radius: 8px; padding: 12px 14px; color: #c0c0f0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; outline: none; resize: vertical; min-height: 72px; transition: border-color 0.18s; box-sizing: border-box; }
+.il-textarea { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid #1e3048; border-radius: 8px; padding: 12px 14px; color: #b0c8e0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; outline: none; resize: vertical; min-height: 72px; transition: border-color 0.18s; box-sizing: border-box; }
 .il-textarea:focus { border-color: rgba(167,139,250,0.5); }
 `
 
@@ -493,7 +493,7 @@ export default function IntroLLMs() {
 
             {/* Next Token Prediction demo */}
             <div style={{ fontFamily: 'IBM Plex Sans', fontSize: 18, fontWeight: 700, color: '#fff', marginBottom: 8 }}>Next Token Prediction</div>
-            <p style={{ fontSize: 14, color: '#3a3a5a', marginBottom: 16, lineHeight: 1.7 }}>
+            <p style={{ fontSize: 14, color: '#7a9bbf', marginBottom: 16, lineHeight: 1.7 }}>
               Select a sentence starter to see the top predicted next tokens and their probabilities — the core mechanism powering every LLM.
             </p>
 
@@ -506,12 +506,12 @@ export default function IntroLLMs() {
             </div>
 
             <div className="il-card-plain" style={{ marginBottom: 20 }}>
-              <div style={{ fontSize: 13, color: '#3a3a5a', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10 }}>Prompt</div>
-              <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 15, color: '#c0c0f0', marginBottom: 20, padding: '10px 14px', background: 'rgba(167,139,250,0.06)', borderRadius: 8, border: '1px solid rgba(167,139,250,0.2)' }}>
+              <div style={{ fontSize: 13, color: '#7a9bbf', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10 }}>Prompt</div>
+              <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 15, color: '#b0c8e0', marginBottom: 20, padding: '10px 14px', background: 'rgba(167,139,250,0.06)', borderRadius: 8, border: '1px solid rgba(167,139,250,0.2)' }}>
                 {NEXT_TOKEN_DATA[selectedPrompt].prompt} <span style={{ color: '#a78bfa', animation: 'none' }}>▌</span>
               </div>
 
-              <div style={{ fontSize: 13, color: '#3a3a5a', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 12 }}>Top-5 predicted next tokens</div>
+              <div style={{ fontSize: 13, color: '#7a9bbf', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 12 }}>Top-5 predicted next tokens</div>
               {NEXT_TOKEN_DATA[selectedPrompt].predictions.map((p, i) => (
                 <div key={p.token} className="il-pred-row">
                   <div className="il-pred-token" style={{ color: i === 0 ? '#a78bfa' : '#5a5a8a' }}>
@@ -521,7 +521,7 @@ export default function IntroLLMs() {
                   <div className="il-pred-bar-bg">
                     <div className="il-pred-bar" style={{ width: `${p.prob * 100}%`, background: i === 0 ? '#a78bfa' : '#1a1a3a' }} />
                   </div>
-                  <div className="il-pred-pct" style={{ color: i === 0 ? '#a78bfa' : '#3a3a5a' }}>
+                  <div className="il-pred-pct" style={{ color: i === 0 ? '#a78bfa' : '#7a9bbf' }}>
                     {Math.round(p.prob * 100)}%
                   </div>
                 </div>
@@ -531,7 +531,7 @@ export default function IntroLLMs() {
             {/* Key insight */}
             <div className="il-card">
               <div style={{ fontFamily: 'IBM Plex Sans', fontSize: 15, fontWeight: 700, color: '#a78bfa', marginBottom: 8 }}>Key insight</div>
-              <p style={{ fontSize: 14, color: '#4a4a7a', lineHeight: 1.7, margin: 0 }}>
+              <p style={{ fontSize: 14, color: '#7a9bbf', lineHeight: 1.7, margin: 0 }}>
                 By predicting the next token billions of times across trillions of examples, the model develops an internal world model — understanding context, meaning, relationships, and even simple reasoning.
               </p>
             </div>
@@ -548,13 +548,13 @@ export default function IntroLLMs() {
             <div className="il-two-col" style={{ marginBottom: 32 }}>
               <div className="il-card-plain">
                 <div style={{ fontFamily: 'IBM Plex Sans', fontSize: 15, fontWeight: 700, color: '#a78bfa', marginBottom: 8 }}>Pre-training</div>
-                <p style={{ fontSize: 14, color: '#4a4a7a', lineHeight: 1.7, margin: 0 }}>
+                <p style={{ fontSize: 14, color: '#7a9bbf', lineHeight: 1.7, margin: 0 }}>
                   Train on massive unlabeled text from the internet, books, code. Objective: predict the next token. Result: broad general knowledge.
                 </p>
               </div>
               <div className="il-card-plain">
                 <div style={{ fontFamily: 'IBM Plex Sans', fontSize: 15, fontWeight: 700, color: '#34d399', marginBottom: 8 }}>Fine-tuning</div>
-                <p style={{ fontSize: 14, color: '#4a4a7a', lineHeight: 1.7, margin: 0 }}>
+                <p style={{ fontSize: 14, color: '#7a9bbf', lineHeight: 1.7, margin: 0 }}>
                   Continue training on curated, labeled examples. Objective: follow instructions, be helpful, avoid harm. Result: assistant behavior.
                 </p>
               </div>
@@ -562,7 +562,7 @@ export default function IntroLLMs() {
 
             {/* Training loop animation */}
             <div style={{ fontFamily: 'IBM Plex Sans', fontSize: 18, fontWeight: 700, color: '#fff', marginBottom: 8 }}>Training Loop</div>
-            <p style={{ fontSize: 14, color: '#3a3a5a', marginBottom: 16, lineHeight: 1.7 }}>
+            <p style={{ fontSize: 14, color: '#7a9bbf', marginBottom: 16, lineHeight: 1.7 }}>
               Watch the training loop: each cycle the model sees data, makes predictions, measures error, and updates its weights.
             </p>
 
@@ -586,14 +586,14 @@ export default function IntroLLMs() {
                 {isLooping ? '⏸ Stop' : '▶ Start Training'}
               </button>
               <button className="il-btn-ghost" onClick={resetLoop}>↺ Reset</button>
-              <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 14, color: '#6a5a9a', marginLeft: 8 }}>
+              <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 14, color: '#7a9bbf', marginLeft: 8 }}>
                 Epoch: <span style={{ color: '#a78bfa' }}>{epoch}</span> &nbsp;|&nbsp; Loss: <span style={{ color: '#a78bfa' }}>{loss.toFixed(2)}</span>
               </div>
             </div>
 
             {/* Loss chart */}
-            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid #0d1428', borderRadius: 12, padding: '16px 20px', marginBottom: 12 }}>
-              <div style={{ fontSize: 12, color: '#3a3a5a', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 12 }}>Training Loss Curve</div>
+            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid #1e3048', borderRadius: 12, padding: '16px 20px', marginBottom: 12 }}>
+              <div style={{ fontSize: 12, color: '#7a9bbf', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 12 }}>Training Loss Curve</div>
               <svg viewBox={`0 0 ${chartW} ${chartH}`} style={{ width: '100%', height: 120, display: 'block' }}>
                 <polyline
                   points={lossCurvePoints}
@@ -613,11 +613,11 @@ export default function IntroLLMs() {
                   r="5"
                   fill="#a78bfa"
                 />
-                <text x="4" y={lossToY(2.4) + 4} fill="#3a3a5a" fontSize="10" fontFamily="IBM Plex Mono">2.4</text>
-                <text x="4" y={lossToY(0.3) - 4} fill="#3a3a5a" fontSize="10" fontFamily="IBM Plex Mono">0.3</text>
+                <text x="4" y={lossToY(2.4) + 4} fill="#7a9bbf" fontSize="10" fontFamily="IBM Plex Mono">2.4</text>
+                <text x="4" y={lossToY(0.3) - 4} fill="#7a9bbf" fontSize="10" fontFamily="IBM Plex Mono">0.3</text>
               </svg>
             </div>
-            <div style={{ fontSize: 12, color: '#2a2050', textAlign: 'center', marginBottom: 24 }}>Loss decreases as the model's predictions improve over training epochs</div>
+            <div style={{ fontSize: 12, color: '#1e3048', textAlign: 'center', marginBottom: 24 }}>Loss decreases as the model's predictions improve over training epochs</div>
           </div>
         )}
 
@@ -629,7 +629,7 @@ export default function IntroLLMs() {
 
             {/* Tokenizer demo */}
             <div style={{ fontFamily: 'IBM Plex Sans', fontSize: 18, fontWeight: 700, color: '#fff', marginBottom: 8 }}>Live Tokenizer</div>
-            <p style={{ fontSize: 14, color: '#3a3a5a', marginBottom: 14, lineHeight: 1.7 }}>
+            <p style={{ fontSize: 14, color: '#7a9bbf', marginBottom: 14, lineHeight: 1.7 }}>
               Edit the text below to see how it splits into tokens. Each color represents a distinct token unit.
             </p>
 
@@ -649,15 +649,15 @@ export default function IntroLLMs() {
                   </span>
                 )
               })}
-              {tokens.length === 0 && <span style={{ color: '#2a2050', fontFamily: 'IBM Plex Mono', fontSize: 13 }}>Start typing above…</span>}
+              {tokens.length === 0 && <span style={{ color: '#1e3048', fontFamily: 'IBM Plex Mono', fontSize: 13 }}>Start typing above…</span>}
             </div>
-            <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 13, color: '#6a5a9a', marginBottom: 32 }}>
+            <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 13, color: '#7a9bbf', marginBottom: 32 }}>
               <span style={{ color: '#a78bfa' }}>{tokens.length}</span> tokens
             </div>
 
             {/* Context window explainer */}
             <div style={{ fontFamily: 'IBM Plex Sans', fontSize: 18, fontWeight: 700, color: '#fff', marginBottom: 8 }}>Context Window</div>
-            <p style={{ fontSize: 14, color: '#3a3a5a', marginBottom: 16, lineHeight: 1.7 }}>
+            <p style={{ fontSize: 14, color: '#7a9bbf', marginBottom: 16, lineHeight: 1.7 }}>
               The context window is the total amount of text (input + output) the model can process at once. Select a scenario to see how different sizes compare.
             </p>
 
@@ -669,9 +669,9 @@ export default function IntroLLMs() {
               ))}
             </div>
 
-            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid #0d1428', borderRadius: 12, padding: '18px 20px', marginBottom: 24 }}>
+            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid #1e3048', borderRadius: 12, padding: '18px 20px', marginBottom: 24 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                <div style={{ fontFamily: 'IBM Plex Sans', fontSize: 14, fontWeight: 700, color: '#c0c0f0' }}>
+                <div style={{ fontFamily: 'IBM Plex Sans', fontSize: 14, fontWeight: 700, color: '#b0c8e0' }}>
                   {CONTEXT_SCENARIOS[contextScenario].tokens.toLocaleString()} tokens
                 </div>
                 <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 13, color: '#a78bfa' }}>
@@ -690,7 +690,7 @@ export default function IntroLLMs() {
                   )}
                 </div>
               </div>
-              <div style={{ fontSize: 12, color: '#2a2050', marginTop: 6, fontFamily: 'IBM Plex Mono' }}>
+              <div style={{ fontSize: 12, color: '#1e3048', marginTop: 6, fontFamily: 'IBM Plex Mono' }}>
                 relative to 128K max
               </div>
             </div>
@@ -698,7 +698,7 @@ export default function IntroLLMs() {
             {/* Why context length matters */}
             <div className="il-card">
               <div style={{ fontFamily: 'IBM Plex Sans', fontSize: 15, fontWeight: 700, color: '#a78bfa', marginBottom: 8 }}>Why context length matters</div>
-              <p style={{ fontSize: 14, color: '#4a4a7a', lineHeight: 1.7, margin: 0 }}>
+              <p style={{ fontSize: 14, color: '#7a9bbf', lineHeight: 1.7, margin: 0 }}>
                 The context window is the model's working memory. Everything before the current token in the window is what the model "sees." Older tokens fall off the left edge as the conversation grows. A larger context window means longer conversations, bigger documents — but also more compute cost and the risk of the model losing focus on early content.
               </p>
             </div>
@@ -747,13 +747,13 @@ export default function IntroLLMs() {
                 </div>
               ))}
             </div>
-            <div style={{ fontSize: 13, color: '#3a3a5a', marginBottom: 32, lineHeight: 1.6 }}>
+            <div style={{ fontSize: 13, color: '#7a9bbf', marginBottom: 32, lineHeight: 1.6 }}>
               System sets behavior, User sends the question, Assistant generates the reply.
             </div>
 
             {/* System prompt effect demo */}
             <div style={{ fontFamily: 'IBM Plex Sans', fontSize: 18, fontWeight: 700, color: '#fff', marginBottom: 8 }}>System Prompt Effect</div>
-            <p style={{ fontSize: 14, color: '#3a3a5a', marginBottom: 16, lineHeight: 1.7 }}>
+            <p style={{ fontSize: 14, color: '#7a9bbf', marginBottom: 16, lineHeight: 1.7 }}>
               The same user question gets a very different answer depending on the system prompt. Select a persona to see how tone and style shift.
             </p>
 
@@ -806,7 +806,7 @@ export default function IntroLLMs() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                     <span style={{ fontSize: 11, fontFamily: 'IBM Plex Mono', textTransform: 'uppercase', letterSpacing: '0.1em', color: severityColor(lim.severity), opacity: 0.8 }}>{lim.severity}</span>
                     <div className="il-severity" style={{ background: severityColor(lim.severity) }} />
-                    <span style={{ color: '#3a3a5a', fontSize: 14 }}>{expandedLimitation === i ? '▲' : '▼'}</span>
+                    <span style={{ color: '#7a9bbf', fontSize: 14 }}>{expandedLimitation === i ? '▲' : '▼'}</span>
                   </div>
                 </div>
                 {expandedLimitation === i && (
@@ -817,7 +817,7 @@ export default function IntroLLMs() {
 
             <div className="il-card" style={{ marginTop: 24 }}>
               <div style={{ fontFamily: 'IBM Plex Sans', fontSize: 15, fontWeight: 700, color: '#a78bfa', marginBottom: 8 }}>The bottom line</div>
-              <p style={{ fontSize: 14, color: '#4a4a7a', lineHeight: 1.7, margin: 0 }}>
+              <p style={{ fontSize: 14, color: '#7a9bbf', lineHeight: 1.7, margin: 0 }}>
                 None of these limitations are fatal. Each has well-understood mitigations. The key is knowing when to trust an LLM's output, when to verify it, and when to supplement it with tools like RAG, structured outputs, or human review.
               </p>
             </div>
