@@ -179,6 +179,20 @@ function GlossaryIcon() {
   )
 }
 
+function ImageGenerationIcon() {
+  return (
+    <svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg" width="30" height="30">
+      <rect x="10" y="18" width="70" height="54" rx="6" stroke="#e879f9" strokeWidth="2.5"/>
+      <circle cx="28" cy="36" r="7" stroke="#e879f9" strokeWidth="2" strokeOpacity="0.7"/>
+      <path d="M10 58 L30 40 L46 54 L60 42 L80 58" stroke="#e879f9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle cx="68" cy="28" r="4" fill="rgba(232,121,249,0.3)" stroke="#e879f9" strokeWidth="1.5"/>
+      <path d="M63 28 L54 28" stroke="#e879f9" strokeWidth="1.5" strokeLinecap="round" strokeOpacity="0.5"/>
+      <path d="M68 23 L68 14" stroke="#e879f9" strokeWidth="1.5" strokeLinecap="round" strokeOpacity="0.5"/>
+      <path d="M73 28 L82 28" stroke="#e879f9" strokeWidth="1.5" strokeLinecap="round" strokeOpacity="0.5"/>
+    </svg>
+  )
+}
+
 const ICON_MAP = {
   'intro-llms': LLMIcon,
   'token-optimization': TokenIcon,
@@ -188,6 +202,7 @@ const ICON_MAP = {
   'rag': RAGIcon,
   'glossary': GlossaryIcon,
   'neural-networks': NeuralNetworksIcon,
+  'image-generation': ImageGenerationIcon,
 }
 
 const VISUALIZATIONS = [
@@ -262,6 +277,18 @@ const VISUALIZATIONS = [
     glowColor: 'rgba(236,72,153,0.08)', ready: true,
   },
   {
+    path: '/image-generation',
+    icon: null,
+    tag: 'Generative AI',
+    title: 'Image Generation',
+    desc: 'Explore how diffusion models turn text prompts into images — from noise to pixels, CFG scale, samplers, and prompt engineering.',
+    pills: ['Diffusion Process', 'Prompt Craft', 'CFG Scale', 'Samplers', 'Quiz'],
+    accent: '#e879f9', accentDim: 'rgba(232,121,249,0.2)', iconBg: 'rgba(232,121,249,0.1)',
+    glow: 'radial-gradient(ellipse at 0% 0%, rgba(232,121,249,0.08) 0%, transparent 60%)',
+    glowColor: 'rgba(232,121,249,0.09)',
+    ready: true,
+  },
+  {
     path: '/rag',
     icon: null,
     tag: 'LLM Architecture',
@@ -291,7 +318,7 @@ export default function Home() {
         <h1 className="hero-title">Learn AI<span className="line2">Visually</span></h1>
         <p className="hero-desc">Stop reading about AI. Start seeing it. Every visualization is interactive, hands-on, and built to give you real intuition — not just theory.</p>
         <div className="hero-stats">
-          {[["7", "Visualizations"], ["53", "Glossary Terms"], ["100%", "Free & Open"]].map(([n, l]) => (
+          {[["8", "Visualizations"], ["53", "Glossary Terms"], ["100%", "Free & Open"]].map(([n, l]) => (
             <div key={l} style={{ textAlign: "center" }}>
               <div className="hero-stat-num">{n}</div>
               <div className="hero-stat-lbl">{l}</div>

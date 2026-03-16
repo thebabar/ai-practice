@@ -8,6 +8,7 @@ import TemperatureSampling from './pages/TemperatureSampling.jsx'
 import RAG from './pages/RAG.jsx'
 import Glossary from './pages/Glossary.jsx'
 import NeuralNetworks from './pages/NeuralNetworks.jsx'
+import ImageGeneration from './pages/ImageGeneration.jsx'
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
       <Route path="/rag" element={<RAG />} />
       <Route path="/glossary" element={<Glossary />} />
       <Route path="/neural-networks" element={<NeuralNetworks />} />
+      <Route path="/image-generation" element={<ImageGeneration />} />
     </Routes>
   )
 }
