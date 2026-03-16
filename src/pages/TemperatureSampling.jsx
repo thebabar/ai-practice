@@ -529,15 +529,15 @@ export default function TemperatureSampling() {
             <div className="ts-card-title">// Top-K Cutoff Visualizer</div>
             <div className="ts-slider-row">
               <span className="ts-slider-label">K value</span>
-              <input type="range" className="ts-slider" min={1} max={8} step={1}
+              <input type="range" className="ts-slider" style={{ accentColor: '#34d399' }} min={1} max={8} step={1}
                 value={topK} onChange={e => setTopK(+e.target.value)} />
-              <span className="ts-slider-val">K={topK}</span>
+              <span className="ts-slider-val" style={{ color: '#34d399' }}>K={topK}</span>
             </div>
             <div className="ts-slider-row">
               <span className="ts-slider-label">Temperature</span>
-              <input type="range" className="ts-slider" min={0.1} max={2.0} step={0.05}
+              <input type="range" className="ts-slider" style={{ accentColor: '#ec4899' }} min={0.1} max={2.0} step={0.05}
                 value={topKTemp} onChange={e => setTopKTemp(+e.target.value)} />
-              <span className="ts-slider-val">{topKTemp.toFixed(1)}</span>
+              <span className="ts-slider-val" style={{ color: '#ec4899' }}>{topKTemp.toFixed(1)}</span>
             </div>
 
             {(() => {
