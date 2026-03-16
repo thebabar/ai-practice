@@ -169,6 +169,13 @@ const css = `
 .rg-hybrid-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #fbbf24; margin-bottom: 8px; }
 .rg-hybrid-text { font-size: 14px; color: #5a5030; line-height: 1.7; }
 
+/* Intro simulator */
+.rg-sim-input { flex:1; background:rgba(255,255,255,0.03); border:1px solid #0d1e28; border-radius:8px; padding:10px 14px; color:#c0e8f0; font-family:'IBM Plex Mono',monospace; font-size:13px; outline:none; transition: border-color 0.18s; }
+.rg-sim-input:focus { border-color: rgba(6,182,212,0.5); }
+.rg-sim-input::placeholder { color: #1a3a4a; }
+.rg-eq-chip { background:transparent; border:1px solid #0d1e28; color:#3a6a7a; font-family:'IBM Plex Mono',monospace; font-size:12px; padding:5px 12px; border-radius:100px; cursor:pointer; transition:all 0.18s; }
+.rg-eq-chip:hover { border-color:#06b6d4; color:#06b6d4; }
+
 /* Quiz tab */
 .rg-quiz-wrap { max-width: 680px; margin: 0 auto; }
 .rg-quiz-progress { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
@@ -325,6 +332,74 @@ const QUIZ = [
   { id: 11, difficulty: 'hard', q: 'A RAG system answers questions about multi-step processes (e.g., "how does the loan approval workflow work?") incompletely. What is the most sophisticated fix?', opts: ["Increase chunk size to 2048 tokens", "Implement hierarchical indexing — index small chunks for precision and their parent summaries for context, fetching the full parent when a child matches", "Use higher LLM temperature", "Add more documents to the knowledge base"], correct: 1, explanation: "Multi-step processes span many paragraphs and don't fit in one chunk. Hierarchical retrieval indexes small chunks for precision while storing references to parent sections. When a small chunk matches, the retriever fetches the full parent document — giving the LLM both specificity and surrounding narrative." }
 ]
 
+// ─── Intro simulator data ─────────────────────────────────────────────────────
+const INTRO_DOCS = [
+  {
+    id: 0, label: 'Company FAQ', icon: '🏢',
+    sentences: [
+      "NovaTech was founded in 2018 and is headquartered in Austin, Texas.",
+      "Our flagship product is CloudSync, a real-time data synchronization platform.",
+      "CloudSync supports integration with Salesforce, HubSpot, and over 200 other tools.",
+      "NovaTech offers three pricing plans: Starter ($29/mo), Pro ($99/mo), and Enterprise (custom).",
+      "The Starter plan includes up to 5 users and 10GB of storage.",
+      "Enterprise customers receive dedicated support, SLA guarantees, and custom security audits.",
+      "All data is encrypted at rest and in transit using AES-256 and TLS 1.3.",
+      "NovaTech's uptime SLA is 99.9%, with an average response time under 200ms.",
+      "To cancel your subscription, visit Account Settings > Billing > Cancel Plan.",
+      "Refunds are available within 30 days of purchase for annual plans."
+    ],
+    exampleQs: ['What is CloudSync?', 'How much does the Pro plan cost?', 'Is my data secure?']
+  },
+  {
+    id: 1, label: 'Study Notes', icon: '📚',
+    sentences: [
+      "Photosynthesis is the process by which plants convert sunlight into glucose using carbon dioxide and water.",
+      "Chlorophyll, the green pigment in plants, absorbs light energy primarily in the red and blue wavelengths.",
+      "The light-dependent reactions occur in the thylakoids and produce ATP and NADPH.",
+      "The Calvin cycle takes place in the stroma and uses ATP to build sugar molecules.",
+      "Plants release oxygen as a byproduct of splitting water molecules during photosynthesis.",
+      "Cellular respiration is essentially the reverse of photosynthesis, breaking down glucose to release energy.",
+      "Mitochondria are the organelles responsible for cellular respiration in eukaryotic cells.",
+      "The overall equation for photosynthesis is: 6CO₂ + 6H₂O + light energy → C₆H₁₂O₆ + 6O₂.",
+      "C4 plants like corn have evolved mechanisms to reduce photorespiration in hot climates.",
+      "Cyanobacteria were the first organisms to perform oxygenic photosynthesis, transforming Earth's atmosphere."
+    ],
+    exampleQs: ['What is photosynthesis?', 'Where does the Calvin cycle happen?', 'What do plants release?']
+  },
+  {
+    id: 2, label: 'Product Manual', icon: '🔧',
+    sentences: [
+      "The ProCam X1 camera shoots 4K video at up to 120 frames per second.",
+      "Battery life is approximately 90 minutes when recording in 4K mode.",
+      "To charge the camera, connect the included USB-C cable to any 18W or higher charger.",
+      "The camera is waterproof to a depth of 10 meters for up to 30 minutes.",
+      "Stabilization is handled by a 6-axis gyroscopic sensor for smooth footage.",
+      "The ProCam X1 connects to the companion mobile app via Bluetooth 5.2.",
+      "Voice commands include Start recording, Stop recording, and Take photo.",
+      "The camera supports SD cards up to 1TB with a Class 10 or UHS-I rating.",
+      "To reset the camera to factory defaults, hold the power and mode buttons for 10 seconds.",
+      "Firmware updates can be applied through the mobile app or by USB connection to a computer."
+    ],
+    exampleQs: ['How long does the battery last?', 'Is it waterproof?', 'How do I reset the camera?']
+  }
+]
+
+const STOPWORDS = new Set(['a','an','the','is','are','was','were','be','been','being','have','has','had','do','does','did','will','would','could','should','may','might','shall','can','to','of','in','on','at','by','for','with','about','into','from','up','down','out','but','and','or','if','as','i','me','my','we','our','you','your','he','his','she','her','it','its','they','their','what','which','who','that','this','these','those','how','when','where','why'])
+
+function simpleRetrieve(question, sentences) {
+  const qWords = question.toLowerCase().split(/\W+/).filter(w => w.length > 2 && !STOPWORDS.has(w))
+  if (!qWords.length) return []
+  return sentences
+    .map((s, i) => {
+      const sWords = s.toLowerCase().split(/\W+/)
+      const matches = qWords.filter(w => sWords.some(sw => sw.startsWith(w) || w.startsWith(sw)))
+      return { i, s, score: matches.length }
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3)
+    .filter(x => x.score > 0)
+}
+
 // ─── Chunk color palette ──────────────────────────────────────────────────────
 const CHUNK_COLORS = [
   { bg: 'rgba(6,182,212,0.12)', border: 'rgba(6,182,212,0.3)' },
@@ -341,9 +416,29 @@ const TEMPLATE_CONFIGS = {
 
 export default function RAG() {
   const [tab, setTab] = useState(0)
-  const TABS = ['Pipeline', 'Chunking', 'Retrieval', 'Prompt Assembly', 'RAG vs Fine-Tuning', 'Quiz']
+  const TABS = ['What is RAG?', 'Pipeline', 'Chunking', 'Retrieval', 'Prompt Assembly', 'RAG vs Fine-Tuning', 'Quiz']
 
-  // ── Tab 0: Pipeline ──────────────────────────────────────────────────────
+  // ── Tab 0: What is RAG? ──────────────────────────────────────────────────
+  const [introDocId, setIntroDocId] = useState(0)
+  const [introQuestion, setIntroQuestion] = useState('')
+  const [introRetrieved, setIntroRetrieved] = useState(null)
+
+  function runIntroAsk(q) {
+    const question = q !== undefined ? q : introQuestion
+    if (!question.trim()) return
+    const doc = INTRO_DOCS.find(d => d.id === introDocId)
+    const results = simpleRetrieve(question, doc.sentences)
+    setIntroRetrieved({ question, results, docId: introDocId })
+    if (q !== undefined) setIntroQuestion(q)
+  }
+
+  function changeIntroDoc(id) {
+    setIntroDocId(id)
+    setIntroRetrieved(null)
+    setIntroQuestion('')
+  }
+
+  // ── Tab 1: Pipeline ──────────────────────────────────────────────────────
   const [pipelineStep, setPipelineStep] = useState(0)
   const [streaming, setStreaming] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
@@ -502,8 +597,120 @@ export default function RAG() {
 
       <div className="rg-panel">
 
-        {/* ── Tab 0: Pipeline ───────────────────────────────────────────── */}
+        {/* ── Tab 0: What is RAG? ───────────────────────────────────────────── */}
         {tab === 0 && (
+          <div>
+            <div className="rg-section-title">What is RAG?</div>
+            <p className="rg-section-sub">
+              RAG stands for <strong style={{color:'#c0e8f0'}}>Retrieval-Augmented Generation</strong>. It gives an AI model access to your own documents — so it can answer questions accurately based on information it was never trained on.
+            </p>
+
+            {/* Flow diagram */}
+            <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap',margin:'24px 0',padding:'20px',background:'rgba(6,182,212,0.04)',borderRadius:12,border:'1px solid rgba(6,182,212,0.12)'}}>
+              {[{label:'Your Documents',icon:'📄'}, null, {label:'Knowledge Base',icon:'🗄️'}, null, {label:'Retrieve',icon:'🔍'}, null, {label:'LLM',icon:'✨'}, null, {label:'Grounded Answer',icon:'💬',highlight:true}].map((item, i) =>
+                item === null
+                  ? <div key={i} style={{color:'#06b6d4',fontSize:18,padding:'0 2px'}}>→</div>
+                  : <div key={item.label} style={{background:item.highlight?'rgba(6,182,212,0.15)':'rgba(255,255,255,0.03)',border:`1px solid ${item.highlight?'rgba(6,182,212,0.4)':'#0d1e28'}`,borderRadius:8,padding:'10px 14px',textAlign:'center',minWidth:88}}>
+                      <div style={{fontSize:20,marginBottom:4}}>{item.icon}</div>
+                      <div style={{fontSize:12,color:item.highlight?'#06b6d4':'#6a9aaa',fontFamily:'IBM Plex Mono',lineHeight:1.3}}>{item.label}</div>
+                    </div>
+              )}
+            </div>
+
+            {/* What is a knowledge base */}
+            <div className="rg-card" style={{marginBottom:28}}>
+              <div style={{fontFamily:'IBM Plex Sans',fontSize:17,fontWeight:700,color:'#fff',marginBottom:8}}>What is a Knowledge Base?</div>
+              <p style={{fontSize:14,color:'#4a8a9a',lineHeight:1.7,marginBottom:14}}>
+                A knowledge base is a collection of your own text that the RAG system indexes and searches. Think of it as giving the AI a reference library to consult before answering. It can hold any text-based content:
+              </p>
+              <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+                {[['📄','PDFs & docs'],['📧','Emails'],['📝','Notes'],['🌐','Web pages'],['💬','Chat logs'],['📊','Spreadsheets'],['📖','Books'],['🎧','Transcripts']].map(([icon,lbl]) => (
+                  <div key={lbl} style={{background:'rgba(6,182,212,0.06)',border:'1px solid rgba(6,182,212,0.15)',borderRadius:8,padding:'8px 12px',fontSize:13,color:'#6ab8cc',display:'flex',alignItems:'center',gap:6}}>
+                    <span>{icon}</span><span>{lbl}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Try it yourself */}
+            <div style={{fontFamily:'IBM Plex Sans',fontSize:18,fontWeight:700,color:'#fff',marginBottom:6}}>Try It Yourself</div>
+            <p style={{fontSize:14,color:'#3a6a7a',marginBottom:16,lineHeight:1.7}}>
+              Pick a sample knowledge base and ask any question about it. The system retrieves the most relevant sentences and assembles a prompt — just like a real RAG pipeline.
+            </p>
+
+            {/* Doc picker */}
+            <div style={{display:'flex',gap:10,marginBottom:20,flexWrap:'wrap'}}>
+              {INTRO_DOCS.map(doc => (
+                <button key={doc.id} onClick={() => changeIntroDoc(doc.id)} style={{background:introDocId===doc.id?'rgba(6,182,212,0.12)':'transparent',border:`1px solid ${introDocId===doc.id?'#06b6d4':'#0d1e28'}`,color:introDocId===doc.id?'#06b6d4':'#3a6a7a',fontFamily:'IBM Plex Mono',fontSize:13,padding:'8px 16px',borderRadius:8,cursor:'pointer',display:'flex',alignItems:'center',gap:8,transition:'all 0.18s'}}>
+                  <span>{doc.icon}</span><span>{doc.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Document with highlighted retrieved sentences */}
+            {(() => {
+              const doc = INTRO_DOCS.find(d => d.id === introDocId)
+              const retrievedIndices = new Set((introRetrieved?.docId === introDocId ? introRetrieved.results : []).map(r => r.i))
+              return (
+                <div style={{background:'rgba(255,255,255,0.02)',border:'1px solid #0d1e28',borderRadius:12,padding:20,marginBottom:16}}>
+                  <div style={{fontSize:12,color:'#3a6a7a',letterSpacing:'0.1em',textTransform:'uppercase',marginBottom:12}}>{doc.icon} {doc.label} · {doc.sentences.length} sentences</div>
+                  <div style={{display:'flex',flexDirection:'column',gap:6}}>
+                    {doc.sentences.map((s, i) => {
+                      const isRetrieved = retrievedIndices.has(i)
+                      const rank = (introRetrieved?.results || []).findIndex(r => r.i === i)
+                      return (
+                        <div key={i} style={{padding:'8px 12px',borderRadius:6,background:isRetrieved?'rgba(6,182,212,0.1)':'transparent',border:isRetrieved?'1px solid rgba(6,182,212,0.3)':'1px solid transparent',fontSize:13,color:isRetrieved?'#c0e8f0':'#4a7a8a',lineHeight:1.6,transition:'all 0.2s',display:'flex',alignItems:'flex-start',gap:8}}>
+                          {isRetrieved && <span style={{fontSize:11,color:'#06b6d4',fontFamily:'IBM Plex Mono',background:'rgba(6,182,212,0.15)',padding:'1px 6px',borderRadius:4,whiteSpace:'nowrap',marginTop:1}}>#{rank+1}</span>}
+                          <span>{s}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })()}
+
+            {/* Question input */}
+            <div style={{marginBottom:10}}>
+              <div style={{fontSize:12,color:'#3a6a7a',letterSpacing:'0.1em',textTransform:'uppercase',marginBottom:8}}>Ask a question</div>
+              <div style={{display:'flex',gap:8}}>
+                <input type="text" className="rg-sim-input" value={introQuestion} onChange={e => setIntroQuestion(e.target.value)} onKeyDown={e => e.key === 'Enter' && runIntroAsk()} placeholder="Type a question about the document..." />
+                <button className="rg-btn" onClick={() => runIntroAsk()}>Ask →</button>
+              </div>
+            </div>
+
+            {/* Example question chips */}
+            <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:24,alignItems:'center'}}>
+              <span style={{fontSize:12,color:'#2a4a5a'}}>Try:</span>
+              {INTRO_DOCS.find(d => d.id === introDocId).exampleQs.map(q => (
+                <button key={q} className="rg-eq-chip" onClick={() => runIntroAsk(q)}>{q}</button>
+              ))}
+            </div>
+
+            {/* Results */}
+            {introRetrieved && introRetrieved.docId === introDocId && (
+              <div>
+                {introRetrieved.results.length === 0 ? (
+                  <div className="rg-card-plain" style={{color:'#f87171',textAlign:'center',padding:'20px'}}>No relevant chunks found. Try a more specific question.</div>
+                ) : (
+                  <>
+                    <div style={{fontFamily:'IBM Plex Sans',fontSize:15,fontWeight:700,color:'#fff',marginBottom:10}}>Retrieved chunks → Assembled prompt</div>
+                    <div style={{background:'#020508',border:'1px solid #0d1e28',borderRadius:10,padding:16,fontFamily:'IBM Plex Mono',fontSize:12,lineHeight:1.7,marginBottom:12,whiteSpace:'pre-wrap'}}>
+                      <span style={{color:'#3a6a7a'}}>{'[SYSTEM]\nYou are a helpful assistant. Answer using ONLY the provided context.\n\n'}</span>
+                      <span style={{color:'#06b6d4'}}>{'[CONTEXT]\n'}{introRetrieved.results.map((r,i) => `Chunk ${i+1}: ${r.s}`).join('\n')}{'\n\n'}</span>
+                      <span style={{color:'#c0e8f0'}}>{'[QUESTION]\n'}{introRetrieved.question}</span>
+                    </div>
+                    <div className="rg-answer-label">LLM Answer</div>
+                    <div className="rg-answer-box">Based on the retrieved context: {introRetrieved.results.map(r => r.s).join(' ')}</div>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Tab 1: Pipeline ───────────────────────────────────────────── */}
+        {tab === 1 && (
           <div>
             <div className="rg-section-title">The RAG Pipeline</div>
             <p className="rg-section-sub">Step through each stage of a Retrieval-Augmented Generation pipeline. Click "Next Step" to advance.</p>
@@ -563,8 +770,8 @@ export default function RAG() {
           </div>
         )}
 
-        {/* ── Tab 1: Chunking ───────────────────────────────────────────── */}
-        {tab === 1 && (
+        {/* ── Tab 2: Chunking ───────────────────────────────────────────── */}
+        {tab === 2 && (
           <div>
             <div className="rg-section-title">Document Chunking</div>
             <p className="rg-section-sub">Documents must be split into chunks before they can be embedded and indexed. The chunking strategy directly affects retrieval quality.</p>
@@ -633,8 +840,8 @@ export default function RAG() {
           </div>
         )}
 
-        {/* ── Tab 2: Retrieval ──────────────────────────────────────────── */}
-        {tab === 2 && (
+        {/* ── Tab 3: Retrieval ──────────────────────────────────────────── */}
+        {tab === 3 && (
           <div>
             <div className="rg-section-title">Semantic Retrieval</div>
             <p className="rg-section-sub">Select a query to see how similarity scores determine which chunks are retrieved. The top 3 results are passed to the LLM.</p>
@@ -708,8 +915,8 @@ export default function RAG() {
           </div>
         )}
 
-        {/* ── Tab 3: Prompt Assembly ────────────────────────────────────── */}
-        {tab === 3 && (
+        {/* ── Tab 4: Prompt Assembly ────────────────────────────────────── */}
+        {tab === 4 && (
           <div>
             <div className="rg-section-title">Prompt Assembly</div>
             <p className="rg-section-sub">Toggle context chunks on and off to see how the assembled prompt — and the LLM's answer — change in real time.</p>
@@ -759,8 +966,8 @@ export default function RAG() {
           </div>
         )}
 
-        {/* ── Tab 4: RAG vs Fine-Tuning ─────────────────────────────────── */}
-        {tab === 4 && (
+        {/* ── Tab 5: RAG vs Fine-Tuning ─────────────────────────────────── */}
+        {tab === 5 && (
           <div>
             <div className="rg-section-title">RAG vs Fine-Tuning</div>
             <p className="rg-section-sub">Both techniques adapt LLMs to specific domains — but in fundamentally different ways. Click any row to expand.</p>
@@ -835,8 +1042,8 @@ export default function RAG() {
           </div>
         )}
 
-        {/* ── Tab 5: Quiz ───────────────────────────────────────────────── */}
-        {tab === 5 && (
+        {/* ── Tab 6: Quiz ───────────────────────────────────────────────── */}
+        {tab === 6 && (
           <div className="rg-quiz-wrap">
             {done ? (
               <div className="rg-quiz-done">
