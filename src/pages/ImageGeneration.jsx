@@ -149,7 +149,14 @@ function lerpPixels(a, b, t) {
 
 // ─── prompt data ──────────────────────────────────────────────────────────────
 const SUBJECTS = ['a glowing forest', 'a cyberpunk city', 'an astronaut on Mars', 'a cozy library', 'a dragon over mountains']
-const STYLES = ['digital art', 'oil painting', 'watercolor', 'photorealistic', 'anime', 'pixel art']
+const STYLES = ['digital art', 'pencil sketch', 'watercolor', 'photorealistic', 'anime', 'pixel art']
+
+const STYLE_IMAGES = {
+  'photorealistic': '/images/image-gen/style-photo.webp',
+  'watercolor':     '/images/image-gen/style-watercolor.webp',
+  'anime':          '/images/image-gen/style-anime.webp',
+  'pencil sketch':  '/images/image-gen/style-pencil.webp',
+}
 const LIGHTINGS = ['golden hour', 'studio lighting', 'dramatic shadows', 'soft diffused light', 'neon lights']
 const QUALITIES = ['8k uhd', 'highly detailed', 'masterpiece', 'award-winning photography', 'sharp focus']
 const NEGATIVES_LIST = ['blurry', 'low quality', 'distorted', 'watermark', 'text', 'duplicate', 'deformed hands', 'overexposed']
@@ -556,6 +563,15 @@ export default function ImageGeneration() {
                 <button key={s} className={`ig-prompt-chip${style === s ? ' sel-st' : ''}`} onClick={() => setStyle(style === s ? null : s)}>{s}</button>
               ))}
             </div>
+
+            {STYLE_IMAGES[style] && (
+              <div style={{ marginBottom: 20, borderRadius: 10, overflow: 'hidden', border: '1px solid rgba(56,189,248,0.2)' }}>
+                <img src={STYLE_IMAGES[style]} alt={`${style} example`} style={{ width: '100%', display: 'block' }} />
+                <div style={{ padding: '8px 14px', background: '#0d1628', fontSize: 12, fontFamily: 'IBM Plex Mono', color: '#38bdf8' }}>
+                  Example output · "a cozy library" · <span style={{ color: '#e0e8f0' }}>{style}</span>
+                </div>
+              </div>
+            )}
 
             <div className="ig-prompt-cat-title">Lighting</div>
             <div className="ig-prompt-chips">
