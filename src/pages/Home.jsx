@@ -43,6 +43,14 @@ const css = `
 .coming-label { position: absolute; top: 16px; right: 16px; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #3a5a7a; background: rgba(255,255,255,0.04); border: 1px solid #1a2744; padding: 4px 8px; border-radius: 4px; }
 
 .lab-footer { border-top: 1px solid #0d1828; padding: 28px 24px; text-align: center; font-size: 13px; color: #2a4060; letter-spacing: 0.06em; }
+
+.gl-utility-bar { max-width: 1100px; margin: 0 auto; padding: 0 24px 32px; }
+.gl-utility-link { display: flex; align-items: center; gap: 14px; background: rgba(148,163,184,0.03); border: 1px solid rgba(148,163,184,0.1); border-radius: 10px; padding: 13px 20px; text-decoration: none; transition: all 0.18s; }
+.gl-utility-link:hover { border-color: rgba(148,163,184,0.28); background: rgba(148,163,184,0.06); }
+.gl-utility-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; font-weight: 700; color: #94a3b8; margin-right: 10px; }
+.gl-utility-desc { font-size: 12px; color: #3a5a7a; font-family: 'IBM Plex Mono', monospace; }
+.gl-utility-arrow { margin-left: auto; color: #94a3b8; font-size: 16px; flex-shrink: 0; transition: transform 0.18s; }
+.gl-utility-link:hover .gl-utility-arrow { transform: translateX(3px); }
 `
 
 const TokenIcon = () => (
@@ -238,20 +246,6 @@ const VISUALIZATIONS = [
     glowColor: 'rgba(6,182,212,0.09)',
     ready: true,
   },
-  {
-    path: '/glossary',
-    icon: null,
-    tag: 'Reference',
-    title: 'Glossary',
-    desc: '53 key terms across all topics — searchable and filterable by category.',
-    pills: ['Foundations', 'Tokens', 'Sampling', 'Agents', 'Embeddings', 'RAG'],
-    accent: '#94a3b8',
-    accentDim: 'rgba(148,163,184,0.15)',
-    iconBg: 'rgba(148,163,184,0.1)',
-    glow: 'radial-gradient(ellipse at 0% 0%, rgba(148,163,184,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(148,163,184,0.07)',
-    ready: true,
-  },
 ]
 
 export default function Home() {
@@ -277,6 +271,15 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      <div className="gl-utility-bar">
+        <Link to="/glossary" className="gl-utility-link">
+          <span style={{ fontSize: 18 }}>📖</span>
+          <span className="gl-utility-title">Glossary</span>
+          <span className="gl-utility-desc">53 terms · Foundations · Tokens · Sampling · Agents · Embeddings · RAG</span>
+          <span className="gl-utility-arrow">→</span>
+        </Link>
+      </div>
 
       <div className="lab-section">
         <div className="section-header">
