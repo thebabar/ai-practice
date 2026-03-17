@@ -47,6 +47,22 @@ const css = `
 .tl-insight { background: rgba(251,146,60,0.05); border: 1px solid rgba(251,146,60,0.18); border-radius: 8px; padding: 12px 16px; font-size: 16px; color: #c09060; line-height: 1.7; margin: 16px 0; }
 .tl-insight strong { color: #fb923c; }
 
+/* ── Large vs Small tradeoff table ── */
+.tl-tradeoff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+@media (max-width: 600px) { .tl-tradeoff-grid { grid-template-columns: 1fr; } }
+.tl-tradeoff-col { border-radius: 10px; padding: 18px; }
+.tl-tradeoff-head { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+.tl-tradeoff-row { display: flex; gap: 8px; font-size: 14px; color: #9a8a7a; line-height: 1.6; margin-bottom: 6px; }
+.tl-tradeoff-row::before { content: '·'; flex-shrink: 0; }
+.tl-open-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+@media (max-width: 600px) { .tl-open-grid { grid-template-columns: 1fr; } }
+.tl-open-card { background: #06040a; border: 1px solid #1e1008; border-radius: 10px; padding: 14px; }
+.tl-open-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #5a4a3a; margin-bottom: 6px; }
+.tl-open-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; font-weight: 700; color: #e0d0c0; margin-bottom: 6px; }
+.tl-open-desc { font-size: 13px; color: #7a6050; line-height: 1.6; }
+.tl-open-examples { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.tl-open-pill { font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 2px 8px; border-radius: 4px; background: rgba(251,146,60,0.08); border: 1px solid rgba(251,146,60,0.2); color: #c07040; }
+
 /* ── Taxonomy tree ── */
 .tl-tree { display: flex; gap: 0; margin: 0 auto; }
 .tl-tree-root { display: flex; flex-direction: column; align-items: center; gap: 0; flex-shrink: 0; }
@@ -485,6 +501,69 @@ export default function TypesOfLLMs() {
                 {[['BERT, RoBERTa, DeBERTa', '#fbbf24'], ['T5, BART, Flan-T5', '#38bdf8'], ['GPT-4, Claude, Llama, Gemini', '#fb923c']].map(([n, c]) => (
                   <div key={n} style={{ padding: '4px 12px', borderRadius: 100, border: `1px solid ${c}`, color: c, fontSize: 16, fontFamily: 'IBM Plex Mono, monospace', background: 'transparent' }}>{n}</div>
                 ))}
+              </div>
+            </div>
+            <div className="tl-card">
+              <div className="tl-card-title">Large vs small — and what "local" means</div>
+              <p style={{ fontSize: 15, color: '#7a6050', marginBottom: 16, lineHeight: 1.7 }}>
+                Model size is measured in <strong style={{ color: '#c09060' }}>parameters</strong> — the learned weights that encode the model's knowledge. More parameters generally means more capability, but also more cost and compute.
+              </p>
+
+              <div className="tl-tradeoff-grid">
+                <div className="tl-tradeoff-col" style={{ background: 'rgba(251,146,60,0.05)', border: '1px solid rgba(251,146,60,0.2)' }}>
+                  <div className="tl-tradeoff-head" style={{ color: '#fb923c' }}>Large models (70B–1T+ params)</div>
+                  {[
+                    'Strongest reasoning and general knowledge',
+                    'Higher accuracy on complex, open-ended tasks',
+                    '$1–15 per million tokens via API',
+                    'Cloud-only — require massive GPU clusters',
+                    'Usually closed-source (OpenAI, Anthropic, Google)',
+                    'Best for: coding, analysis, chat, creative writing',
+                  ].map(t => <div key={t} className="tl-tradeoff-row">{t}</div>)}
+                </div>
+                <div className="tl-tradeoff-col" style={{ background: 'rgba(52,211,153,0.04)', border: '1px solid rgba(52,211,153,0.2)' }}>
+                  <div className="tl-tradeoff-head" style={{ color: '#34d399' }}>Small models (7M–13B params)</div>
+                  {[
+                    'Excellent accuracy on narrow, well-defined tasks',
+                    'Fast inference, low latency',
+                    '$0.001–0.06 per million tokens (or free locally)',
+                    'Can run on a laptop or single GPU',
+                    'Often open-weight — download and run anywhere',
+                    'Best for: classification, embeddings, high-volume tasks',
+                  ].map(t => <div key={t} className="tl-tradeoff-row">{t}</div>)}
+                </div>
+              </div>
+
+              <div style={{ fontSize: 15, fontFamily: 'IBM Plex Sans, sans-serif', fontWeight: 700, color: '#e0d0c0', marginBottom: 12, marginTop: 4 }}>Open-source · Open-weight · Local — what's the difference?</div>
+              <div className="tl-open-grid">
+                <div className="tl-open-card">
+                  <div className="tl-open-label">Open-weight</div>
+                  <div className="tl-open-title">Weights are public</div>
+                  <div className="tl-open-desc">The trained model weights are released so anyone can download and run the model — no API required. May still have a license restricting commercial use.</div>
+                  <div className="tl-open-examples">
+                    {['Llama 3', 'Mistral', 'Phi-3', 'Qwen', 'Gemma'].map(m => <span key={m} className="tl-open-pill">{m}</span>)}
+                  </div>
+                </div>
+                <div className="tl-open-card">
+                  <div className="tl-open-label">Local deployment</div>
+                  <div className="tl-open-title">Runs on your hardware</div>
+                  <div className="tl-open-desc">Run a model on your own laptop, server, or private cloud. Data never leaves your machine — no per-token costs, no rate limits, full privacy.</div>
+                  <div className="tl-open-examples">
+                    {['Ollama', 'LM Studio', 'llama.cpp', 'Jan'].map(m => <span key={m} className="tl-open-pill">{m}</span>)}
+                  </div>
+                </div>
+                <div className="tl-open-card">
+                  <div className="tl-open-label">When to go local</div>
+                  <div className="tl-open-title">Privacy · Cost · Control</div>
+                  <div className="tl-open-desc">Sensitive data that can't leave your org, high-volume tasks where API costs compound, or offline environments. Tradeoff: smaller models, you manage the infra.</div>
+                  <div className="tl-open-examples">
+                    {['HIPAA data', 'Air-gapped', 'Cost control'].map(m => <span key={m} className="tl-open-pill">{m}</span>)}
+                  </div>
+                </div>
+              </div>
+
+              <div className="tl-insight" style={{ marginTop: 16 }}>
+                <strong>Rule of thumb:</strong> Start with a large cloud model to validate your use case. Once you know exactly what you need, fine-tune or prompt a smaller open-weight model to cut costs by 10–100×.
               </div>
             </div>
           </>
