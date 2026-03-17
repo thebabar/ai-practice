@@ -9,12 +9,14 @@ import RAG from './pages/RAG.jsx'
 import Glossary from './pages/Glossary.jsx'
 import NeuralNetworks from './pages/NeuralNetworks.jsx'
 import ImageGeneration from './pages/ImageGeneration.jsx'
+import TypesOfLLMs from './pages/TypesOfLLMs.jsx'
 
 export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/intro-llms" element={<IntroLLMs />} />
+      <Route path="/types-of-llms" element={<TypesOfLLMs />} />
       <Route path="/token-optimization" element={<TokenOptimization />} />
       <Route path="/agents-tools" element={<AgentsTools />} />
       <Route path="/vector-embeddings" element={<VectorEmbeddings />} />

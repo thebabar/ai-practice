@@ -179,6 +179,28 @@ function GlossaryIcon() {
   )
 }
 
+function TypesOfLLMsIcon() {
+  return (
+    <svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg" width="30" height="30">
+      <rect x="8" y="14" width="22" height="12" rx="3" stroke="#fb923c" strokeWidth="2"/>
+      <path d="M30 20 L38 20" stroke="#fb923c" strokeWidth="2" strokeLinecap="round"/>
+      <polygon points="38,17 44,20 38,23" fill="#fb923c"/>
+      <rect x="8" y="38" width="22" height="12" rx="3" stroke="#fbbf24" strokeWidth="2"/>
+      <path d="M30 44 L44 44" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round"/>
+      <polygon points="38,41 44,44 38,47" fill="#fbbf24"/>
+      <polygon points="32,41 26,44 32,47" fill="#fbbf24" opacity="0.5"/>
+      <rect x="8" y="62" width="16" height="12" rx="3" stroke="#34d399" strokeWidth="2"/>
+      <rect x="30" y="62" width="16" height="12" rx="3" stroke="#38bdf8" strokeWidth="2"/>
+      <path d="M24 68 L30 68" stroke="#fb923c" strokeWidth="2" strokeLinecap="round"/>
+      <rect x="54" y="14" width="28" height="20" rx="3" stroke="#818cf8" strokeWidth="2"/>
+      <circle cx="61" cy="20" r="3" stroke="#818cf8" strokeWidth="1.5"/>
+      <path d="M54 28 L64 22 L72 28 L82 28" stroke="#818cf8" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M54 42 L82 42" stroke="#818cf8" strokeWidth="2" strokeLinecap="round" strokeOpacity="0.5"/>
+      <path d="M54 48 L74 48" stroke="#818cf8" strokeWidth="2" strokeLinecap="round" strokeOpacity="0.3"/>
+    </svg>
+  )
+}
+
 function ImageGenerationIcon() {
   return (
     <svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg" width="30" height="30">
@@ -203,6 +225,7 @@ const ICON_MAP = {
   'glossary': GlossaryIcon,
   'neural-networks': NeuralNetworksIcon,
   'image-generation': ImageGenerationIcon,
+  'types-of-llms': TypesOfLLMsIcon,
 }
 
 const VISUALIZATIONS = [
@@ -219,6 +242,20 @@ const VISUALIZATIONS = [
     iconBg: 'rgba(167,139,250,0.1)',
     glow: 'radial-gradient(ellipse at 0% 0%, rgba(167,139,250,0.08) 0%, transparent 60%)',
     glowColor: 'rgba(167,139,250,0.09)',
+    ready: true,
+  },
+  {
+    path: '/types-of-llms',
+    icon: null,
+    tag: 'LLM Landscape',
+    title: 'Types of LLMs',
+    desc: 'Compare encoder, decoder, and encoder-decoder architectures — and understand when to use GPT, BERT, T5, and multimodal models.',
+    pills: ['Decoder-only', 'Encoder-only', 'Encoder-Decoder', 'Multimodal', 'Model Selection'],
+    accent: '#fb923c',
+    accentDim: 'rgba(251,146,60,0.2)',
+    iconBg: 'rgba(251,146,60,0.1)',
+    glow: 'radial-gradient(ellipse at 0% 0%, rgba(251,146,60,0.08) 0%, transparent 60%)',
+    glowColor: 'rgba(251,146,60,0.09)',
     ready: true,
   },
   {
@@ -304,20 +341,6 @@ const VISUALIZATIONS = [
     accent: '#f97316', accentDim: 'rgba(249,115,22,0.2)', iconBg: 'rgba(249,115,22,0.1)',
     glow: 'radial-gradient(ellipse at 0% 0%, rgba(249,115,22,0.08) 0%, transparent 60%)',
     glowColor: 'rgba(249,115,22,0.08)', ready: true,
-  },
-  {
-    path: '/types-of-llms',
-    icon: null,
-    tag: 'LLM Landscape',
-    title: 'Types of LLMs',
-    desc: 'Compare encoder, decoder, and encoder-decoder architectures — and understand when to use GPT, BERT, T5, and multimodal models.',
-    pills: ['Decoder-only', 'Encoder-only', 'Encoder-Decoder', 'Multimodal', 'Model Selection'],
-    accent: '#fb923c',
-    accentDim: 'rgba(251,146,60,0.2)',
-    iconBg: 'rgba(251,146,60,0.1)',
-    glow: 'radial-gradient(ellipse at 0% 0%, rgba(251,146,60,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(251,146,60,0.09)',
-    ready: false,
   },
 ]
 
