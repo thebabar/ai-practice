@@ -610,8 +610,8 @@ export default function ImageGeneration() {
               const match = getExampleImage(subject, style, lighting)
               if (!match) return null
               return (
-                <div style={{ marginBottom: 20, borderRadius: 10, overflow: 'hidden', border: `1px solid ${match.lightingMatched ? 'rgba(251,191,36,0.2)' : 'rgba(56,189,248,0.2)'}` }}>
-                  <img src={match.src} alt="example output" style={{ width: '100%', display: 'block' }} />
+                <div key={match.src} style={{ marginBottom: 20, borderRadius: 10, overflow: 'hidden', border: `1px solid ${match.lightingMatched ? 'rgba(251,191,36,0.2)' : 'rgba(56,189,248,0.2)'}` }}>
+                  <img key={match.src} src={match.src} alt="example output" style={{ width: '100%', display: 'block' }} />
                   <div style={{ padding: '8px 14px', background: '#0d1628', fontSize: 12, fontFamily: 'IBM Plex Mono', color: match.lightingMatched ? '#fbbf24' : '#38bdf8' }}>
                     Example · <span style={{ color: '#e879f9' }}>{subject}</span> · <span style={{ color: '#38bdf8' }}>{style}</span>
                     {match.lightingMatched && <> · <span style={{ color: '#e0e8f0' }}>{lighting}</span></>}
