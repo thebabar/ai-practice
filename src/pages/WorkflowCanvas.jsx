@@ -574,8 +574,8 @@ const css = `
 .wf-root { height: 100vh; display: flex; flex-direction: column; overflow: hidden; background: #0d0f18; color: #e0e8f0; position: relative; }
 
 /* Toolbar */
-.wf-toolbar { height: 48px; background: #080a12; border-bottom: 1px solid #1a1f2e; display: flex; align-items: center; padding: 0 16px; gap: 16px; flex-shrink: 0; }
-.wf-toolbar-logo { display: flex; align-items: center; gap: 8px; font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; font-weight: 600; color: #e0e8f0; text-decoration: none; }
+.wf-toolbar { height: 54px; background: #080a12; border-bottom: 1px solid #1a1f2e; display: flex; align-items: center; padding: 0 20px; gap: 16px; flex-shrink: 0; }
+.wf-toolbar-logo { display: flex; align-items: center; gap: 8px; font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 600; color: #e0e8f0; text-decoration: none; }
 .wf-toolbar-logo-icon { width: 28px; height: 28px; background: rgba(249,115,22,0.15); border: 1px solid rgba(249,115,22,0.3); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
 .wf-toolbar-center { flex: 1; display: flex; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #3a4a6a; }
 .wf-btn { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.06em; padding: 6px 14px; border-radius: 6px; border: 1px solid; cursor: pointer; transition: all 0.15s; background: none; text-transform: uppercase; }
@@ -597,7 +597,7 @@ const css = `
 .wf-palette-icon { font-size: 18px; flex-shrink: 0; width: 24px; text-align: center; }
 .wf-palette-label { font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 600; color: #b0c8e0; }
 .wf-palette-desc { font-size: 11px; color: #3a4a6a; margin-top: 1px; }
-.wf-sidebar-hint { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4a6a8a; line-height: 1.6; padding: 8px 4px; }
+.wf-sidebar-hint { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #5a7a9a; line-height: 1.6; padding: 8px 4px; }
 .wf-sidebar-divider { height: 1px; background: #1a1f2e; margin: 4px 0; }
 
 /* React Flow Controls overrides */
@@ -886,9 +886,9 @@ function WorkflowCanvasInner() {
       {/* Toolbar */}
       <div className="wf-toolbar">
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: "'IBM Plex Mono',monospace", fontSize: 12, color: '#4a6a8a', textDecoration: 'none', border: '1px solid #1a2a3a', borderRadius: 6, padding: '5px 10px', transition: 'all 0.15s' }}
-            onMouseEnter={e => { e.currentTarget.style.color = '#b0c8e0'; e.currentTarget.style.borderColor = '#2a3a5a' }}
-            onMouseLeave={e => { e.currentTarget.style.color = '#4a6a8a'; e.currentTarget.style.borderColor = '#1a2a3a' }}
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: "'IBM Plex Mono',monospace", fontSize: 14, color: '#7a9bbf', textDecoration: 'none', border: '1px solid #2a3a5a', borderRadius: 6, padding: '6px 14px', transition: 'all 0.15s' }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#e0e8f0'; e.currentTarget.style.borderColor = '#4a6a8a' }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#7a9bbf'; e.currentTarget.style.borderColor = '#2a3a5a' }}
           >
             ← Home
           </Link>
@@ -904,7 +904,7 @@ function WorkflowCanvasInner() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {humanTaskNodes.length > 0 && (
-            <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 13, color: '#7a9bbf', background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 6, padding: '5px 12px' }}>
+            <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 14, color: '#7a9bbf', background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 6, padding: '6px 14px' }}>
               👤 {humanTaskNodes.length} human task{humanTaskNodes.length !== 1 ? 's' : ''}
               {aiCandidates > 0 && <span style={{ color: '#10b981', marginLeft: 8 }}>· {aiCandidates} candidate{aiCandidates !== 1 ? 's' : ''}</span>}
             </span>
@@ -913,7 +913,7 @@ function WorkflowCanvasInner() {
             className="wf-btn wf-btn-primary"
             disabled={!reportEnabled}
             onClick={() => setShowReport(true)}
-            style={{ fontSize: 13, padding: '7px 18px' }}
+            style={{ fontSize: 14, padding: '8px 20px' }}
           >
             Generate Report
           </button>
