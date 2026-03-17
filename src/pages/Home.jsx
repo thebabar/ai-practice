@@ -206,6 +206,7 @@ const ICON_MAP = {
 }
 
 const VISUALIZATIONS = [
+  // ── Row 1: Foundations & Generative ──────────────────────────────────────────
   {
     path: '/intro-llms',
     icon: null,
@@ -243,6 +244,7 @@ const VISUALIZATIONS = [
     glow: 'radial-gradient(ellipse at 0% 0%, rgba(52,211,153,0.08) 0%, transparent 60%)',
     glowColor: 'rgba(52,211,153,0.08)', ready: true,
   },
+  // ── Row 2: LLM Fundamentals ───────────────────────────────────────────────────
   {
     path: '/token-optimization',
     icon: null,
@@ -253,30 +255,6 @@ const VISUALIZATIONS = [
     accent: '#38bdf8', accentDim: 'rgba(56,189,248,0.2)', iconBg: 'rgba(56,189,248,0.1)',
     glow: 'radial-gradient(ellipse at 0% 0%, rgba(56,189,248,0.08) 0%, transparent 60%)',
     glowColor: 'rgba(56,189,248,0.08)', ready: true,
-  },
-  {
-    path: '/neural-networks',
-    icon: null,
-    tag: 'Deep Learning',
-    title: 'Neural Networks',
-    desc: 'Watch signals flow through a network, see activations, and understand how backpropagation trains weights.',
-    pills: ['Overview', 'Forward Pass', 'Activations', 'Backprop', 'Gradient Descent'],
-    accent: '#818cf8',
-    accentDim: 'rgba(129,140,248,0.2)',
-    iconBg: 'rgba(129,140,248,0.1)',
-    glow: 'radial-gradient(ellipse at 0% 0%, rgba(129,140,248,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(129,140,248,0.08)',
-    ready: true,
-  },
-  {
-    path: '/vector-embeddings',
-    icon: null,
-    tag: 'Embeddings', title: 'Vector Embeddings',
-    desc: 'Explore how words and concepts map to high-dimensional vectors, and why semantic similarity works.',
-    pills: ['Word Vectors', 'Cosine Similarity', 'Semantic Search', 'RAG', 'Quiz'],
-    accent: '#f97316', accentDim: 'rgba(249,115,22,0.2)', iconBg: 'rgba(249,115,22,0.1)',
-    glow: 'radial-gradient(ellipse at 0% 0%, rgba(249,115,22,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(249,115,22,0.08)', ready: true,
   },
   {
     path: '/temperature-sampling',
@@ -302,10 +280,50 @@ const VISUALIZATIONS = [
     glowColor: 'rgba(6,182,212,0.09)',
     ready: true,
   },
+  // ── Row 3: Deep Learning & Embeddings ────────────────────────────────────────
+  {
+    path: '/neural-networks',
+    icon: null,
+    tag: 'Deep Learning',
+    title: 'Neural Networks',
+    desc: 'Watch signals flow through a network, see activations, and understand how backpropagation trains weights.',
+    pills: ['Overview', 'Forward Pass', 'Activations', 'Backprop', 'Gradient Descent'],
+    accent: '#818cf8',
+    accentDim: 'rgba(129,140,248,0.2)',
+    iconBg: 'rgba(129,140,248,0.1)',
+    glow: 'radial-gradient(ellipse at 0% 0%, rgba(129,140,248,0.08) 0%, transparent 60%)',
+    glowColor: 'rgba(129,140,248,0.08)',
+    ready: true,
+  },
+  {
+    path: '/vector-embeddings',
+    icon: null,
+    tag: 'Embeddings', title: 'Vector Embeddings',
+    desc: 'Explore how words and concepts map to high-dimensional vectors, and why semantic similarity works.',
+    pills: ['Word Vectors', 'Cosine Similarity', 'Semantic Search', 'RAG', 'Quiz'],
+    accent: '#f97316', accentDim: 'rgba(249,115,22,0.2)', iconBg: 'rgba(249,115,22,0.1)',
+    glow: 'radial-gradient(ellipse at 0% 0%, rgba(249,115,22,0.08) 0%, transparent 60%)',
+    glowColor: 'rgba(249,115,22,0.08)', ready: true,
+  },
+  {
+    path: '/types-of-llms',
+    icon: null,
+    tag: 'LLM Landscape',
+    title: 'Types of LLMs',
+    desc: 'Compare encoder, decoder, and encoder-decoder architectures — and understand when to use GPT, BERT, T5, and multimodal models.',
+    pills: ['Decoder-only', 'Encoder-only', 'Encoder-Decoder', 'Multimodal', 'Model Selection'],
+    accent: '#fb923c',
+    accentDim: 'rgba(251,146,60,0.2)',
+    iconBg: 'rgba(251,146,60,0.1)',
+    glow: 'radial-gradient(ellipse at 0% 0%, rgba(251,146,60,0.08) 0%, transparent 60%)',
+    glowColor: 'rgba(251,146,60,0.09)',
+    ready: false,
+  },
 ]
 
 export default function Home() {
   const ready = VISUALIZATIONS.filter(v => v.ready)
+  const coming = VISUALIZATIONS.filter(v => !v.ready)
 
   return (
     <div className="home">
@@ -352,6 +370,17 @@ export default function Home() {
               <div className="card-pills">{v.pills.map(p => <span key={p} className="card-pill">{p}</span>)}</div>
               <div className="card-arrow">→</div>
             </Link>
+          ))}
+          {coming.map(v => (
+            <div key={v.title} className="viz-card coming-soon"
+              style={{ '--card-accent': v.accent, '--card-accent-dim': v.accentDim, '--card-icon-bg': v.iconBg, '--card-glow': v.glow, '--card-glow-color': v.glowColor, '--card-tag-bg': v.iconBg, position: 'relative' }}>
+              <div className="coming-label">Coming Soon</div>
+              <div className="card-icon-wrap">{(() => { const IC = v.path && ICON_MAP[v.path.replace('/','')]; return IC ? <IC /> : v.icon })()}</div>
+              <div className="card-tag">{v.tag}</div>
+              <div className="card-title">{v.title}</div>
+              <div className="card-desc">{v.desc}</div>
+              <div className="card-pills">{v.pills.map(p => <span key={p} className="card-pill">{p}</span>)}</div>
+            </div>
           ))}
         </div>
       </div>
