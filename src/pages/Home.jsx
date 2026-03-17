@@ -297,7 +297,21 @@ const VISUALIZATIONS = [
     glow: 'radial-gradient(ellipse at 0% 0%, rgba(52,211,153,0.08) 0%, transparent 60%)',
     glowColor: 'rgba(52,211,153,0.08)', ready: true,
   },
-  // ── Row 2: LLM Fundamentals ───────────────────────────────────────────────────
+  // ── Row 2: Applied AI & LLM Fundamentals ─────────────────────────────────────
+  {
+    path: '/workflow-canvas',
+    icon: null,
+    tag: 'AI Tools',
+    title: 'Workflow Canvas',
+    desc: 'Design AI-ready workflows with a drag-and-drop canvas. Map human vs AI tasks and get an instant automation readiness report.',
+    pills: ['Visual Builder', 'Node Types', 'AI Readiness', 'Automation Score'],
+    accent: '#2dd4bf',
+    accentDim: 'rgba(45,212,191,0.2)',
+    iconBg: 'rgba(45,212,191,0.1)',
+    glow: 'radial-gradient(ellipse at 0% 0%, rgba(45,212,191,0.08) 0%, transparent 60%)',
+    glowColor: 'rgba(45,212,191,0.09)',
+    ready: true,
+  },
   {
     path: '/token-optimization',
     icon: null,
@@ -357,21 +371,6 @@ const VISUALIZATIONS = [
     accent: '#f97316', accentDim: 'rgba(249,115,22,0.2)', iconBg: 'rgba(249,115,22,0.1)',
     glow: 'radial-gradient(ellipse at 0% 0%, rgba(249,115,22,0.08) 0%, transparent 60%)',
     glowColor: 'rgba(249,115,22,0.08)', ready: true,
-  },
-  // ── AI Tools ─────────────────────────────────────────────────────────────────
-  {
-    path: '/workflow-canvas',
-    icon: null,
-    tag: 'AI Tools',
-    title: 'Workflow Canvas',
-    desc: 'Design AI-ready workflows with a drag-and-drop canvas. Map human vs AI tasks and get an instant automation readiness report.',
-    pills: ['Visual Builder', 'Node Types', 'AI Readiness', 'Automation Score'],
-    accent: '#2dd4bf',
-    accentDim: 'rgba(45,212,191,0.2)',
-    iconBg: 'rgba(45,212,191,0.1)',
-    glow: 'radial-gradient(ellipse at 0% 0%, rgba(45,212,191,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(45,212,191,0.09)',
-    ready: true,
   },
 ]
 

@@ -1,5 +1,6 @@
 import '@xyflow/react/dist/style.css'
 import { useCallback, useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -878,32 +879,35 @@ function WorkflowCanvasInner() {
 
       {/* Toolbar */}
       <div className="wf-toolbar">
-        <div className="wf-toolbar-logo">
-          <div className="wf-toolbar-logo-icon">⬡</div>
-          Workflow Canvas
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: "'IBM Plex Mono',monospace", fontSize: 12, color: '#4a6a8a', textDecoration: 'none', border: '1px solid #1a2a3a', borderRadius: 6, padding: '5px 10px', transition: 'all 0.15s' }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#b0c8e0'; e.currentTarget.style.borderColor = '#2a3a5a' }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#4a6a8a'; e.currentTarget.style.borderColor = '#1a2a3a' }}
+          >
+            ← Home
+          </Link>
+          <div className="wf-toolbar-logo">
+            <div className="wf-toolbar-logo-icon">⬡</div>
+            Workflow Canvas
+          </div>
         </div>
 
         <div className="wf-toolbar-center">
           {nodes.length} node{nodes.length !== 1 ? 's' : ''} · {edges.length} connection{edges.length !== 1 ? 's' : ''}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {humanTaskNodes.length > 0 && (
-            <span
-              style={{
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 11,
-                color: '#4a6a8a',
-              }}
-            >
-              {humanTaskNodes.length} human task{humanTaskNodes.length !== 1 ? 's' : ''}
-              {aiCandidates > 0 && ` · ${aiCandidates} automation candidate${aiCandidates !== 1 ? 's' : ''}`}
+            <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 13, color: '#7a9bbf', background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 6, padding: '5px 12px' }}>
+              👤 {humanTaskNodes.length} human task{humanTaskNodes.length !== 1 ? 's' : ''}
+              {aiCandidates > 0 && <span style={{ color: '#10b981', marginLeft: 8 }}>· {aiCandidates} candidate{aiCandidates !== 1 ? 's' : ''}</span>}
             </span>
           )}
           <button
             className="wf-btn wf-btn-primary"
             disabled={!reportEnabled}
             onClick={() => setShowReport(true)}
+            style={{ fontSize: 13, padding: '7px 18px' }}
           >
             Generate Report
           </button>
