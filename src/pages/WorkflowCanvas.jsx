@@ -590,15 +590,21 @@ const css = `
 
 /* Sidebar */
 .wf-sidebar { width: 240px; flex-shrink: 0; background: #0a0c14; border-right: 1px solid #1a1f2e; display: flex; flex-direction: column; padding: 16px 12px; gap: 8px; overflow-y: auto; }
-.wf-sidebar-title { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #3a4a6a; padding: 0 4px 8px; border-bottom: 1px solid #1a1f2e; margin-bottom: 4px; }
+.wf-sidebar-title { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #7a9bbf; padding: 0 4px 8px; border-bottom: 1px solid #1a1f2e; margin-bottom: 4px; }
 .wf-palette-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; border: 1px solid #1a1f2e; background: #0d0f18; cursor: grab; transition: all 0.15s; border-left: 3px solid var(--node-color); user-select: none; }
 .wf-palette-item:hover { background: #131620; border-color: var(--node-color); transform: translateX(2px); }
 .wf-palette-item:active { cursor: grabbing; }
 .wf-palette-icon { font-size: 18px; flex-shrink: 0; width: 24px; text-align: center; }
 .wf-palette-label { font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 600; color: #b0c8e0; }
 .wf-palette-desc { font-size: 11px; color: #3a4a6a; margin-top: 1px; }
-.wf-sidebar-hint { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #2a3a5a; line-height: 1.6; padding: 8px 4px; }
+.wf-sidebar-hint { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4a6a8a; line-height: 1.6; padding: 8px 4px; }
 .wf-sidebar-divider { height: 1px; background: #1a1f2e; margin: 4px 0; }
+
+/* React Flow Controls overrides */
+.react-flow__controls { background: #0a0c14 !important; border: 1px solid #2a3a5a !important; border-radius: 8px !important; box-shadow: 0 4px 16px rgba(0,0,0,0.5) !important; }
+.react-flow__controls-button { background: #0d0f18 !important; border-bottom: 1px solid #1a2a3a !important; fill: #7a9bbf !important; }
+.react-flow__controls-button:hover { background: #131620 !important; fill: #b0c8e0 !important; }
+.react-flow__controls-button svg { fill: inherit !important; }
 
 /* Node styles */
 .wf-node { border-radius: 10px; min-width: 180px; font-family: 'IBM Plex Sans', sans-serif; box-shadow: 0 4px 24px rgba(0,0,0,0.4); background: #0d0f18; }
