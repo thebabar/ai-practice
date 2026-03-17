@@ -598,6 +598,13 @@ export default function ImageGeneration() {
               ))}
             </div>
 
+            <div className="ig-prompt-cat-title">Lighting</div>
+            <div className="ig-prompt-chips">
+              {LIGHTINGS.map(l => (
+                <button key={l} className={`ig-prompt-chip${lighting === l ? ' sel-l' : ''}`} onClick={() => setLighting(lighting === l ? null : l)}>{l}</button>
+              ))}
+            </div>
+
             {(() => {
               const match = getExampleImage(subject, style, lighting)
               if (!match) return null
@@ -611,13 +618,6 @@ export default function ImageGeneration() {
                 </div>
               )
             })()}
-
-            <div className="ig-prompt-cat-title">Lighting</div>
-            <div className="ig-prompt-chips">
-              {LIGHTINGS.map(l => (
-                <button key={l} className={`ig-prompt-chip${lighting === l ? ' sel-l' : ''}`} onClick={() => setLighting(lighting === l ? null : l)}>{l}</button>
-              ))}
-            </div>
 
             <div className="ig-prompt-cat-title">Quality Boosters</div>
             <div className="ig-prompt-chips">
