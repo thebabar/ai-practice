@@ -6,6 +6,7 @@ import {
   useNodesState,
   useEdgesState,
   addEdge,
+  reconnectEdge,
   Handle,
   Position,
   Background,
@@ -372,6 +373,7 @@ function LabeledEdge({
   data,
   markerEnd,
   style,
+  selected,
 }) {
   const { setEdges } = useReactFlow()
   const [edgePath, labelX, labelY] = getBezierPath({
@@ -392,16 +394,23 @@ function LabeledEdge({
     [id, setEdges]
   )
 
+  const deleteEdge = useCallback(
+    () => setEdges(eds => eds.filter(e => e.id !== id)),
+    [id, setEdges]
+  )
+
   const label = data?.label || ''
 
   return (
     <>
+      {/* Wide invisible hit-target so the edge is easy to click */}
+      <path d={edgePath} fill="none" stroke="transparent" strokeWidth={20} />
       <path
         id={id}
         className="react-flow__edge-path"
         d={edgePath}
         markerEnd={markerEnd}
-        style={style}
+        style={{ ...style, stroke: selected ? '#60a5fa' : (style?.stroke || '#3a4a6a') }}
       />
       <EdgeLabelRenderer>
         <div
@@ -409,44 +418,47 @@ function LabeledEdge({
             position: 'absolute',
             transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
             pointerEvents: 'all',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 3,
           }}
           className="nodrag nopan"
         >
-          {label || label === '' ? (
-            <input
-              value={label}
-              onChange={e => updateLabel(e.target.value)}
-              placeholder="+"
-              style={{
-                background: '#0d1628',
-                border: '1px solid #1e2a3a',
-                borderRadius: 4,
-                color: '#7a9bbf',
-                fontSize: 10,
-                fontFamily: "'IBM Plex Mono', monospace",
-                padding: '2px 6px',
-                outline: 'none',
-                width: label ? Math.max(40, label.length * 7 + 12) : 24,
-                textAlign: 'center',
-                cursor: 'text',
-              }}
-            />
-          ) : (
-            <button
-              onClick={() => updateLabel('')}
-              style={{
-                background: '#0d1628',
-                border: '1px solid #1e2a3a',
-                borderRadius: 4,
-                color: '#4a6a8a',
-                fontSize: 12,
-                cursor: 'pointer',
-                padding: '1px 6px',
-              }}
-            >
-              +
-            </button>
-          )}
+          <input
+            value={label}
+            onChange={e => updateLabel(e.target.value)}
+            placeholder="label"
+            style={{
+              background: '#0d1628',
+              border: `1px solid ${selected ? '#60a5fa' : '#1e2a3a'}`,
+              borderRadius: 4,
+              color: '#7a9bbf',
+              fontSize: 10,
+              fontFamily: "'IBM Plex Mono', monospace",
+              padding: '2px 6px',
+              outline: 'none',
+              width: label ? Math.max(44, label.length * 7 + 12) : 36,
+              textAlign: 'center',
+              cursor: 'text',
+            }}
+          />
+          <button
+            onClick={deleteEdge}
+            title="Delete connection"
+            style={{
+              background: 'rgba(239,68,68,0.12)',
+              border: '1px solid rgba(239,68,68,0.3)',
+              borderRadius: 4,
+              color: '#ef4444',
+              fontSize: 11,
+              lineHeight: 1,
+              cursor: 'pointer',
+              padding: '2px 5px',
+              fontFamily: "'IBM Plex Mono', monospace",
+            }}
+          >
+            ×
+          </button>
         </div>
       </EdgeLabelRenderer>
     </>
@@ -783,6 +795,12 @@ function WorkflowCanvasInner() {
     [setEdges]
   )
 
+  const onReconnect = useCallback(
+    (oldEdge, newConnection) =>
+      setEdges(eds => reconnectEdge(oldEdge, newConnection, eds)),
+    [setEdges]
+  )
+
   const onDragOver = useCallback(event => {
     event.preventDefault()
     event.dataTransfer.dropEffect = 'move'
@@ -905,7 +923,7 @@ function WorkflowCanvasInner() {
           </button>
 
           <div className="wf-sidebar-hint">
-            Drag nodes onto canvas · Connect by dragging from a handle · Delete key removes selected
+            Drag nodes onto canvas · Connect by dragging from a handle · Click × on a connection to delete it · Drag a connection endpoint to re-route it · Delete/Backspace removes selected nodes
           </div>
         </div>
 
@@ -922,7 +940,10 @@ function WorkflowCanvasInner() {
           nodeTypes={NODE_TYPES}
           edgeTypes={EDGE_TYPES}
           fitView
-          deleteKeyCode="Delete"
+          deleteKeyCode={['Delete', 'Backspace']}
+          edgesReconnectable
+          onReconnect={onReconnect}
+          reconnectRadius={20}
           style={{ flex: 1, background: '#0d0f18' }}
         >
           <Background color="#1e2a3a" gap={24} size={1} />
