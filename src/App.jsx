@@ -10,6 +10,7 @@ import Glossary from './pages/Glossary.jsx'
 import NeuralNetworks from './pages/NeuralNetworks.jsx'
 import ImageGeneration from './pages/ImageGeneration.jsx'
 import TypesOfLLMs from './pages/TypesOfLLMs.jsx'
+import WorkflowCanvas from './pages/WorkflowCanvas.jsx'
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
       <Route path="/glossary" element={<Glossary />} />
       <Route path="/neural-networks" element={<NeuralNetworks />} />
       <Route path="/image-generation" element={<ImageGeneration />} />
+      <Route path="/workflow-canvas" element={<WorkflowCanvas />} />
     </Routes>
   )
 }

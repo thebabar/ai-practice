@@ -215,6 +215,21 @@ function ImageGenerationIcon() {
   )
 }
 
+function WorkflowIcon() {
+  return (
+    <svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg" width="30" height="30">
+      <rect x="8" y="36" width="20" height="18" rx="4" stroke="#10b981" strokeWidth="2"/>
+      <rect x="36" y="14" width="20" height="18" rx="4" stroke="#3b82f6" strokeWidth="2"/>
+      <rect x="36" y="58" width="20" height="18" rx="4" stroke="#f97316" strokeWidth="2"/>
+      <rect x="64" y="36" width="20" height="18" rx="4" stroke="#eab308" strokeWidth="2"/>
+      <path d="M28 45 L36 23" stroke="#3a5a7a" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M28 45 L36 67" stroke="#3a5a7a" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M56 23 L64 45" stroke="#3a5a7a" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M56 67 L64 45" stroke="#3a5a7a" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  )
+}
+
 const ICON_MAP = {
   'intro-llms': LLMIcon,
   'token-optimization': TokenIcon,
@@ -226,6 +241,7 @@ const ICON_MAP = {
   'neural-networks': NeuralNetworksIcon,
   'image-generation': ImageGenerationIcon,
   'types-of-llms': TypesOfLLMsIcon,
+  'workflow-canvas': WorkflowIcon,
 }
 
 const VISUALIZATIONS = [
@@ -341,6 +357,21 @@ const VISUALIZATIONS = [
     accent: '#f97316', accentDim: 'rgba(249,115,22,0.2)', iconBg: 'rgba(249,115,22,0.1)',
     glow: 'radial-gradient(ellipse at 0% 0%, rgba(249,115,22,0.08) 0%, transparent 60%)',
     glowColor: 'rgba(249,115,22,0.08)', ready: true,
+  },
+  // ── AI Tools ─────────────────────────────────────────────────────────────────
+  {
+    path: '/workflow-canvas',
+    icon: null,
+    tag: 'AI Tools',
+    title: 'Workflow Canvas',
+    desc: 'Design AI-ready workflows with a drag-and-drop canvas. Map human vs AI tasks and get an instant automation readiness report.',
+    pills: ['Visual Builder', 'Node Types', 'AI Readiness', 'Automation Score'],
+    accent: '#2dd4bf',
+    accentDim: 'rgba(45,212,191,0.2)',
+    iconBg: 'rgba(45,212,191,0.1)',
+    glow: 'radial-gradient(ellipse at 0% 0%, rgba(45,212,191,0.08) 0%, transparent 60%)',
+    glowColor: 'rgba(45,212,191,0.09)',
+    ready: true,
   },
 ]
 
