@@ -22,6 +22,34 @@ import {
 // Pure helper functions (module-level, no JSX)
 // ─────────────────────────────────────────────────────────────────────────────
 
+const WHY_REASONS = [
+  { value: 'judgment',    label: 'Requires judgment / intuition',           implication: 'AI can assist but human judgment is essential' },
+  { value: 'compliance',  label: 'Legal or compliance requirement',          implication: 'Human likely required permanently — AI can assist but not replace' },
+  { value: 'relationship',label: 'Customer relationship / empathy',          implication: 'Human touch is the value — consider AI for prep work only' },
+  { value: 'creative',    label: 'Creative or strategic work',               implication: 'AI can generate options, human makes the final call' },
+  { value: 'not-yet',     label: 'Not automated yet (opportunity!)',         implication: 'Strong automation candidate — evaluate data and tool requirements' },
+  { value: 'habit',       label: 'Habit — never been questioned (opportunity!)', implication: 'Highest opportunity — this step has never been scrutinized for automation' },
+]
+
+function getImplication(whyHuman) {
+  return WHY_REASONS.find(r => r.value === whyHuman)?.implication || ''
+}
+
+function getWhyLabel(whyHuman) {
+  return WHY_REASONS.find(r => r.value === whyHuman)?.label || whyHuman
+}
+
+function getReadinessDot(whyHuman, automatable) {
+  if (!whyHuman || !automatable) return { color: '#3a4a6a', label: 'Not assessed' }
+  if (automatable === 'no' || whyHuman === 'compliance' || whyHuman === 'relationship')
+    return { color: '#ef4444', label: 'Keep Human' }
+  if (automatable === 'maybe' || (automatable === 'yes' && whyHuman === 'creative'))
+    return { color: '#eab308', label: 'Partial' }
+  if (automatable === 'yes' && (whyHuman === 'not-yet' || whyHuman === 'habit'))
+    return { color: '#10b981', label: 'Strong Candidate' }
+  return { color: '#eab308', label: 'Partial' }
+}
+
 function getAutomatabilityScore(automatable) {
   if (automatable === 'yes') return 100
   if (automatable === 'maybe') return 50
@@ -29,28 +57,39 @@ function getAutomatabilityScore(automatable) {
 }
 
 function generateReport(nodes) {
-  const humanTasks = nodes.filter(n => n.type === 'humanTask')
-  const scored = humanTasks.map(n => {
+  const allHuman = nodes.filter(n => n.type === 'humanTask')
+  const analyzed = allHuman.filter(n => n.data.whyHuman && n.data.automatable)
+  const scored = analyzed.map(n => {
     const d = n.data
     const score = getAutomatabilityScore(d.automatable)
-    const impact = (d.timeMinutes || 0) * (d.frequency === 'daily' ? 22 : d.frequency === 'weekly' ? 4.3 : 1)
+    const freqMult = d.frequency === 'daily' ? 5 : d.frequency === 'weekly' ? 1 : 0.25
+    const weeklyMins = (d.timeMinutes || 0) * freqMult
+    const dot = getReadinessDot(d.whyHuman, d.automatable)
     return {
       id: n.id,
-      label: d.label,
+      label: d.label || 'Unnamed task',
       whyHuman: d.whyHuman,
       automatable: d.automatable,
       score,
-      timeMinutes: d.timeMinutes,
+      timeMinutes: d.timeMinutes || 0,
       frequency: d.frequency,
-      impact: Math.round(impact),
+      weeklyMins,
+      dot,
+      implication: getImplication(d.whyHuman),
     }
   })
-  const candidates = scored.filter(t => t.score > 0).sort((a, b) => b.score - a.score)
-  const overallScore =
-    humanTasks.length > 0
-      ? Math.round(scored.reduce((s, t) => s + t.score, 0) / humanTasks.length)
-      : 0
-  return { humanTasks: scored, candidates, overallScore, totalTasks: humanTasks.length }
+  const completed = scored.filter(t => t.score > 0)
+  const overallScore = analyzed.length > 0
+    ? Math.round(scored.reduce((s, t) => s + t.score, 0) / analyzed.length)
+    : 0
+  const totalWeeklySavings = completed.reduce((s, t) => s + t.weeklyMins, 0)
+  return {
+    allTasks: scored,
+    totalNodes: nodes.length,
+    analyzedCount: analyzed.length,
+    overallScore,
+    totalWeeklySavings: Math.round(totalWeeklySavings),
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -88,13 +127,8 @@ function TriggerNode({ id, data }) {
 function HumanTaskNode({ id, data }) {
   const { updateNodeData } = useReactFlow()
   const expanded = data.expanded || false
-
-  const badgeStyle = {
-    yes: { background: 'rgba(16,185,129,0.15)', color: '#10b981', border: '1px solid #10b981' },
-    maybe: { background: 'rgba(234,179,8,0.15)', color: '#eab308', border: '1px solid #eab308' },
-    no: { background: 'rgba(239,68,68,0.12)', color: '#ef4444', border: '1px solid #ef4444' },
-  }
-  const badgeLabel = { yes: 'AI Ready', maybe: 'Partial', no: 'Manual' }
+  const dot = getReadinessDot(data.whyHuman, data.automatable)
+  const implication = getImplication(data.whyHuman)
 
   return (
     <div
@@ -112,22 +146,19 @@ function HumanTaskNode({ id, data }) {
           onChange={e => updateNodeData(id, { label: e.target.value })}
           placeholder="Human task..."
         />
-        {data.automatable && (
-          <span className="wf-node-badge" style={badgeStyle[data.automatable]}>
-            {badgeLabel[data.automatable]}
-          </span>
-        )}
+        {/* Readiness dot — always visible */}
+        <span
+          title={dot.label}
+          style={{
+            width: 9, height: 9, borderRadius: '50%',
+            background: dot.color,
+            flexShrink: 0,
+            boxShadow: `0 0 5px ${dot.color}80`,
+          }}
+        />
         <button
           onClick={() => updateNodeData(id, { expanded: !expanded })}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: '#4a6a8a',
-            cursor: 'pointer',
-            fontSize: 12,
-            padding: '0 2px',
-            flexShrink: 0,
-          }}
+          style={{ background: 'none', border: 'none', color: '#4a6a8a', cursor: 'pointer', fontSize: 12, padding: '0 2px', flexShrink: 0 }}
         >
           {expanded ? '▲' : '▼'}
         </button>
@@ -143,12 +174,15 @@ function HumanTaskNode({ id, data }) {
                 onChange={e => updateNodeData(id, { whyHuman: e.target.value })}
               >
                 <option value="">Select reason...</option>
-                <option value="judgment">Requires judgment / intuition</option>
-                <option value="compliance">Legal or compliance requirement</option>
-                <option value="relationship">Customer relationship / empathy</option>
-                <option value="creative">Creative or strategic work</option>
-                <option value="not-yet">Not automated yet (opportunity!)</option>
+                {WHY_REASONS.map(r => (
+                  <option key={r.value} value={r.value}>{r.label}</option>
+                ))}
               </select>
+              {implication && (
+                <div style={{ fontSize: 11, color: '#4a6a8a', marginTop: 5, lineHeight: 1.5, fontStyle: 'italic', fontFamily: "'IBM Plex Mono', monospace" }}>
+                  {implication}
+                </div>
+              )}
             </div>
 
             <div>
@@ -172,9 +206,7 @@ function HumanTaskNode({ id, data }) {
                 type="number"
                 value={data.timeMinutes || ''}
                 min={1}
-                onChange={e =>
-                  updateNodeData(id, { timeMinutes: parseInt(e.target.value) || 0 })
-                }
+                onChange={e => updateNodeData(id, { timeMinutes: parseInt(e.target.value) || 0 })}
               />
             </div>
 
@@ -196,16 +228,8 @@ function HumanTaskNode({ id, data }) {
         </div>
       )}
 
-      <Handle
-        type="target"
-        position={Position.Left}
-        style={{ background: '#3b82f6', border: 'none', width: 8, height: 8 }}
-      />
-      <Handle
-        type="source"
-        position={Position.Right}
-        style={{ background: '#3b82f6', border: 'none', width: 8, height: 8 }}
-      />
+      <Handle type="target" position={Position.Left} style={{ background: '#3b82f6', border: 'none', width: 8, height: 8 }} />
+      <Handle type="source" position={Position.Right} style={{ background: '#3b82f6', border: 'none', width: 8, height: 8 }} />
     </div>
   )
 }
@@ -546,7 +570,7 @@ const css = `
 
 *, *::before, *::after { box-sizing: border-box; }
 
-.wf-root { height: 100vh; display: flex; flex-direction: column; overflow: hidden; background: #0d0f18; color: #e0e8f0; }
+.wf-root { height: 100vh; display: flex; flex-direction: column; overflow: hidden; background: #0d0f18; color: #e0e8f0; position: relative; }
 
 /* Toolbar */
 .wf-toolbar { height: 48px; background: #080a12; border-bottom: 1px solid #1a1f2e; display: flex; align-items: center; padding: 0 16px; gap: 16px; flex-shrink: 0; }
@@ -595,20 +619,29 @@ const css = `
 .wf-pill.active-freq { background: rgba(59,130,246,0.12); border-color: #3b82f6; color: #3b82f6; }
 .wf-quest input[type=number] { width: 70px; background: #06080e; border: 1px solid #1e2a3a; border-radius: 6px; color: #b0c8e0; font-size: 13px; padding: 5px 8px; outline: none; font-family: 'IBM Plex Mono', monospace; }
 
-/* Report panel */
-.wf-report { width: 320px; flex-shrink: 0; background: #0a0c14; border-left: 1px solid #1a1f2e; display: flex; flex-direction: column; overflow-y: auto; }
-.wf-report-header { padding: 16px 20px; border-bottom: 1px solid #1a1f2e; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
-.wf-report-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; font-weight: 700; color: #e0e8f0; }
-.wf-report-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 20px; }
-.wf-report-score { text-align: center; padding: 16px; }
-.wf-report-score-num { font-family: 'IBM Plex Sans', sans-serif; font-size: 56px; font-weight: 800; line-height: 1; }
-.wf-report-score-label { font-size: 13px; color: #7a9bbf; margin-top: 6px; }
+/* Report panel — bottom slide-up */
+.wf-report { position: absolute; bottom: 0; left: 0; right: 0; height: 56vh; background: #0a0c14; border-top: 1px solid #2a3a5a; display: flex; flex-direction: column; z-index: 100; box-shadow: 0 -8px 40px rgba(0,0,0,0.6); }
+.wf-report-header { padding: 12px 24px; border-bottom: 1px solid #1a1f2e; display: flex; align-items: center; gap: 12px; flex-shrink: 0; background: #080a12; }
+.wf-report-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; font-weight: 700; color: #e0e8f0; flex: 1; }
+.wf-report-body { padding: 0 24px 24px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; flex: 1; }
+/* Summary strip */
+.wf-report-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 16px 0; flex-shrink: 0; }
+.wf-stat-box { background: #0d0f18; border: 1px solid #1a1f2e; border-radius: 10px; padding: 14px 16px; text-align: center; }
+.wf-stat-num { font-family: 'IBM Plex Sans', sans-serif; font-size: 28px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+.wf-stat-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #3a4a6a; }
+/* Section title */
 .wf-report-section-title { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: #3a4a6a; margin-bottom: 10px; border-bottom: 1px solid #1a1f2e; padding-bottom: 6px; }
-.wf-task-card { background: #0d0f18; border: 1px solid #1a1f2e; border-radius: 8px; padding: 12px; margin-bottom: 8px; }
-.wf-task-name { font-size: 13px; font-weight: 600; color: #b0c8e0; margin-bottom: 4px; }
-.wf-task-meta { font-size: 11px; color: #3a4a6a; font-family: 'IBM Plex Mono', monospace; }
-.wf-rec-item { font-size: 13px; color: #7a9bbf; line-height: 1.6; padding: 8px 0; border-bottom: 1px solid #1a1f2e; }
+/* Task rows */
+.wf-task-row { display: grid; grid-template-columns: 1fr 140px 80px 70px 80px; gap: 8px; align-items: center; padding: 10px 12px; background: #0d0f18; border: 1px solid #1a1f2e; border-radius: 8px; margin-bottom: 6px; }
+.wf-task-name { font-size: 13px; font-weight: 600; color: #b0c8e0; }
+.wf-task-reason { font-size: 11px; color: #4a6a8a; font-family: 'IBM Plex Mono', monospace; line-height: 1.4; }
+.wf-task-implication { font-size: 11px; color: #4a6080; font-style: italic; line-height: 1.4; grid-column: 1 / -1; margin-top: 2px; }
+.wf-task-meta { font-size: 11px; color: #3a4a6a; font-family: 'IBM Plex Mono', monospace; text-align: center; }
+.wf-readiness-badge { font-size: 10px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.06em; padding: 3px 8px; border-radius: 100px; font-weight: 600; text-align: center; white-space: nowrap; }
+/* Rec items */
+.wf-rec-item { font-size: 13px; color: #7a9bbf; line-height: 1.7; padding: 8px 0; border-bottom: 1px solid #1a1f2e; display: flex; gap: 10px; }
 .wf-rec-item:last-child { border-bottom: none; }
+.wf-rec-num { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #f97316; flex-shrink: 0; font-weight: 700; padding-top: 2px; }
 
 /* React Flow overrides */
 .react-flow__node { cursor: default; }
@@ -620,148 +653,138 @@ const css = `
 // ─────────────────────────────────────────────────────────────────────────────
 
 function ReportPanel({ nodes, onClose }) {
-  const report = generateReport(nodes)
-  const { overallScore, humanTasks, candidates, totalTasks } = report
+  const { allTasks, totalNodes, analyzedCount, overallScore, totalWeeklySavings } = generateReport(nodes)
 
-  const scoreColor =
-    overallScore > 60 ? '#10b981' : overallScore > 30 ? '#eab308' : '#ef4444'
-  const scoreLabel =
-    overallScore > 60
-      ? 'High — automation-ready'
-      : overallScore > 30
-      ? 'Moderate — partial automation'
-      : 'Low — mostly manual'
+  const scoreColor = overallScore >= 70 ? '#10b981' : overallScore >= 40 ? '#eab308' : '#ef4444'
+  const scoreLabel = overallScore >= 70 ? 'High — automation-ready' : overallScore >= 40 ? 'Moderate — partial automation' : 'Low — mostly manual'
 
-  const manualTasks = humanTasks.filter(t => t.score === 0)
+  // Recommended next steps from node data
+  const steps = []
+  allTasks.forEach(t => {
+    if ((t.whyHuman === 'habit' || t.whyHuman === 'not-yet') && t.automatable === 'yes')
+      steps.push(`Evaluate "${t.label}" for full automation — no compliance or judgment blockers identified`)
+    else if (t.automatable === 'maybe')
+      steps.push(`Consider AI-assisted "${t.label}" — human review recommended before full automation`)
+    else if (t.automatable === 'no' && t.whyHuman === 'compliance')
+      steps.push(`"${t.label}" requires human sign-off — explore AI for preparation steps only`)
+  })
 
-  const whyHumanLabels = {
-    judgment: 'Requires judgment / intuition',
-    compliance: 'Legal or compliance requirement',
-    relationship: 'Customer relationship / empathy',
-    creative: 'Creative or strategic work',
-    'not-yet': 'Not automated yet (opportunity!)',
-  }
+  const automationTasks = allTasks.filter(t => t.score > 0)
 
   return (
     <div className="wf-report">
+      {/* Header */}
       <div className="wf-report-header">
         <span className="wf-report-title">AI Readiness Report</span>
         <button
+          onClick={() => window.print()}
+          style={{ background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.35)', color: '#f97316', fontFamily: "'IBM Plex Mono',monospace", fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '5px 12px', borderRadius: 6, cursor: 'pointer' }}
+        >
+          Export PDF
+        </button>
+        <button
           onClick={onClose}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: '#4a6a8a',
-            cursor: 'pointer',
-            fontSize: 18,
-            lineHeight: 1,
-          }}
+          style={{ background: 'none', border: 'none', color: '#4a6a8a', cursor: 'pointer', fontSize: 20, lineHeight: 1, padding: '0 4px' }}
         >
           ×
         </button>
       </div>
 
       <div className="wf-report-body">
-        <div className="wf-report-score">
-          <div className="wf-report-score-num" style={{ color: scoreColor }}>
-            {overallScore}%
+        {/* Summary stats strip */}
+        <div className="wf-report-stats">
+          <div className="wf-stat-box">
+            <div className="wf-stat-num" style={{ color: '#b0c8e0' }}>{totalNodes}</div>
+            <div className="wf-stat-label">Total Nodes</div>
           </div>
-          <div className="wf-report-score-label">{scoreLabel}</div>
-          <div style={{ fontSize: 11, color: '#3a4a6a', marginTop: 6, fontFamily: "'IBM Plex Mono', monospace" }}>
-            {totalTasks} human task{totalTasks !== 1 ? 's' : ''} analyzed
+          <div className="wf-stat-box">
+            <div className="wf-stat-num" style={{ color: '#3b82f6' }}>{analyzedCount}</div>
+            <div className="wf-stat-label">Human Tasks Analyzed</div>
+          </div>
+          <div className="wf-stat-box">
+            <div className="wf-stat-num" style={{ color: scoreColor }}>{analyzedCount > 0 ? `${overallScore}%` : '—'}</div>
+            <div className="wf-stat-label">AI Readiness Score</div>
+            {analyzedCount > 0 && <div style={{ fontSize: 10, color: scoreColor, marginTop: 3, fontFamily: "'IBM Plex Mono',monospace" }}>{scoreLabel}</div>}
           </div>
         </div>
 
-        {candidates.length > 0 && (
+        {/* Task list */}
+        {allTasks.length > 0 && (
           <div>
-            <div className="wf-report-section-title">Automation Candidates</div>
-            {candidates.map(t => (
-              <div key={t.id} className="wf-task-card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
-                  <div className="wf-task-name">{t.label}</div>
-                  <span
-                    style={{
-                      fontSize: 10,
-                      fontFamily: "'IBM Plex Mono', monospace",
-                      padding: '2px 7px',
-                      borderRadius: 100,
-                      fontWeight: 600,
-                      flexShrink: 0,
-                      ...(t.automatable === 'yes'
-                        ? { background: 'rgba(16,185,129,0.15)', color: '#10b981', border: '1px solid #10b981' }
-                        : { background: 'rgba(234,179,8,0.15)', color: '#eab308', border: '1px solid #eab308' }),
-                    }}
-                  >
-                    {t.automatable === 'yes' ? 'AI Ready' : 'Partial'}
-                  </span>
-                </div>
-                {t.impact > 0 && (
-                  <div className="wf-task-meta">{t.impact} hrs/month potential savings</div>
-                )}
-                {t.whyHuman && (
-                  <div className="wf-task-meta" style={{ marginTop: 4 }}>
-                    Was: {whyHumanLabels[t.whyHuman] || t.whyHuman}
+            <div className="wf-report-section-title">Human Task Analysis</div>
+            {/* Column headers */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px 80px 70px 80px', gap: 8, padding: '0 12px 6px', fontSize: 10, fontFamily: "'IBM Plex Mono',monospace", letterSpacing: '0.1em', textTransform: 'uppercase', color: '#2a3a5a' }}>
+              <span>Task</span><span>Why Human</span><span style={{ textAlign: 'center' }}>AI?</span><span style={{ textAlign: 'center' }}>Time</span><span style={{ textAlign: 'center' }}>Readiness</span>
+            </div>
+            {allTasks.map(t => {
+              const autoColor = t.automatable === 'yes' ? '#10b981' : t.automatable === 'maybe' ? '#eab308' : '#ef4444'
+              return (
+                <div key={t.id} className="wf-task-row">
+                  <div>
+                    <div className="wf-task-name">{t.label}</div>
                   </div>
-                )}
+                  <div className="wf-task-reason">{getWhyLabel(t.whyHuman)}</div>
+                  <div style={{ textAlign: 'center' }}>
+                    <span style={{ fontSize: 10, fontFamily: "'IBM Plex Mono',monospace", padding: '3px 8px', borderRadius: 100, fontWeight: 600, background: `${autoColor}18`, color: autoColor, border: `1px solid ${autoColor}` }}>
+                      {t.automatable.charAt(0).toUpperCase() + t.automatable.slice(1)}
+                    </span>
+                  </div>
+                  <div className="wf-task-meta">{t.timeMinutes}m / {t.frequency}</div>
+                  <div style={{ textAlign: 'center' }}>
+                    <span className="wf-readiness-badge" style={{ background: `${t.dot.color}18`, color: t.dot.color, border: `1px solid ${t.dot.color}` }}>
+                      {t.dot.label}
+                    </span>
+                  </div>
+                  <div className="wf-task-implication">{t.implication}</div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Time savings */}
+        {automationTasks.length > 0 && (
+          <div>
+            <div className="wf-report-section-title">Estimated Time Savings</div>
+            {automationTasks.map(t => (
+              <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid #1a1f2e', fontSize: 13 }}>
+                <span style={{ color: '#7a9bbf' }}>{t.label}</span>
+                <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 12, color: '#10b981' }}>
+                  {t.weeklyMins >= 60
+                    ? `${(t.weeklyMins / 60).toFixed(1)} hrs/week`
+                    : `${t.weeklyMins} min/week`}
+                </span>
+              </div>
+            ))}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0 0', fontSize: 14, fontWeight: 700 }}>
+              <span style={{ color: '#e0e8f0' }}>Total weekly savings</span>
+              <span style={{ fontFamily: "'IBM Plex Mono',monospace", color: '#10b981' }}>
+                {totalWeeklySavings >= 60
+                  ? `${(totalWeeklySavings / 60).toFixed(1)} hours`
+                  : `${totalWeeklySavings} min`}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Recommended next steps */}
+        {steps.length > 0 && (
+          <div>
+            <div className="wf-report-section-title">Recommended Next Steps</div>
+            {steps.map((s, i) => (
+              <div key={i} className="wf-rec-item">
+                <span className="wf-rec-num">{i + 1}.</span>
+                <span>{s}</span>
               </div>
             ))}
           </div>
         )}
 
-        {manualTasks.length > 0 && (
-          <div>
-            <div className="wf-report-section-title">Manual Tasks</div>
-            {manualTasks.map(t => (
-              <div key={t.id} className="wf-task-card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
-                  <div className="wf-task-name">{t.label}</div>
-                  <span
-                    style={{
-                      fontSize: 10,
-                      fontFamily: "'IBM Plex Mono', monospace",
-                      padding: '2px 7px',
-                      borderRadius: 100,
-                      fontWeight: 600,
-                      flexShrink: 0,
-                      background: 'rgba(239,68,68,0.12)',
-                      color: '#ef4444',
-                      border: '1px solid #ef4444',
-                    }}
-                  >
-                    Manual
-                  </span>
-                </div>
-                {t.whyHuman && (
-                  <div className="wf-task-meta">
-                    {whyHumanLabels[t.whyHuman] || t.whyHuman}
-                  </div>
-                )}
-              </div>
-            ))}
+        {allTasks.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '32px 0', color: '#3a4a6a', fontFamily: "'IBM Plex Mono',monospace", fontSize: 13 }}>
+            Open a Human Task node and fill in the questionnaire to see analysis here.
           </div>
         )}
-
-        <div>
-          <div className="wf-report-section-title">Recommendations</div>
-          {overallScore > 60 && (
-            <div className="wf-rec-item">
-              ✓ Strong automation candidate — consider piloting with an AI agent
-            </div>
-          )}
-          {overallScore >= 30 && overallScore <= 60 && (
-            <div className="wf-rec-item">
-              ◐ Review 'Maybe' tasks — add structured data to enable automation
-            </div>
-          )}
-          {overallScore < 30 && (
-            <div className="wf-rec-item">
-              Consider starting with AI-assisted (human-in-the-loop) rather than full automation
-            </div>
-          )}
-          <div className="wf-rec-item">
-            Document exception handling before automating decision nodes
-          </div>
-        </div>
       </div>
     </div>
   )
@@ -966,11 +989,12 @@ function WorkflowCanvasInner() {
           />
         </ReactFlow>
 
-        {/* Report panel */}
-        {showReport && (
-          <ReportPanel nodes={nodes} onClose={() => setShowReport(false)} />
-        )}
       </div>
+
+      {/* Report panel — overlays bottom of canvas */}
+      {showReport && (
+        <ReportPanel nodes={nodes} onClose={() => setShowReport(false)} />
+      )}
     </div>
   )
 }
