@@ -164,6 +164,7 @@ const IMG = {
   'library|photorealistic|neon lights':        '/images/image-gen/style-photo-light-neon.webp',
   'library|photorealistic|studio lighting':    '/images/image-gen/style-photo-light-studio.webp',
   // cozy library — digital art + lighting
+  'library|digital art':                        '/images/image-gen/style-digital-light-golden.webp',
   'library|digital art|golden hour':           '/images/image-gen/style-digital-light-golden.webp',
   'library|digital art|dramatic shadows':      '/images/image-gen/style-digital-light-dramatic.webp',
   'library|digital art|neon lights':           '/images/image-gen/style-digital-light-neon.webp',
