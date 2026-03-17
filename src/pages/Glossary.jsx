@@ -120,12 +120,27 @@ export default function Glossary() {
 
   const CATEGORIES = ['All', 'Foundations', 'Tokens', 'Sampling', 'Agents', 'Embeddings', 'RAG']
 
-  const filtered = TERMS.filter(t => {
-    const matchCat = activeCategory === 'All' || t.category === activeCategory
+  const filtered = (() => {
     const q = search.toLowerCase()
-    const matchSearch = !q || t.term.toLowerCase().includes(q) || t.definition.toLowerCase().includes(q)
-    return matchCat && matchSearch
-  }).sort((a, b) => a.term.localeCompare(b.term))
+    const results = TERMS.filter(t => {
+      const matchCat = activeCategory === 'All' || t.category === activeCategory
+      const matchSearch = !q || t.term.toLowerCase().includes(q) || t.definition.toLowerCase().includes(q)
+      return matchCat && matchSearch
+    })
+    if (!q) return results.sort((a, b) => a.term.localeCompare(b.term))
+    // Relevance: exact term match → starts with → term contains → definition only
+    const score = t => {
+      const term = t.term.toLowerCase()
+      if (term === q) return 0
+      if (term.startsWith(q)) return 1
+      if (term.includes(q)) return 2
+      return 3
+    }
+    return results.sort((a, b) => {
+      const diff = score(a) - score(b)
+      return diff !== 0 ? diff : a.term.localeCompare(b.term)
+    })
+  })()
 
   return (
     <div className="gl-root">
