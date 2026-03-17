@@ -185,7 +185,11 @@ function subjectKey(s) {
 function getExampleImage(subject, style, lighting) {
   const sk = subjectKey(subject)
   if (!sk || !style) return null
-  return IMG[`${sk}|${style}|${lighting}`] || IMG[`${sk}|${style}`] || null
+  const withLighting = lighting ? IMG[`${sk}|${style}|${lighting}`] : null
+  if (withLighting) return { src: withLighting, lightingMatched: true }
+  const withStyle = IMG[`${sk}|${style}`]
+  if (withStyle) return { src: withStyle, lightingMatched: false }
+  return null
 }
 const LIGHTINGS = ['golden hour', 'studio lighting', 'dramatic shadows', 'soft diffused light', 'neon lights']
 const QUALITIES = ['8k uhd', 'highly detailed', 'masterpiece', 'award-winning photography', 'sharp focus']
@@ -594,14 +598,19 @@ export default function ImageGeneration() {
               ))}
             </div>
 
-            {getExampleImage(subject, style, null) && (
-              <div style={{ marginBottom: 20, borderRadius: 10, overflow: 'hidden', border: '1px solid rgba(56,189,248,0.2)' }}>
-                <img src={getExampleImage(subject, style, null)} alt={`${style} example`} style={{ width: '100%', display: 'block' }} />
-                <div style={{ padding: '8px 14px', background: '#0d1628', fontSize: 12, fontFamily: 'IBM Plex Mono', color: '#38bdf8' }}>
-                  Example · <span style={{ color: '#e879f9' }}>{subject}</span> · <span style={{ color: '#e0e8f0' }}>{style}</span>
+            {(() => {
+              const match = getExampleImage(subject, style, lighting)
+              if (!match) return null
+              return (
+                <div style={{ marginBottom: 20, borderRadius: 10, overflow: 'hidden', border: `1px solid ${match.lightingMatched ? 'rgba(251,191,36,0.2)' : 'rgba(56,189,248,0.2)'}` }}>
+                  <img src={match.src} alt="example output" style={{ width: '100%', display: 'block' }} />
+                  <div style={{ padding: '8px 14px', background: '#0d1628', fontSize: 12, fontFamily: 'IBM Plex Mono', color: match.lightingMatched ? '#fbbf24' : '#38bdf8' }}>
+                    Example · <span style={{ color: '#e879f9' }}>{subject}</span> · <span style={{ color: '#38bdf8' }}>{style}</span>
+                    {match.lightingMatched && <> · <span style={{ color: '#e0e8f0' }}>{lighting}</span></>}
+                  </div>
                 </div>
-              </div>
-            )}
+              )
+            })()}
 
             <div className="ig-prompt-cat-title">Lighting</div>
             <div className="ig-prompt-chips">
@@ -609,15 +618,6 @@ export default function ImageGeneration() {
                 <button key={l} className={`ig-prompt-chip${lighting === l ? ' sel-l' : ''}`} onClick={() => setLighting(lighting === l ? null : l)}>{l}</button>
               ))}
             </div>
-
-            {getExampleImage(subject, style, lighting) && getExampleImage(subject, style, lighting) !== getExampleImage(subject, style, null) && (
-              <div style={{ marginBottom: 20, borderRadius: 10, overflow: 'hidden', border: '1px solid rgba(251,191,36,0.2)' }}>
-                <img src={getExampleImage(subject, style, lighting)} alt={`${style} ${lighting} example`} style={{ width: '100%', display: 'block' }} />
-                <div style={{ padding: '8px 14px', background: '#0d1628', fontSize: 12, fontFamily: 'IBM Plex Mono', color: '#fbbf24' }}>
-                  Example · <span style={{ color: '#e879f9' }}>{subject}</span> · <span style={{ color: '#38bdf8' }}>{style}</span> · <span style={{ color: '#e0e8f0' }}>{lighting}</span>
-                </div>
-              </div>
-            )}
 
             <div className="ig-prompt-cat-title">Quality Boosters</div>
             <div className="ig-prompt-chips">
