@@ -151,11 +151,41 @@ function lerpPixels(a, b, t) {
 const SUBJECTS = ['a glowing forest', 'a cyberpunk city', 'an astronaut on Mars', 'a cozy library', 'a dragon over mountains']
 const STYLES = ['digital art', 'pencil sketch', 'watercolor', 'photorealistic', 'anime', 'pixel art']
 
-const STYLE_IMAGES = {
-  'photorealistic': '/images/image-gen/style-photo.webp',
-  'watercolor':     '/images/image-gen/style-watercolor.webp',
-  'anime':          '/images/image-gen/style-anime.webp',
-  'pencil sketch':  '/images/image-gen/style-pencil.webp',
+const IMG = {
+  // cozy library — style only
+  'library|photorealistic':                    '/images/image-gen/style-photo.webp',
+  'library|watercolor':                        '/images/image-gen/style-watercolor.webp',
+  'library|anime':                             '/images/image-gen/style-anime.webp',
+  'library|pencil sketch':                     '/images/image-gen/style-pencil.webp',
+  'library|pixel art':                         '/images/image-gen/style-pixelart-light-amber.webp',
+  // cozy library — photorealistic + lighting
+  'library|photorealistic|golden hour':        '/images/image-gen/style-photo-light-golden.webp',
+  'library|photorealistic|dramatic shadows':   '/images/image-gen/style-photo-light-dramatic.webp',
+  'library|photorealistic|neon lights':        '/images/image-gen/style-photo-light-neon.webp',
+  'library|photorealistic|studio lighting':    '/images/image-gen/style-photo-light-studio.webp',
+  // cozy library — digital art + lighting
+  'library|digital art|golden hour':           '/images/image-gen/style-digital-light-golden.webp',
+  'library|digital art|dramatic shadows':      '/images/image-gen/style-digital-light-dramatic.webp',
+  'library|digital art|neon lights':           '/images/image-gen/style-digital-light-neon.webp',
+  'library|digital art|studio lighting':       '/images/image-gen/style-digital-light-studio.webp',
+  // glowing forest — photorealistic + lighting
+  'forest|photorealistic|golden hour':         '/images/image-gen/forest-photo-light-golden.webp',
+  'forest|photorealistic|soft diffused light': '/images/image-gen/forest-photo-light-diffused.webp',
+  // glowing forest — watercolor + lighting
+  'forest|watercolor|golden hour':             '/images/image-gen/forest-watercolor-light-golden.webp',
+  'forest|watercolor|soft diffused light':     '/images/image-gen/forest-watercolor-light-diffused.webp',
+}
+
+function subjectKey(s) {
+  if (s?.includes('forest'))  return 'forest'
+  if (s?.includes('library')) return 'library'
+  return null
+}
+
+function getExampleImage(subject, style, lighting) {
+  const sk = subjectKey(subject)
+  if (!sk || !style) return null
+  return IMG[`${sk}|${style}|${lighting}`] || IMG[`${sk}|${style}`] || null
 }
 const LIGHTINGS = ['golden hour', 'studio lighting', 'dramatic shadows', 'soft diffused light', 'neon lights']
 const QUALITIES = ['8k uhd', 'highly detailed', 'masterpiece', 'award-winning photography', 'sharp focus']
@@ -564,11 +594,11 @@ export default function ImageGeneration() {
               ))}
             </div>
 
-            {STYLE_IMAGES[style] && (
+            {getExampleImage(subject, style, null) && (
               <div style={{ marginBottom: 20, borderRadius: 10, overflow: 'hidden', border: '1px solid rgba(56,189,248,0.2)' }}>
-                <img src={STYLE_IMAGES[style]} alt={`${style} example`} style={{ width: '100%', display: 'block' }} />
+                <img src={getExampleImage(subject, style, null)} alt={`${style} example`} style={{ width: '100%', display: 'block' }} />
                 <div style={{ padding: '8px 14px', background: '#0d1628', fontSize: 12, fontFamily: 'IBM Plex Mono', color: '#38bdf8' }}>
-                  Example output · "a cozy library" · <span style={{ color: '#e0e8f0' }}>{style}</span>
+                  Example · <span style={{ color: '#e879f9' }}>{subject}</span> · <span style={{ color: '#e0e8f0' }}>{style}</span>
                 </div>
               </div>
             )}
@@ -579,6 +609,15 @@ export default function ImageGeneration() {
                 <button key={l} className={`ig-prompt-chip${lighting === l ? ' sel-l' : ''}`} onClick={() => setLighting(lighting === l ? null : l)}>{l}</button>
               ))}
             </div>
+
+            {getExampleImage(subject, style, lighting) && getExampleImage(subject, style, lighting) !== getExampleImage(subject, style, null) && (
+              <div style={{ marginBottom: 20, borderRadius: 10, overflow: 'hidden', border: '1px solid rgba(251,191,36,0.2)' }}>
+                <img src={getExampleImage(subject, style, lighting)} alt={`${style} ${lighting} example`} style={{ width: '100%', display: 'block' }} />
+                <div style={{ padding: '8px 14px', background: '#0d1628', fontSize: 12, fontFamily: 'IBM Plex Mono', color: '#fbbf24' }}>
+                  Example · <span style={{ color: '#e879f9' }}>{subject}</span> · <span style={{ color: '#38bdf8' }}>{style}</span> · <span style={{ color: '#e0e8f0' }}>{lighting}</span>
+                </div>
+              </div>
+            )}
 
             <div className="ig-prompt-cat-title">Quality Boosters</div>
             <div className="ig-prompt-chips">
