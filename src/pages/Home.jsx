@@ -347,6 +347,20 @@ const VISUALIZATIONS = [
     glowColor: 'rgba(6,182,212,0.09)',
     ready: true,
   },
+  {
+    path: '/agent-simulation',
+    icon: null,
+    tag: 'AI Agents',
+    title: 'Agent Simulation Sandbox',
+    desc: 'Walk through a real AI agent pipeline — inspect every node, explore risks, latency, and cost, and simulate the happy path step by step.',
+    pills: ['Agent Workflows', 'Decision Gates', 'Risk Analysis', 'Latency & Cost', 'Human-in-the-Loop'],
+    accent: '#6366f1',
+    accentDim: 'rgba(99,102,241,0.2)',
+    iconBg: 'rgba(99,102,241,0.1)',
+    glow: 'radial-gradient(ellipse at 0% 0%, rgba(99,102,241,0.08) 0%, transparent 60%)',
+    glowColor: 'rgba(99,102,241,0.08)',
+    ready: true,
+  },
   // ── Row 3: Deep Learning & Embeddings ────────────────────────────────────────
   {
     path: '/neural-networks',
