@@ -540,7 +540,7 @@ const SCENARIO = {
   nodes: [
     {
       id: 'lead_intake', type: 'entry', label: 'Lead Intake', sub: 'Entry Point', zone: 'Intake Zone',
-      cx: 240, cy: 55, w: 200, h: 72,
+      cx: 240, cy: 40, w: 200, h: 72,
       desc: "Receives raw prospect data from CRM imports, web forms, LinkedIn, and API feeds. Normalises, deduplicates, and stamps each record before passing downstream. This is where data quality is either set up for success — or quietly sabotaged.",
       inputs: ['CRM export', 'Web form fills', 'LinkedIn enrichment', 'Manual entry'],
       outputs: ['Normalised lead record', 'Duplicate flags', 'Validation status'],
@@ -558,7 +558,7 @@ const SCENARIO = {
     },
     {
       id: 'research', type: 'agent', label: 'Research Agent', sub: 'Intelligence Gathering', zone: 'Intelligence Zone',
-      cx: 240, cy: 165, w: 200, h: 72,
+      cx: 240, cy: 160, w: 200, h: 72,
       desc: "Autonomously gathers company intelligence from approved public sources: news, LinkedIn, Crunchbase, company websites, SEC filings. Enriches the lead record with org size, tech stack, recent events, and decision-maker contacts.",
       inputs: ['Lead record', 'Search & scraping APIs', 'Internal knowledge base'],
       outputs: ['Enriched company profile', 'Key contacts list', 'Confidence score', 'Source citations'],
@@ -577,7 +577,7 @@ const SCENARIO = {
     },
     {
       id: 'd_data', type: 'decision', label: 'Data Quality Gate', sub: 'Pass / Fail', zone: 'Intelligence Zone',
-      cx: 240, cy: 285, w: 96, h: 96,
+      cx: 240, cy: 320, w: 96, h: 96,
       desc: "Evaluates the completeness and confidence of the research output. If the enriched profile meets the minimum quality threshold, the lead proceeds automatically. If not, a human reviewer is flagged before anything continues.",
       inputs: ['Enriched profile', 'Quality rule set', 'Confidence thresholds'],
       outputs: ['PASS → Qualification Agent', 'FAIL → Human Review Queue'],
@@ -595,7 +595,7 @@ const SCENARIO = {
     },
     {
       id: 'human_flag', type: 'endpoint', label: 'Human Review Queue', sub: 'Escalation Branch', zone: 'Escalation',
-      cx: 490, cy: 285, w: 178, h: 72,
+      cx: 490, cy: 290, w: 178, h: 72,
       desc: "Holds leads that failed the data quality gate. A human analyst reviews the record, adds missing data, corrects errors, and resubmits — or permanently discards the lead with a reason code.",
       inputs: ['Failed lead record', 'Failure reason codes'],
       outputs: ['Corrected record → resubmit to gate', 'Discarded record + reason'],
@@ -611,7 +611,7 @@ const SCENARIO = {
     },
     {
       id: 'qualify', type: 'agent', label: 'Qualification Agent', sub: 'ICP Scoring', zone: 'Qualification Zone',
-      cx: 240, cy: 405, w: 200, h: 72,
+      cx: 240, cy: 460, w: 200, h: 72,
       desc: "Scores the enriched lead against the Ideal Customer Profile (ICP) criteria. Evaluates firmographic fit (company size, industry, region), technographic signals (current software stack), and any available intent data.",
       inputs: ['Enriched lead record', 'ICP criteria store', 'Intent signal feed'],
       outputs: ['ICP score (0–100)', 'Score explanation (LIME/SHAP-style)', 'Recommended tier'],
@@ -629,7 +629,7 @@ const SCENARIO = {
     },
     {
       id: 'd_qualify', type: 'decision', label: 'Qualification Gate', sub: 'Route by Score', zone: 'Qualification Zone',
-      cx: 240, cy: 527, w: 96, h: 96,
+      cx: 240, cy: 630, w: 96, h: 96,
       desc: "Routes leads based on ICP score. Leads scoring ≥70 proceed to personalised outreach. Leads below the threshold are routed into a nurture sequence for longer-term development, not discarded.",
       inputs: ['ICP score', 'Tier routing thresholds'],
       outputs: ['≥70 → Personalisation Agent', '<70 → Nurture Queue'],
@@ -646,7 +646,7 @@ const SCENARIO = {
     },
     {
       id: 'nurture', type: 'endpoint', label: 'Nurture Queue', sub: 'Long-term Development', zone: 'Escalation',
-      cx: 490, cy: 527, w: 178, h: 72,
+      cx: 490, cy: 600, w: 178, h: 72,
       desc: "Receives leads below the qualification threshold. Enrols them in a lower-frequency nurture sequence and schedules a re-evaluation at a set cadence. These are potential customers — they should be treated accordingly.",
       inputs: ['Lead record', 'Nurture programme config'],
       outputs: ['Enrolled in nurture sequence', 'Scheduled re-qualification check'],
@@ -662,7 +662,7 @@ const SCENARIO = {
     },
     {
       id: 'personalize', type: 'agent', label: 'Personalisation Agent', sub: 'Content Generation', zone: 'Content Zone',
-      cx: 240, cy: 647, w: 200, h: 72,
+      cx: 240, cy: 775, w: 200, h: 72,
       desc: "Generates highly personalised outreach content by combining research insights, brand voice guidelines, and proven messaging frameworks. Creates tailored email sequences, LinkedIn messages, and call talk-tracks grounded in specific company intelligence.",
       inputs: ['Qualified lead record', 'Brand voice library', 'Approved message frameworks', 'Research summary'],
       outputs: ['Draft email sequence', 'LinkedIn connection note', 'Call talk-track'],
@@ -681,7 +681,7 @@ const SCENARIO = {
     },
     {
       id: 'd_review', type: 'decision', label: 'Human Approval Gate', sub: 'Rep Review Required', zone: 'Content Zone',
-      cx: 240, cy: 769, w: 96, h: 96,
+      cx: 240, cy: 945, w: 96, h: 96,
       desc: "A sales rep reviews AI-generated content before it is sent. They can approve as-is, edit, or reject with specific feedback. Rejection routes content back to the Personalisation Agent with structured guidance for revision.",
       inputs: ['Draft content package', 'Assigned rep', 'Quality checklist'],
       outputs: ['Approved → Outreach Agent', 'Rejected → Revision Loop'],
@@ -699,7 +699,7 @@ const SCENARIO = {
     },
     {
       id: 'revise', type: 'revision', label: 'Revision Loop', sub: 'Quality Branch', zone: 'Escalation',
-      cx: 490, cy: 769, w: 178, h: 72,
+      cx: 490, cy: 915, w: 178, h: 72,
       desc: "Receives rejected content along with rep feedback. The Personalisation Agent regenerates with explicit guidance. A maximum of 2–3 revision cycles is enforced; beyond that, the content escalates to full human authoring to prevent infinite loops.",
       inputs: ['Rejected draft', 'Structured rep feedback', 'Revision count'],
       outputs: ['Revised draft → Human Approval Gate', 'Escalate to human authoring (if max retries hit)'],
@@ -715,7 +715,7 @@ const SCENARIO = {
     },
     {
       id: 'outreach', type: 'agent', label: 'Outreach Agent', sub: 'Execution', zone: 'Execution Zone',
-      cx: 240, cy: 889, w: 200, h: 72,
+      cx: 240, cy: 1090, w: 200, h: 72,
       desc: "Executes the approved outreach sequence across channels. Manages send-time optimisation, channel sequencing (email → LinkedIn → call reminder), tracks delivery and engagement events, and adapts the next touch based on engagement signals.",
       inputs: ['Approved content package', 'Lead contact details', 'Send schedule config', 'Channel credentials'],
       outputs: ['Sent messages (with timestamps)', 'Engagement events (opens, clicks, replies)', 'Delivery status per channel'],
@@ -733,7 +733,7 @@ const SCENARIO = {
     },
     {
       id: 'd_response', type: 'decision', label: 'Response Detection Gate', sub: 'Classify & Route', zone: 'Execution Zone',
-      cx: 240, cy: 1010, w: 96, h: 96,
+      cx: 240, cy: 1260, w: 96, h: 96,
       desc: "Monitors all outreach channels for prospect responses. An NLP classifier categorises response sentiment — positive, negative, objection, or neutral — and routes accordingly. Positive responses trigger immediate sales rep alerts; objections route to a structured handling flow.",
       inputs: ['Engagement events', 'NLP response classifier', 'Channel monitoring feed'],
       outputs: ['Positive → Alert Sales Rep', 'Objection → Structured handling flow', 'No response → Continue sequence'],
@@ -751,7 +751,7 @@ const SCENARIO = {
     },
     {
       id: 'alert_rep', type: 'success', label: 'Alert Sales Rep', sub: 'Human Handoff', zone: 'Handoff',
-      cx: 490, cy: 1010, w: 178, h: 72,
+      cx: 490, cy: 1230, w: 178, h: 72,
       desc: "Delivers a fully contextualised alert to the assigned sales rep. Includes the full conversation history, a prospect intelligence summary, recommended talking points, and any relevant objection-handling guidance. The rep takes it from here.",
       inputs: ['Response event', 'Full lead context', 'Conversation history', 'Talking-point brief'],
       outputs: ['Rep notification (Slack / email / CRM push)', 'Contextual brief', 'Booked meeting → CRM logged'],
@@ -767,7 +767,7 @@ const SCENARIO = {
     },
     {
       id: 'feedback', type: 'learning', label: 'Feedback Loop Agent', sub: 'Continuous Learning', zone: 'Learning Zone',
-      cx: 240, cy: 1130, w: 200, h: 72,
+      cx: 240, cy: 1410, w: 200, h: 72,
       desc: "Continuously ingests outcome data — meetings booked, deals won and lost, response rates per message variant — and feeds structured signals back to improve research quality, ICP scoring accuracy, and personalisation effectiveness over time. The nervous system of the whole pipeline.",
       inputs: ['CRM win/loss data', 'Sequence engagement metrics', 'Rep override history', 'Meeting and pipeline outcomes'],
       outputs: ['Updated ICP scoring weights', 'Research quality signals', 'Content performance insights', 'Drift alerts for human review'],
