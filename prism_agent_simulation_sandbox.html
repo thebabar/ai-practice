@@ -1,0 +1,1999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prism — Agent Simulation Sandbox</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#070e1f;--bg2:#0b1628;--bg3:#101e34;--bg4:#162440;
+  --border:#1c3050;--border2:#243e62;--border3:#2e5080;
+  --text:#c4d8f2;--text2:#7a9cc4;--text3:#3d6080;
+  --blue:#3b82f6;--blue-pale:rgba(59,130,246,.12);
+  --teal:#14b8a6;--teal-pale:rgba(20,184,166,.1);
+  --amber:#f59e0b;--amber-pale:rgba(245,158,11,.1);
+  --red:#ef4444;--red-pale:rgba(239,68,68,.1);
+  --green:#22c55e;--green-pale:rgba(34,197,94,.1);
+  --violet:#8b5cf6;--violet-pale:rgba(139,92,246,.1);
+  --orange:#f97316;--orange-pale:rgba(249,115,22,.1);
+  --slate:#64748b;
+  --grid:rgba(59,130,246,.04);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+
+/* HEADER */
+.hdr{background:rgba(7,14,31,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 24px;height:52px;display:flex;align-items:center;gap:16px;flex-shrink:0;z-index:10;position:relative}
+.logo{display:flex;align-items:center;gap:7px;font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:#fff}
+.logo-icon{width:26px;height:26px;background:linear-gradient(135deg,var(--blue),var(--violet));border-radius:5px;display:flex;align-items:center;justify-content:center}
+.logo-icon svg{width:13px;height:13px}
+.hdr-div{width:1px;height:20px;background:var(--border2)}
+.hdr-label{font-size:12px;color:var(--text3);font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.08em}
+.hdr-title{font-size:13px;color:var(--text2)}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+
+/* SCENARIO BAR */
+.scbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:8px 24px;display:flex;align-items:center;gap:10px;flex-shrink:0;z-index:9;position:relative;overflow-x:auto}
+.scbar-lbl{font-size:10px;color:var(--text3);font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.1em;white-space:nowrap;margin-right:4px}
+.sc-chip{padding:5px 13px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text3);transition:all .15s;white-space:nowrap;font-family:'DM Sans',sans-serif}
+.sc-chip.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.sc-chip:hover:not(.active){background:var(--bg3);color:var(--text)}
+.sc-chip.locked{opacity:.45;cursor:not-allowed}
+
+/* BODY */
+.body{display:flex;flex:1;overflow:hidden;position:relative}
+
+/* FLOOR */
+.floor-col{flex:1;overflow:auto;padding:20px 24px;position:relative}
+.floor-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;position:sticky;left:0}
+.floor-hed{font-size:10px;font-family:'Space Mono',monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.1em}
+.legend{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3)}
+.leg-dot{width:8px;height:8px;border-radius:2px}
+.floor-canvas{position:relative;width:680px;margin:0 auto}
+.floor-svg{position:absolute;top:0;left:0;width:100%;pointer-events:none}
+
+/* NODES */
+.nd{position:absolute;cursor:pointer;transition:transform .15s}
+.nd:hover{transform:scale(1.02)}
+.nd.active{transform:scale(1.02)}
+.nd-box{border-radius:8px;padding:10px 14px;border:1px solid}
+.nd-agent{width:200px;background:var(--bg3);border-color:var(--border2);border-left:3px solid var(--blue)}
+.nd-entry{width:200px;background:var(--teal-pale);border-color:rgba(20,184,166,.35);border-left:3px solid var(--teal)}
+.nd-success{width:180px;background:var(--green-pale);border-color:rgba(34,197,94,.3);border-left:3px solid var(--green)}
+.nd-endpoint{width:178px;background:var(--bg2);border-color:var(--border);border-left:3px solid var(--slate)}
+.nd-revision{width:178px;background:var(--orange-pale);border-color:rgba(249,115,22,.3);border-left:3px solid var(--orange)}
+.nd-learning{width:200px;background:var(--violet-pale);border-color:rgba(139,92,246,.3);border-left:3px solid var(--violet)}
+.nd.active .nd-agent,.nd.active .nd-entry,.nd.active .nd-learning{box-shadow:0 0 0 1px var(--blue),0 0 20px rgba(59,130,246,.2)}
+.nd.active .nd-success{box-shadow:0 0 0 1px var(--green),0 0 16px rgba(34,197,94,.18)}
+.nd.active .nd-endpoint{box-shadow:0 0 0 1px var(--border3)}
+.nd.active .nd-revision{box-shadow:0 0 0 1px var(--orange),0 0 16px rgba(249,115,22,.18)}
+.nd-title{font-size:12.5px;font-weight:600;color:#dde9fa;line-height:1.3}
+.nd-sub{font-size:10px;color:var(--text3);font-family:'Space Mono',monospace;margin-top:2px}
+.nd-zone{display:inline-block;font-size:9px;color:var(--text3);border:1px solid var(--border);border-radius:10px;padding:1px 7px;margin-top:5px}
+
+/* DIAMOND DECISION */
+.nd-decision{position:absolute;cursor:pointer;transition:transform .15s}
+.nd-decision:hover{transform:rotate(45deg) scale(1.06)!important}
+.nd-decision.active{transform:rotate(45deg) scale(1.06)!important}
+.diamond-wrap{width:96px;height:96px;display:flex;align-items:center;justify-content:center}
+.diamond-shape{width:80px;height:80px;background:var(--amber-pale);border:1.5px solid rgba(245,158,11,.5);border-radius:6px;transform:rotate(45deg);transition:all .2s}
+.nd-decision:hover .diamond-shape,.nd-decision.active .diamond-shape{background:rgba(245,158,11,.18);box-shadow:0 0 0 1px var(--amber),0 0 18px rgba(245,158,11,.25)}
+.diamond-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:10px;font-weight:600;color:var(--amber);text-align:center;white-space:nowrap;line-height:1.3;pointer-events:none}
+
+/* SIM PULSE */
+.sim-pulse{position:absolute;top:-4px;right:-4px;width:10px;height:10px;border-radius:50%;background:var(--blue);display:none;z-index:5}
+.sim-pulse::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--blue);animation:pulse-ring 1.4s infinite}
+@keyframes pulse-ring{0%{opacity:.8;transform:scale(1)}100%{opacity:0;transform:scale(2.4)}}
+.nd.sim-on .sim-pulse,.nd-decision.sim-on .sim-pulse{display:block}
+
+/* DETAIL PANEL */
+.detail-col{width:380px;flex-shrink:0;border-left:1px solid var(--border);overflow-y:auto;background:var(--bg);display:flex;flex-direction:column;position:relative;z-index:1}
+.detail-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:12px;text-align:center;padding:32px;opacity:.7}
+.de-icon{width:44px;height:44px;background:var(--bg3);border:1px solid var(--border2);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.de-icon svg{width:18px;height:18px;stroke:var(--text3)}
+.de-title{font-size:13px;color:var(--text2);font-weight:500}
+.de-sub{font-size:12px;color:var(--text3);line-height:1.6;max-width:200px}
+.detail-body{padding:20px;display:none}
+.detail-body.show{display:block}
+
+.type-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.tb-agent{background:rgba(59,130,246,.12);color:var(--blue);border:1px solid rgba(59,130,246,.3)}
+.tb-decision{background:var(--amber-pale);color:var(--amber);border:1px solid rgba(245,158,11,.3)}
+.tb-entry{background:var(--teal-pale);color:var(--teal);border:1px solid rgba(20,184,166,.3)}
+.tb-endpoint{background:rgba(100,116,139,.12);color:var(--slate);border:1px solid rgba(100,116,139,.3)}
+.tb-success{background:var(--green-pale);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+.tb-learning{background:var(--violet-pale);color:var(--violet);border:1px solid rgba(139,92,246,.3)}
+.tb-revision{background:var(--orange-pale);color:var(--orange);border:1px solid rgba(249,115,22,.3)}
+
+.d-name{font-size:17px;font-weight:700;color:#dde9fa;line-height:1.25;margin-bottom:3px}
+.d-sub{font-size:11px;color:var(--text3);font-family:'Space Mono',monospace;margin-bottom:14px}
+.d-desc{font-size:12.5px;color:var(--text2);line-height:1.7;padding:11px 13px;background:var(--bg2);border-radius:6px;border-left:3px solid var(--border2);margin-bottom:16px}
+.io-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px}
+.io-box{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:9px 11px}
+.io-lbl{font-size:9.5px;font-family:'Space Mono',monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.io-item{font-size:11.5px;color:var(--text2);padding:2px 0;display:flex;align-items:flex-start;gap:5px;line-height:1.4}
+.io-item::before{content:'›';color:var(--text3);font-size:13px;margin-top:-1px;flex-shrink:0}
+
+/* TABS */
+.tabs{display:flex;gap:2px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:3px;margin-bottom:14px}
+.tab{flex:1;padding:7px;font-size:12px;font-weight:500;border-radius:5px;cursor:pointer;text-align:center;color:var(--text3);transition:all .15s;border:none;background:transparent;font-family:'DM Sans',sans-serif}
+.tab.on{background:var(--bg3);color:var(--text);border:1px solid var(--border2)}
+.tab-pane{display:none}
+.tab-pane.on{display:block}
+
+.q-list{display:flex;flex-direction:column;gap:7px}
+.q-item{padding:9px 11px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;font-size:12.5px;color:var(--text2);line-height:1.55;display:flex;gap:8px;align-items:flex-start}
+.q-num{font-family:'Space Mono',monospace;font-size:9.5px;color:var(--text3);background:var(--bg3);border:1px solid var(--border2);border-radius:4px;padding:2px 6px;white-space:nowrap;margin-top:1px;flex-shrink:0}
+
+.r-list{display:flex;flex-direction:column;gap:7px}
+.r-item{padding:9px 11px;background:var(--bg2);border:1px solid var(--border);border-radius:6px}
+.r-hdr{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.r-name{font-size:12.5px;font-weight:600;color:#dde9fa}
+.sev{padding:2px 8px;border-radius:10px;font-size:9.5px;font-weight:700;font-family:'Space Mono',monospace;text-transform:uppercase}
+.sev-critical{background:var(--red-pale);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.sev-high{background:var(--orange-pale);color:var(--orange);border:1px solid rgba(249,115,22,.3)}
+.sev-medium{background:var(--amber-pale);color:var(--amber);border:1px solid rgba(245,158,11,.3)}
+.sev-low{background:rgba(100,116,139,.1);color:var(--slate);border:1px solid rgba(100,116,139,.3)}
+.r-note{font-size:12px;color:var(--text2);line-height:1.5}
+
+/* SIM BAR */
+.sim-bar{position:absolute;bottom:0;left:0;right:380px;background:var(--bg2);border-top:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:12px;z-index:8;transition:transform .3s}
+.sim-bar.hidden{transform:translateY(100%)}
+.sim-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .15s}
+.sb-run{background:var(--blue);color:#fff}
+.sb-run:hover{opacity:.85}
+.sb-stop{background:var(--bg3);color:var(--text2);border:1px solid var(--border2)}
+.sb-stop:hover{background:var(--bg4)}
+.sb-step{background:var(--bg3);color:var(--text2);border:1px solid var(--border2)}
+.sb-step:hover{background:var(--bg4)}
+.sim-btn svg{width:12px;height:12px}
+.sim-prog-wrap{flex:1}
+.sim-prog-lbl{font-size:11px;color:var(--text3);font-family:'Space Mono',monospace;margin-bottom:4px}
+.sim-prog{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.sim-prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--violet));border-radius:2px;transition:width .5s ease}
+.sim-node-lbl{font-size:11.5px;color:var(--text2);min-width:170px;font-family:'Space Mono',monospace}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .15s}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border2)}
+.btn-outline:hover{background:var(--bg3);color:var(--text)}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{opacity:.85}
+.btn-sim{background:transparent;color:var(--amber);border:1px solid rgba(245,158,11,.3)}
+.btn-sim:hover{background:var(--amber-pale)}
+.btn svg{width:12px;height:12px}
+
+/* PIPELINE SUMMARY BAR */
+.pipe-bar{background:var(--bg2);border-bottom:1px solid var(--border);padding:7px 24px;display:flex;align-items:center;gap:0;flex-shrink:0;z-index:8;position:relative;overflow-x:auto}
+.pipe-stat{display:flex;align-items:center;gap:8px;padding:0 18px;border-right:1px solid var(--border);flex-shrink:0}
+.pipe-stat:first-child{padding-left:0}
+.pipe-stat:last-child{border-right:none}
+.pipe-icon{width:26px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pipe-icon svg{width:13px;height:13px}
+.pi-blue{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.2)}
+.pi-teal{background:rgba(20,184,166,.1);border:1px solid rgba(20,184,166,.2)}
+.pi-amber{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2)}
+.pi-red{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2)}
+.pi-violet{background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2)}
+.pipe-val{font-size:13px;font-weight:600;color:#dde9fa}
+.pipe-lbl{font-size:10px;color:var(--text3);font-family:'Space Mono',monospace}
+.pipe-detail{font-size:10px;color:var(--text3);margin-top:0}
+.pipe-bottleneck{font-size:10px;color:var(--amber);font-family:'Space Mono',monospace;background:var(--amber-pale);border:1px solid rgba(245,158,11,.25);border-radius:4px;padding:2px 7px;margin-left:auto;white-space:nowrap;flex-shrink:0}
+
+/* NODE BADGES */
+.nd-badges{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap}
+.nd-badge{font-size:8.5px;font-family:'Space Mono',monospace;padding:1px 5px;border-radius:3px;font-weight:700}
+.nb-latency-fast{background:rgba(34,197,94,.1);color:#4ade80;border:1px solid rgba(34,197,94,.2)}
+.nb-latency-med{background:rgba(245,158,11,.1);color:#fbbf24;border:1px solid rgba(245,158,11,.2)}
+.nb-latency-slow{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.2)}
+.nb-latency-human{background:rgba(100,116,139,.1);color:#94a3b8;border:1px solid rgba(100,116,139,.2)}
+.nb-cost-lo{background:rgba(34,197,94,.1);color:#4ade80;border:1px solid rgba(34,197,94,.2)}
+.nb-cost-mid{background:rgba(245,158,11,.1);color:#fbbf24;border:1px solid rgba(245,158,11,.2)}
+.nb-cost-hi{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.2)}
+.nb-risk-lo{background:rgba(34,197,94,.1);color:#4ade80;border:1px solid rgba(34,197,94,.2)}
+.nb-risk-med{background:rgba(245,158,11,.1);color:#fbbf24;border:1px solid rgba(245,158,11,.2)}
+.nb-risk-hi{background:rgba(249,115,22,.1);color:#fb923c;border:1px solid rgba(249,115,22,.2)}
+.nb-risk-crit{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.2)}
+
+/* METRICS TAB */
+.m-section{margin-bottom:14px}
+.m-section-title{font-size:9.5px;font-family:'Space Mono',monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.m-section-title svg{width:11px;height:11px;stroke:var(--text3)}
+.m-card{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:7px}
+.m-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.m-row:last-child{margin-bottom:0}
+.m-key{font-size:11.5px;color:var(--text2)}
+.m-val{font-size:11.5px;font-weight:600;color:#dde9fa;font-family:'Space Mono',monospace}
+.m-note{font-size:11px;color:var(--text3);line-height:1.5;margin-top:5px;padding-top:5px;border-top:1px solid var(--border)}
+.bar-wrap{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin:4px 0 2px;flex:1}
+.bar-fill{height:100%;border-radius:3px;transition:width .4s ease}
+.bf-green{background:#22c55e}
+.bf-amber{background:#f59e0b}
+.bf-orange{background:#f97316}
+.bf-red{background:#ef4444}
+.bf-blue{background:#3b82f6}
+.bf-violet{background:#8b5cf6}
+.bar-label{font-size:10px;color:var(--text3);font-family:'Space Mono',monospace}
+.latency-grid{display:grid;grid-template-columns:38px 1fr 42px;gap:4px 8px;align-items:center;margin-bottom:2px}
+.token-bar-row{display:grid;grid-template-columns:44px 1fr 50px;gap:4px 8px;align-items:center;margin-bottom:2px}
+.risk-gauge-wrap{position:relative;height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin:6px 0 4px}
+.risk-gauge-fill{height:100%;border-radius:4px;transition:width .5s ease}
+.risk-score-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.risk-score-big{font-size:22px;font-weight:700;font-family:'Space Mono',monospace}
+.risk-driver-list{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+.risk-driver{font-size:11px;color:var(--text2);padding:4px 8px;background:var(--bg3);border-radius:4px;border-left:2px solid var(--border3);line-height:1.4}
+.human-note{font-size:11px;color:var(--slate);padding:8px 10px;background:rgba(100,116,139,.06);border:1px solid rgba(100,116,139,.2);border-radius:5px;line-height:1.5;text-align:center;margin-top:4px}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5"/><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="8.5" x2="22" y2="8.5"/></svg>
+    </div>
+    Prism
+  </div>
+  <div class="hdr-div"></div>
+  <span class="hdr-label">Agent Sandbox</span>
+  <div class="hdr-div"></div>
+  <span class="hdr-title">Workflow Simulation &amp; Decision Mapping</span>
+  <div class="hdr-right">
+    <button class="btn btn-outline" onclick="exportNotes()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Export Notes
+    </button>
+    <button class="btn btn-sim" onclick="startSim()">
+      <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Run Simulation
+    </button>
+  </div>
+</header>
+
+<!-- SCENARIO BAR -->
+<div class="scbar">
+  <span class="scbar-lbl">Scenario:</span>
+  <button class="sc-chip active" onclick="setScenario(0,this)">Sales AI Pipeline</button>
+  <button class="sc-chip" onclick="setScenario(2,this)">Learning Path AI</button>
+  <button class="sc-chip" onclick="setScenario(1,this)">HR Screening AI</button>
+  <button class="sc-chip" onclick="setScenario(3,this)">Ops Automation AI</button>
+</div>
+
+<!-- PIPELINE SUMMARY BAR -->
+<div class="pipe-bar" id="pipeBar">
+  <div class="pipe-stat">
+    <div class="pipe-icon pi-blue"><svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+    <div><div class="pipe-val" id="pipeLatency">—</div><div class="pipe-lbl">Pipeline latency (p50)</div></div>
+  </div>
+  <div class="pipe-stat">
+    <div class="pipe-icon pi-teal"><svg viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>
+    <div><div class="pipe-val" id="pipeTokens">—</div><div class="pipe-lbl">Tokens / run (happy path)</div></div>
+  </div>
+  <div class="pipe-stat">
+    <div class="pipe-icon pi-amber"><svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+    <div><div class="pipe-val" id="pipeCost">—</div><div class="pipe-lbl">Est. cost / run</div></div>
+  </div>
+  <div class="pipe-stat">
+    <div class="pipe-icon pi-red"><svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+    <div><div class="pipe-val" id="pipeRisk">—</div><div class="pipe-lbl">Avg. risk score</div></div>
+  </div>
+  <div class="pipe-stat">
+    <div class="pipe-icon pi-violet"><svg viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+    <div><div class="pipe-val" id="pipeBottleneckVal">—</div><div class="pipe-lbl" id="pipeBottleneckLbl">Bottleneck node</div></div>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="body">
+
+  <!-- FLOOR -->
+  <div class="floor-col" id="floorCol">
+    <div class="floor-top">
+      <span class="floor-hed" id="floorHed">Agent Workflow — Click any node to inspect</span>
+      <div class="legend">
+        <div class="leg-item"><div class="leg-dot" style="background:var(--teal)"></div>Entry</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--blue)"></div>Agent</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--amber)"></div>Decision</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--slate)"></div>Branch</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--green)"></div>Handoff</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--violet)"></div>Learning</div>
+      </div>
+    </div>
+
+    <div class="floor-canvas" id="floorCanvas">
+      <!-- SVG connections drawn by JS -->
+      <svg class="floor-svg" id="floorSvg"></svg>
+
+      <!-- NODES — positioned absolutely by JS -->
+    </div>
+    <!-- sim bar spacer -->
+    <div style="height:60px"></div>
+  </div>
+
+  <!-- DETAIL PANEL -->
+  <div class="detail-col">
+    <div class="detail-empty" id="detailEmpty">
+      <div class="de-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 13l4.553 2.276A1 1 0 0021 21.382V10.618a1 1 0 00-1.447-.894L15 12m0 8V12m0 0L9 7"/></svg>
+      </div>
+      <div class="de-title">Select a node</div>
+      <div class="de-sub">Click any agent, decision, or branch node on the floor plan to inspect it</div>
+    </div>
+    <div class="detail-body" id="detailBody">
+      <div id="typeBadge" class="type-badge"></div>
+      <div id="dName" class="d-name"></div>
+      <div id="dSub" class="d-sub"></div>
+      <div id="dDesc" class="d-desc"></div>
+      <div class="io-grid" id="ioGrid"></div>
+      <div class="tabs">
+        <button class="tab on" onclick="switchTab('overview',this)">Overview</button>
+        <button class="tab" onclick="switchTab('questions',this)">Questions</button>
+        <button class="tab" onclick="switchTab('risks',this)">Risks</button>
+        <button class="tab" onclick="switchTab('metrics',this)">Metrics</button>
+      </div>
+      <div class="tab-pane on" id="pane-overview">
+        <div id="overviewContent"></div>
+      </div>
+      <div class="tab-pane" id="pane-questions">
+        <div class="q-list" id="questionList"></div>
+      </div>
+      <div class="tab-pane" id="pane-risks">
+        <div class="r-list" id="riskList"></div>
+      </div>
+      <div class="tab-pane" id="pane-metrics">
+        <div id="metricsContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIM BAR -->
+  <div class="sim-bar hidden" id="simBar">
+    <button class="sim-btn sb-stop" onclick="stopSim()">
+      <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+      Stop
+    </button>
+    <button class="sim-btn sb-step" onclick="stepSim(-1)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <button class="sim-btn sb-step" onclick="stepSim(1)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+    <div class="sim-prog-wrap">
+      <div class="sim-prog-lbl" id="simLbl">— / —</div>
+      <div class="sim-prog"><div class="sim-prog-fill" id="simFill" style="width:0%"></div></div>
+    </div>
+    <div class="sim-node-lbl" id="simNodeLbl"></div>
+  </div>
+
+</div><!-- /body -->
+
+<script>
+const SCENARIOS = {
+  0: {
+    name:'Sales AI Pipeline',
+    nodes:[
+      {
+        id:'lead_intake',type:'entry',label:'Lead Intake',sub:'Entry Point',zone:'Intake Zone',
+        cx:240,cy:55,w:200,h:72,
+        desc:'Receives raw prospect data from CRM imports, web forms, LinkedIn, and API feeds. Normalises, deduplicates, and stamps each record before passing downstream. This is where data quality is either set up for success — or quietly sabotaged.',
+        inputs:['CRM export','Web form fills','LinkedIn enrichment','Manual entry'],
+        outputs:['Normalised lead record','Duplicate flags','Validation status'],
+        questions:[
+          'What data sources feed into this intake point, and are they all trusted?',
+          'How do we handle duplicate leads arriving from multiple sources simultaneously?',
+          'What minimum required fields must exist before the agent can proceed?',
+          'Who owns the lead data quality standard — and is it documented?'
+        ],
+        risks:[
+          {label:'Garbage In / Garbage Out',sev:'high',note:'Poor input data propagates silently through all downstream agents, producing convincing but worthless output.'},
+          {label:'Missing Required Fields',sev:'medium',note:'Agents may infer or fabricate missing data rather than surfacing a clear gap to a human.'},
+          {label:'PII Handling from Day One',sev:'high',note:'Personal data must be scoped to GDPR / CCPA from intake, not retrofitted later.'}
+        ]
+      },
+      {
+        id:'research',type:'agent',label:'Research Agent',sub:'Intelligence Gathering',zone:'Intelligence Zone',
+        cx:240,cy:165,w:200,h:72,
+        desc:'Autonomously gathers company intelligence from approved public sources: news, LinkedIn, Crunchbase, company websites, SEC filings. Enriches the lead record with org size, tech stack, recent events, and decision-maker contacts.',
+        inputs:['Lead record','Search & scraping APIs','Internal knowledge base'],
+        outputs:['Enriched company profile','Key contacts list','Confidence score','Source citations'],
+        questions:[
+          'Which data sources are licensed for automated scraping — and which are legally off-limits?',
+          'How do we verify that scraped facts are accurate before they influence downstream scoring?',
+          'What is the token / cost budget per research run — and what triggers a "good enough" stop?',
+          'How fresh does the data need to be — and how do we detect stale cache hits?'
+        ],
+        risks:[
+          {label:'Hallucinated Company Facts',sev:'critical',note:'LLMs readily fabricate headcount, funding rounds, and leadership names if grounding data is thin.'},
+          {label:'Scraping Blocks & Rate Limits',sev:'medium',note:'Target domains actively block automated crawlers; failure modes are often silent.'},
+          {label:'Privacy Law Violations',sev:'high',note:'Automated collection of personal contact data may violate GDPR Article 6, CCPA, or LinkedIn ToS.'},
+          {label:'Stale Cached Data',sev:'medium',note:'A cached research run from three months ago will look identical to a fresh one but may be dangerously wrong.'}
+        ]
+      },
+      {
+        id:'d_data',type:'decision',label:'Data Quality Gate',sub:'Pass / Fail',zone:'Intelligence Zone',
+        cx:240,cy:285,w:96,h:96,
+        desc:'Evaluates the completeness and confidence of the research output. If the enriched profile meets the minimum quality threshold, the lead proceeds automatically. If not, a human reviewer is flagged before anything continues.',
+        inputs:['Enriched profile','Quality rule set','Confidence thresholds'],
+        outputs:['PASS → Qualification Agent','FAIL → Human Review Queue'],
+        questions:[
+          'What numeric threshold defines "passing" — and who set that number?',
+          'Who receives the human-review flag, and what is the SLA before the lead goes cold?',
+          'Does the agent auto-approve when the review queue is long, or does it hard-block?',
+          'Is the threshold the same for all lead sources, or does it vary by data type?'
+        ],
+        risks:[
+          {label:'Threshold Set Too Low',sev:'high',note:'A permissive bar lets poor-quality leads through, wasting every downstream agent\'s effort.'},
+          {label:'Review Queue Bottleneck',sev:'medium',note:'High failure rates flood the human review queue and create cold-lead latency.'},
+          {label:'Silent Auto-Approval',sev:'high',note:'Agents may self-approve borderline leads to avoid latency if the logic permits it.'}
+        ]
+      },
+      {
+        id:'human_flag',type:'endpoint',label:'Human Review Queue',sub:'Escalation Branch',zone:'Escalation',
+        cx:490,cy:285,w:178,h:72,
+        desc:'Holds leads that failed the data quality gate. A human analyst reviews the record, adds missing data, corrects errors, and resubmits — or permanently discards the lead with a reason code.',
+        inputs:['Failed lead record','Failure reason codes'],
+        outputs:['Corrected record → resubmit to gate','Discarded record + reason'],
+        questions:[
+          'What is the expected review volume, and is the team resourced for it?',
+          'How does a corrected record cleanly re-enter the pipeline without creating a duplicate?',
+          'Is there an immutable audit trail for every human edit?'
+        ],
+        risks:[
+          {label:'Review Latency = Cold Lead',sev:'medium',note:'The longer a lead waits in the queue, the lower the eventual response rate.'},
+          {label:'Inconsistent Human Standards',sev:'medium',note:'Different analysts may apply different quality bars, making the gate\'s output unpredictable.'}
+        ]
+      },
+      {
+        id:'qualify',type:'agent',label:'Qualification Agent',sub:'ICP Scoring',zone:'Qualification Zone',
+        cx:240,cy:405,w:200,h:72,
+        desc:'Scores the enriched lead against the Ideal Customer Profile (ICP) criteria. Evaluates firmographic fit (company size, industry, region), technographic signals (current software stack), and any available intent data.',
+        inputs:['Enriched lead record','ICP criteria store','Intent signal feed'],
+        outputs:['ICP score (0–100)','Score explanation (LIME/SHAP-style)','Recommended tier'],
+        questions:[
+          'Who owns and governs the ICP definition — and when was it last updated?',
+          'Does the agent produce an explainable reason for every score, or is it a black box?',
+          'Can sales reps override a score, and if so, does the override feed back into training?',
+          'Are there segments where historical win data is too thin to score reliably?'
+        ],
+        risks:[
+          {label:'ICP Definition Drift',sev:'high',note:'The ICP may become stale as the market shifts, causing the agent to optimise for yesterday\'s ideal customer.'},
+          {label:'Opaque Black-Box Scores',sev:'medium',note:'Reps who don\'t understand why a lead scored high or low will not adopt the output.'},
+          {label:'Encoded Demographic Bias',sev:'high',note:'Historical CRM data may encode patterns where certain company profiles were never pursued — not because they were poor fits, but because of past sales team blind spots.'}
+        ]
+      },
+      {
+        id:'d_qualify',type:'decision',label:'Qualification Gate',sub:'Route by Score',zone:'Qualification Zone',
+        cx:240,cy:527,w:96,h:96,
+        desc:'Routes leads based on ICP score. Leads scoring ≥70 proceed to personalised outreach. Leads below the threshold are routed into a nurture sequence for longer-term development, not discarded.',
+        inputs:['ICP score','Tier routing thresholds'],
+        outputs:['≥70 → Personalisation Agent','<70 → Nurture Queue'],
+        questions:[
+          'Is the 70/30 split the right threshold — and has it been validated against win-rate data?',
+          'What does a "nurture" lead actually receive — is it a real programme or a low-effort sequence?',
+          'Are there escalation paths for borderline leads (60–70)?',
+          'How do leads graduate from nurture back into the active pipeline?'
+        ],
+        risks:[
+          {label:'Wrong Threshold = Revenue Leakage',sev:'medium',note:'Too strict loses addressable market; too loose dilutes rep time and conversion rates.'},
+          {label:'Nurture as a Dead End',sev:'medium',note:'Without a re-trigger mechanism, leads may enter nurture and never be re-evaluated.'}
+        ]
+      },
+      {
+        id:'nurture',type:'endpoint',label:'Nurture Queue',sub:'Long-term Development',zone:'Escalation',
+        cx:490,cy:527,w:178,h:72,
+        desc:'Receives leads below the qualification threshold. Enrols them in a lower-frequency nurture sequence and schedules a re-evaluation at a set cadence. These are potential customers — they should be treated accordingly.',
+        inputs:['Lead record','Nurture programme config'],
+        outputs:['Enrolled in nurture sequence','Scheduled re-qualification check'],
+        questions:[
+          'What cadence does the nurture sequence follow, and who approves the content?',
+          'What signal triggers a re-qualification check — time elapsed, intent score spike, company event?',
+          'Is the nurture content personalised per lead or batch-templated?'
+        ],
+        risks:[
+          {label:'Abandoned Leads',sev:'medium',note:'Without an active re-trigger, leads may enter nurture and remain there indefinitely.'},
+          {label:'Over-Nurturing Opt-Outs',sev:'low',note:'A high-frequency sequence on a leads that isn\'t ready creates unsubscribes and damaged reputation.'}
+        ]
+      },
+      {
+        id:'personalize',type:'agent',label:'Personalisation Agent',sub:'Content Generation',zone:'Content Zone',
+        cx:240,cy:647,w:200,h:72,
+        desc:'Generates highly personalised outreach content by combining research insights, brand voice guidelines, and proven messaging frameworks. Creates tailored email sequences, LinkedIn messages, and call talk-tracks grounded in specific company intelligence.',
+        inputs:['Qualified lead record','Brand voice library','Approved message frameworks','Research summary'],
+        outputs:['Draft email sequence','LinkedIn connection note','Call talk-track'],
+        questions:[
+          'What brand voice constraints must the agent respect — and are they machine-readable?',
+          'How many hard personalisation variables are required per message (beyond first name and company)?',
+          'Is there a legal / compliance review requirement before any message is sent in regulated industries?',
+          'How do we detect and prevent repetitive personalisation patterns across a large book of leads?'
+        ],
+        risks:[
+          {label:'Fabricated Prospect References',sev:'critical',note:'The agent may invent specific details about the prospect — a fake product launch, a wrong hire — that the rep then sends, causing immediate credibility damage.'},
+          {label:'Brand Voice Drift',sev:'high',note:'Each generation is a fresh sample. Without explicit style constraints, content tone drifts across sequences.'},
+          {label:'Spam Trigger Language',sev:'medium',note:'Generated content frequently includes phrases that trigger inbox spam filters, reducing deliverability.'},
+          {label:'Legal Exposure',sev:'high',note:'Claims made in outreach to regulated industries (finance, health, legal) may require legal review that the automation bypasses.'}
+        ]
+      },
+      {
+        id:'d_review',type:'decision',label:'Human Approval Gate',sub:'Rep Review Required',zone:'Content Zone',
+        cx:240,cy:769,w:96,h:96,
+        desc:'A sales rep reviews AI-generated content before it is sent. They can approve as-is, edit, or reject with specific feedback. Rejection routes content back to the Personalisation Agent with structured guidance for revision.',
+        inputs:['Draft content package','Assigned rep','Quality checklist'],
+        outputs:['Approved → Outreach Agent','Rejected → Revision Loop'],
+        questions:[
+          'What percentage of messages should require human review long-term — what is the target autonomy level?',
+          'Is there a fast-track auto-approve path for high-confidence content — and who can enable it?',
+          'How are rep edits captured and fed back as training signals for the personalisation agent?',
+          'What is the review SLA — and is there a process if the rep is unavailable?'
+        ],
+        risks:[
+          {label:'Review Fatigue → Rubber Stamping',sev:'high',note:'High review volumes cause reps to approve everything without reading it — defeating the safety purpose entirely.'},
+          {label:'Bypassing the Gate',sev:'critical',note:'Operational pressure to "hit quota" can lead teams to disable or route around approval gates.'},
+          {label:'No Feedback Loop',sev:'medium',note:'If rep edits are not captured as structured signals, the agent never learns and quality never improves.'}
+        ]
+      },
+      {
+        id:'revise',type:'revision',label:'Revision Loop',sub:'Quality Branch',zone:'Escalation',
+        cx:490,cy:769,w:178,h:72,
+        desc:'Receives rejected content along with rep feedback. The Personalisation Agent regenerates with explicit guidance. A maximum of 2–3 revision cycles is enforced; beyond that, the content escalates to full human authoring to prevent infinite loops.',
+        inputs:['Rejected draft','Structured rep feedback','Revision count'],
+        outputs:['Revised draft → Human Approval Gate','Escalate to human authoring (if max retries hit)'],
+        questions:[
+          'How many revision cycles are allowed before full human takeover — and is there a hard cap in the code?',
+          'Is rep feedback structured (checkboxes, rubric) or free-text — and how does the agent parse it?',
+          'How are revision reasons logged for model improvement?'
+        ],
+        risks:[
+          {label:'Infinite Loop Risk',sev:'high',note:'Without a hard retry cap enforced in code, the system can cycle indefinitely between rejection and revision.'},
+          {label:'Vague Feedback = Shallow Revision',sev:'medium',note:'Free-text rejections like "sounds off" produce superficial rewrites that fail again for the same reason.'}
+        ]
+      },
+      {
+        id:'outreach',type:'agent',label:'Outreach Agent',sub:'Execution',zone:'Execution Zone',
+        cx:240,cy:889,w:200,h:72,
+        desc:'Executes the approved outreach sequence across channels. Manages send-time optimisation, channel sequencing (email → LinkedIn → call reminder), tracks delivery and engagement events, and adapts the next touch based on engagement signals.',
+        inputs:['Approved content package','Lead contact details','Send schedule config','Channel credentials'],
+        outputs:['Sent messages (with timestamps)','Engagement events (opens, clicks, replies)','Delivery status per channel'],
+        questions:[
+          'What send-time optimisation logic is used — is it per-lead or timezone-average?',
+          'How are bounced or undeliverable contacts immediately surfaced and resolved?',
+          'Does the agent have permission to act autonomously on follow-up touches, or does each require approval?',
+          'How many total touchpoints are allowed before a lead is marked inactive for this cycle?'
+        ],
+        risks:[
+          {label:'CAN-SPAM / GDPR Compliance',sev:'critical',note:'Automated email sequences must honour unsubscribe requests within 10 business days (CAN-SPAM) and handle consent properly under GDPR. Automation makes violations at scale trivially easy.'},
+          {label:'Sender Reputation Degradation',sev:'high',note:'High-volume sending without domain warm-up, or sending to invalid addresses, triggers spam classification that takes weeks to repair.'},
+          {label:'Over-Sequencing',sev:'medium',note:'Automated follow-up logic can create aggressive cadences that are counter-productive and damage brand perception.'}
+        ]
+      },
+      {
+        id:'d_response',type:'decision',label:'Response Detection Gate',sub:'Classify & Route',zone:'Execution Zone',
+        cx:240,cy:1010,w:96,h:96,
+        desc:'Monitors all outreach channels for prospect responses. An NLP classifier categorises response sentiment — positive, negative, objection, or neutral — and routes accordingly. Positive responses trigger immediate sales rep alerts; objections route to a structured handling flow.',
+        inputs:['Engagement events','NLP response classifier','Channel monitoring feed'],
+        outputs:['Positive → Alert Sales Rep','Objection → Structured handling flow','No response → Continue sequence'],
+        questions:[
+          'What exactly defines a "positive" response — and how confident must the classifier be before acting?',
+          'What is the rep alert SLA from response detection — 5 minutes? 2 hours?',
+          'Are objections handled autonomously with a rebuttal, or always escalated to a human?',
+          'How are out-of-office replies and vacation auto-responders identified and correctly suppressed?'
+        ],
+        risks:[
+          {label:'Misclassified Negative as Positive',sev:'critical',note:'"Remove me from your list" being classified as a positive and triggering an enthusiastic follow-up is a reputational disaster.'},
+          {label:'Response-to-Rep Alert Latency',sev:'medium',note:'Every minute between a prospect\'s response and the rep\'s first touch reduces conversion probability.'},
+          {label:'Autonomous Response Boundary',sev:'high',note:'The boundary between "agent informs the rep" and "agent replies on the rep\'s behalf" must be explicitly defined and technically enforced.'}
+        ]
+      },
+      {
+        id:'alert_rep',type:'success',label:'Alert Sales Rep',sub:'Human Handoff',zone:'Handoff',
+        cx:490,cy:1010,w:178,h:72,
+        desc:'Delivers a fully contextualised alert to the assigned sales rep. Includes the full conversation history, a prospect intelligence summary, recommended talking points, and any relevant objection-handling guidance. The rep takes it from here.',
+        inputs:['Response event','Full lead context','Conversation history','Talking-point brief'],
+        outputs:['Rep notification (Slack / email / CRM push)','Contextual brief','Booked meeting → CRM logged'],
+        questions:[
+          'Which channel delivers the alert — Slack, email, CRM notification, mobile push?',
+          'How rich is the context package — does it include a "why they\'re hot right now" summary?',
+          'Is there an escalation if the assigned rep doesn\'t respond within the SLA?'
+        ],
+        risks:[
+          {label:'Alert Fatigue',sev:'medium',note:'If too many low-quality alerts are sent, reps stop responding urgently to any of them — including the genuinely hot ones.'},
+          {label:'Poor Contextual Brief Quality',sev:'medium',note:'A rep going into a call with a weak summary will underperform. The agent\'s brief quality directly affects conversion.'}
+        ]
+      },
+      {
+        id:'feedback',type:'learning',label:'Feedback Loop Agent',sub:'Continuous Learning',zone:'Learning Zone',
+        cx:240,cy:1130,w:200,h:72,
+        desc:'Continuously ingests outcome data — meetings booked, deals won and lost, response rates per message variant — and feeds structured signals back to improve research quality, ICP scoring accuracy, and personalisation effectiveness over time. The nervous system of the whole pipeline.',
+        inputs:['CRM win/loss data','Sequence engagement metrics','Rep override history','Meeting and pipeline outcomes'],
+        outputs:['Updated ICP scoring weights','Research quality signals','Content performance insights','Drift alerts for human review'],
+        questions:[
+          'What outcomes are used as primary training signals — and are they aligned with actual revenue, not just proxy metrics?',
+          'How frequently is the feedback data reviewed by a human before any model update is applied?',
+          'Who has the authority to pause or roll back the feedback loop — and is that process documented?',
+          'Are there guardrails that prevent the model from optimising toward biased historical patterns?'
+        ],
+        risks:[
+          {label:'Reward Hacking',sev:'critical',note:'The agent may optimise for measurable proxies (open rate, reply rate) instead of real business outcomes (revenue, LTV), because those are the signals that arrive fastest.'},
+          {label:'Feedback Loop Delay',sev:'medium',note:'Enterprise deal cycles can take 6–18 months. By the time outcome signals arrive, the model may have already drifted.'},
+          {label:'Unmonitored Model Drift',sev:'high',note:'Without continuous human oversight, the model gradually shifts in ways that no single change makes obvious — a slow, undetected quality degradation.'}
+        ]
+      }
+    ],
+    edges:[
+      {from:'lead_intake',to:'research',type:'main'},
+      {from:'research',to:'d_data',type:'main'},
+      {from:'d_data',to:'qualify',type:'yes',label:'Pass'},
+      {from:'d_data',to:'human_flag',type:'branch',label:'Fail'},
+      {from:'qualify',to:'d_qualify',type:'main'},
+      {from:'d_qualify',to:'personalize',type:'yes',label:'≥70'},
+      {from:'d_qualify',to:'nurture',type:'branch',label:'<70'},
+      {from:'personalize',to:'d_review',type:'main'},
+      {from:'d_review',to:'outreach',type:'yes',label:'Approved'},
+      {from:'d_review',to:'revise',type:'branch',label:'Rejected'},
+      {from:'revise',to:'d_review',type:'loop'},
+      {from:'outreach',to:'d_response',type:'main'},
+      {from:'d_response',to:'feedback',type:'main',label:'Sequence done'},
+      {from:'d_response',to:'alert_rep',type:'yes',label:'Response'},
+      {from:'alert_rep',to:'feedback',type:'side'}
+    ],
+    simFlow:['lead_intake','research','d_data','qualify','d_qualify','personalize','d_review','outreach','d_response','alert_rep','feedback']
+  },
+  2:{
+    name:'Learning Path AI (Prism)',
+    nodes:[
+      {
+        id:'lp_context',type:'entry',label:'Context Capture',sub:'Onboarding · Stage 1–3',zone:'Onboarding',
+        cx:240,cy:55,w:200,h:72,
+        desc:'Collects seven structured questions covering target role, current experience, available time, learning style, and company context. The defaults estimator pre-fills skill levels from role signals; the research agent validates the topic and gathers subtopic structure. This is the only human input the entire pipeline depends on — quality here determines quality everywhere.',
+        inputs:['7-question onboarding form','Role title signal','Company context (B2B)','Time availability','Learning style preference'],
+        outputs:['User context record','Estimated skill defaults','Validated topic structure','Duration estimate (Stage 4)'],
+        questions:[
+          'What happens when the user gives vague or contradictory answers — does the agent surface ambiguity or silently resolve it?',
+          'How does the defaults estimator handle roles it has never seen before — does it fall back gracefully or fabricate plausible-sounding skill levels?',
+          'Is the company context field actually used downstream, or is it collected and ignored?',
+          'What is the minimum acceptable context capture for the pipeline to produce a useful path — and is that threshold enforced?'
+        ],
+        risks:[
+          {label:'Garbage Context In',sev:'high',note:'Every downstream agent uses this context as ground truth. Vague or misunderstood role definitions corrupt the entire learning path silently.'},
+          {label:'Fabricated Skill Defaults',sev:'medium',note:'The defaults estimator may assign confident-sounding skill levels to roles it has thin data on, setting the wrong difficulty baseline from the start.'},
+          {label:'Company Context Orphan',sev:'medium',note:'If the B2B company context is captured but not wired into content generation prompts, it creates a false impression of personalisation that the content does not deliver.'}
+        ]
+      },
+      {
+        id:'lp_journey',type:'agent',label:'Journey Generation Agent',sub:'Roadmap · Stage 5',zone:'Roadmap Zone',
+        cx:240,cy:167,w:200,h:72,
+        desc:'Generates the complete learning roadmap: recommends a track type (Structured or On-Demand), determines the module and lesson hierarchy, names modules descriptively, numbers lessons in Module.Lesson format, and estimates duration per lesson. This single agent output governs the entire learning experience the user will have.',
+        inputs:['User context record','Skill defaults','Topic research output','Duration budget (up to 360 min)'],
+        outputs:['Track type recommendation','Module hierarchy (3+ modules)','Lesson structure (3+ lessons/module)','Duration estimates','Session outline JSONB'],
+        questions:[
+          'How does the agent decide between Structured and On-Demand tracks — and can the user meaningfully override that recommendation?',
+          'What enforces the minimum module and lesson count — is it a prompt instruction, a validator, or a hard code check?',
+          'If the agent produces a journey for a niche or emerging role with thin training data, how does it signal low confidence vs. hallucinating confident-sounding content?',
+          'How is the journey output versioned so that a mid-onboarding JD change does not silently regenerate a path the user has already started?'
+        ],
+        risks:[
+          {label:'Single-Point-of-Failure Output',sev:'critical',note:'This agent produces the schema that every subsequent agent builds on. A structurally malformed journey output cascades failure across all content generation stages.'},
+          {label:'Prompt-Only Enforcement',sev:'high',note:'If module/lesson minimum counts are enforced only in the prompt (not in a validator), the agent can and will occasionally produce non-compliant structures that reach the user.'},
+          {label:'Thin-Data Role Hallucination',sev:'high',note:'For emerging roles like "AI for Business" or "Data-Driven PM", the agent has limited ground truth and may generate a plausible-sounding but pedagogically unsound learning structure.'}
+        ]
+      },
+      {
+        id:'lp_content',type:'agent',label:'Content Creation Agent',sub:'Generation · Stage 6',zone:'Content Zone',
+        cx:240,cy:279,w:200,h:72,
+        desc:'Generates the full lesson content for each session: a structured narrative covering all lesson topics, grounded in the learner\'s role and company context, formatted to 800–1,200 words. Runs per-lesson, per-user. This is the highest-volume LLM workload in the platform — every lesson for every user is a fresh generation.',
+        inputs:['Lesson metadata (module, lesson, title, topics, objectives)','User context','Company context','Course title','Duration constraint (<=20 min)'],
+        outputs:['Lesson content markdown (800–1,200 words)','Structured narrative with role-relevant examples','Saved to /content/{lesson_number}.md'],
+        questions:[
+          'What prevents the agent from generating content that is accurate in general but wrong for the specific company context or industry vertical?',
+          'Is there a factual accuracy check before content reaches the learner — or does the reviewer agent only check structure and format?',
+          'How does the agent handle lesson topics where the training data is thin, outdated, or contested — such as rapidly evolving AI tooling?',
+          'What is the retry strategy when content fails the review gate — and does each retry use the same prompt or does it receive structured revision guidance?'
+        ],
+        risks:[
+          {label:'Confident Misinformation',sev:'critical',note:'The agent generates authoritative-sounding lesson content. Factual errors about tools, concepts, or industry practices are indistinguishable from accurate content to the learner.'},
+          {label:'Context Decoration vs. Grounding',sev:'high',note:'Injecting company context into the prompt creates a surface appearance of personalisation. The model may mention the company name without actually tailoring the substance of the content.'},
+          {label:'Stale Technical Content',sev:'high',note:'AI tooling, frameworks, and best practices evolve faster than training data. A lesson on "AI for Business" tools generated today may be materially wrong in six months.'},
+          {label:'Parallel Generation Race Conditions',sev:'medium',note:'Sessions 2 and 3 are generated in background queues immediately after onboarding. If the user edits their context before those jobs complete, stale context may be used.'}
+        ]
+      },
+      {
+        id:'lp_review',type:'agent',label:'Content Review Agent',sub:'Quality Gate · Stage 7',zone:'Content Zone',
+        cx:240,cy:391,w:200,h:72,
+        desc:'Reviews generated lesson content against a quality rubric: word count (800–1,200), terminology compliance (no legacy "Stage" references), structural completeness, and basic coherence check. Returns pass or fail with specific revision guidance. Up to 2 retries are permitted before escalation.',
+        inputs:['Generated lesson content','Lesson metadata','Quality rubric','Retry count'],
+        outputs:['PASS → Question Generation','FAIL + revision guidance → Content Creation Agent','Max retries exceeded → escalation flag'],
+        questions:[
+          'Does the review agent check factual accuracy — or only structural compliance and word count?',
+          'What specific revision guidance is returned on failure — is it actionable enough for the content agent to correct the right thing?',
+          'Is the 2-retry cap enforced in code or only in the prompt — and what actually happens when it is exceeded?',
+          'How are systematic review failures (same error across many lessons) surfaced to a human for curriculum-level diagnosis?'
+        ],
+        risks:[
+          {label:'Structural Reviewer, Not Factual',sev:'high',note:'The review agent validates format and length — not accuracy. A fluent, well-structured lesson containing incorrect information will pass every time.'},
+          {label:'Retry Cap Not Code-Enforced',sev:'medium',note:'If the retry limit is a prompt instruction rather than application logic, a persistent generation failure can loop past the cap.'},
+          {label:'Silent Escalation',sev:'medium',note:'When max retries are exceeded, the failure must surface visibly to a human — not silently fall back to a degraded experience the learner cannot distinguish from normal.'}
+        ]
+      },
+      {
+        id:'lp_questions',type:'agent',label:'Question Generator Agent',sub:'Assessment · Stage 8',zone:'Assessment Zone',
+        cx:240,cy:503,w:200,h:72,
+        desc:'Generates three assessment questions per lesson: Technical Accuracy, Business Application, and Communication Skills. Each question is a scenario-based prompt grounded in the lesson content and the learner\'s role context. Questions are stored as the assessment activities for that lesson.',
+        inputs:['Reviewed lesson content','Lesson metadata','User role context','Assessment type (Technical / Business / Communication)'],
+        outputs:['3 scenario-based assessment questions','Evaluation rubric per question','Saved to /questions/{lesson_number}.md'],
+        questions:[
+          'Are questions generated fresh per learner or cached and reused across learners with the same role? What are the tradeoffs of each?',
+          'How does the agent ensure questions are genuinely scenario-based and not just factual recall dressed up as scenarios?',
+          'Who validates that the evaluation rubric the agent generates is a fair measure of the stated learning objective?',
+          'What happens when the lesson content itself is poor quality — does that cascade into poor questions, or does the question agent compensate?'
+        ],
+        risks:[
+          {label:'Question–Content Circular Dependency',sev:'medium',note:'Questions graded against a rubric generated from the same content they are testing. A content error propagates into both the question and its grading standard.'},
+          {label:'Assessment Monoculture',sev:'medium',note:'Three fixed question types per lesson may not be appropriate for all content types — a coding lesson and a communication skills lesson warrant fundamentally different assessment formats.'},
+          {label:'Rubric Calibration Drift',sev:'medium',note:'Without a human validation layer, generated rubrics can drift toward being either too lenient or too strict across the learner cohort with no visibility.'}
+        ]
+      },
+      {
+        id:'lp_tts',type:'agent',label:'TTS Agent',sub:'Audio · Stage 9',zone:'Delivery Zone',
+        cx:240,cy:615,w:200,h:72,
+        desc:'Converts the reviewed lesson content to an audio narration using text-to-speech. Produces an MP3 saved alongside the text content. The learner receives both formats and chooses based on their situation — same content, different modality. Audio is always generated even if the learner\'s stated preference is text.',
+        inputs:['Reviewed lesson content markdown','TTS voice config','Output path config'],
+        outputs:['Audio narration MP3','Saved to /audio/{lesson_number}.mp3','Duration estimate for progress tracking'],
+        questions:[
+          'Is TTS generated for every lesson regardless of the learner\'s stated preference — and what is the cost and storage justification for that choice?',
+          'How are technical terms, acronyms, and product names handled by the TTS engine — are they pronounced correctly, and is there a dictionary override?',
+          'What is the fallback if TTS generation fails — does the learner see a graceful degradation or a broken audio player?',
+          'How is audio content updated when lesson text is revised — is there an invalidation mechanism for cached MP3s?'
+        ],
+        risks:[
+          {label:'Mispronounced Technical Terms',sev:'low',note:'TTS engines handle industry jargon, acronyms, and product names inconsistently. A learner hearing "S-Q-L" vs "sequel" or a mangled tool name is a trust signal — small but real.'},
+          {label:'Always-On Generation Cost',sev:'medium',note:'Generating audio for every lesson regardless of learner preference creates compounding storage and TTS API cost at scale with no clear ROI for unused files.'},
+          {label:'Stale Audio After Content Revision',sev:'medium',note:'If lesson content is corrected post-generation, the audio file must be invalidated and regenerated. Without a cache-invalidation mechanism, learners hear outdated narrations.'}
+        ]
+      },
+      {
+        id:'lp_eval',type:'agent',label:'Evaluation Agent',sub:'Feedback · Stage 10',zone:'Assessment Zone',
+        cx:240,cy:727,w:200,h:72,
+        desc:'Evaluates learner responses to assessment questions across three dimensions: Technical Accuracy, Communication Skills, and Business Application. Returns a score, pass/fail verdict, and specific improvement guidance. Runs on every assessment attempt — unlimited retries are permitted.',
+        inputs:['Learner response (text or voice transcript)','Assessment question','Evaluation rubric','Lesson content context'],
+        outputs:['Dimensional scores (Technical / Business / Communication)','Pass / Fail verdict','Specific improvement guidance','Attempt logged for progress tracking'],
+        questions:[
+          'How consistent is the evaluation across repeated submissions of the same response — is there meaningful variance between runs?',
+          'Does the agent evaluate the actual substance of the response, or primarily its form (length, structure, keyword presence)?',
+          'How is the pass threshold calibrated — against the rubric, against a population of prior responses, or set statically?',
+          'What prevents a learner from gaming the rubric by including the right keywords without demonstrating genuine understanding?'
+        ],
+        risks:[
+          {label:'Evaluation Inconsistency',sev:'high',note:'LLM evaluation of open-ended responses has measurable variance. The same response submitted twice can receive different scores — which is a fairness problem when pass/fail governs lesson completion.'},
+          {label:'Keyword Gaming',sev:'medium',note:'Rubric-based evaluation is gameable. A learner who reverse-engineers the rubric language can pass assessments without understanding the material.'},
+          {label:'False Confidence Signal',sev:'high',note:'Passing 2 of 3 assessments becomes the proxy for "learned". If the evaluation itself is unreliable, pass rates are a meaningless signal that gets reported to B2B clients as proof of workforce development.'}
+        ]
+      },
+      {
+        id:'lp_adapt',type:'agent',label:'Micro-Adjustment Agent',sub:'Adaptation · Session-Level',zone:'Adaptation Zone',
+        cx:240,cy:839,w:200,h:72,
+        desc:'Analyses learner performance signals within and across sessions — assessment scores, engagement patterns, time-on-task, retry counts — and proposes session-level adjustments: pace changes, additional practice, content simplification, or path acceleration. Adjustments are surfaced as recommendations, not automatic changes.',
+        inputs:['Assessment results per lesson','Session engagement metrics','Retry counts','Time-on-task data','Learning path context'],
+        outputs:['Adjustment recommendations (pace / depth / practice)','Next-step options presented to learner','Signals logged for path-level adaptation'],
+        questions:[
+          'What is the minimum data required before the agent makes an adjustment recommendation — and is there a cold-start problem for early lessons?',
+          'Are adjustment recommendations surfaced to the learner as choices, or applied automatically without disclosure?',
+          'How does the agent distinguish between a learner who is struggling and one who is deliberately taking their time?',
+          'Are B2B managers able to see adjustment signals per learner — and is that consistent with the learner\'s privacy expectations?'
+        ],
+        risks:[
+          {label:'Premature Adaptation',sev:'medium',note:'Recommending path changes after one or two data points mistakes early noise for a meaningful signal. Over-adaptive systems frustrate learners who are on a normal learning curve.'},
+          {label:'Learner Surveillance Tension',sev:'medium',note:'Granular engagement tracking (time-on-task, retry counts, scroll depth) creates a detailed behavioural profile. B2B manager access to this data may conflict with learner trust and in some jurisdictions data protection law.'},
+          {label:'Adaptation as Engagement Theatre',sev:'medium',note:'If adjustments are cosmetic (re-ordering content, changing labels) rather than substantive (genuinely different pedagogical approach), the adaptation layer creates false promise.'}
+        ]
+      },
+      {
+        id:'lp_analytics',type:'learning',label:'Analytics & Reporting Agent',sub:'Insights · B2B Layer',zone:'Analytics Zone',
+        cx:240,cy:951,w:200,h:72,
+        desc:'Aggregates learner progress, completion rates, assessment scores, and engagement data across an organisation. Generates structured reports for B2B clients: skill gap summaries, cohort progress dashboards, and ROI proxies. This is the layer that justifies Prism\'s value to enterprise buyers — and the one most likely to be misread.',
+        inputs:['Lesson completion events','Assessment results','Session engagement logs','Org user roster','Report config'],
+        outputs:['Cohort progress dashboard','Skill gap heat map','Individual learner progress (gated by role)','B2B ROI summary','Drift alerts for low engagement'],
+        questions:[
+          'What does the analytics layer actually measure — completion and score, or genuine skill development? How are those presented to clients?',
+          'How is individual learner data protected when aggregated into team or org reports — can a manager infer an individual\'s performance from group data?',
+          'What is the minimum cohort size before individual reports are suppressed to prevent re-identification?',
+          'How are B2B clients trained to interpret the data correctly — and what guardrails prevent misleading conclusions from being drawn?'
+        ],
+        risks:[
+          {label:'Completion Rate as Proxy for Learning',sev:'high',note:'Completion and score metrics are trackable; actual skill transfer is not. B2B clients who equate completion with workforce development are being given a misleading signal — even if unintentionally.'},
+          {label:'Re-identification in Small Cohorts',sev:'high',note:'In a team of five, an "anonymised" report showing one low performer is trivially re-identifiable. Without a minimum cohort size gate, the analytics layer violates reasonable privacy expectations.'},
+          {label:'Vanity Metric Optimisation',sev:'medium',note:'If B2B renewals correlate with high completion rates, there is a systemic incentive to make completion easier — quietly degrading quality in a way that makes dashboards look better.'}
+        ]
+      }
+    ],
+    edges:[
+      {from:'lp_context',to:'lp_journey',type:'main'},
+      {from:'lp_journey',to:'lp_content',type:'main'},
+      {from:'lp_content',to:'lp_review',type:'main'},
+      {from:'lp_review',to:'lp_questions',type:'yes',label:'Pass'},
+      {from:'lp_review',to:'lp_content',type:'loop'},
+      {from:'lp_questions',to:'lp_tts',type:'main'},
+      {from:'lp_tts',to:'lp_eval',type:'main'},
+      {from:'lp_eval',to:'lp_adapt',type:'main'},
+      {from:'lp_adapt',to:'lp_analytics',type:'main'},
+      {from:'lp_eval',to:'lp_questions',type:'loop'}
+    ],
+    simFlow:['lp_context','lp_journey','lp_content','lp_review','lp_questions','lp_tts','lp_eval','lp_adapt','lp_analytics']
+  },
+  3:{
+    name:'Ops Automation AI',
+    nodes:[
+      {
+        id:'ops_trigger',type:'entry',label:'Event Trigger',sub:'Entry Point',zone:'Trigger Zone',
+        cx:240,cy:55,w:200,h:72,
+        desc:'Receives the initiating event that activates the automation pipeline. Events arrive from scheduled cron jobs, webhook callbacks (Slack, Jira, email), API calls from upstream systems, or manual triggers from an operator. Every run begins here — the trigger\'s quality and completeness determines how cleanly the agent can act.',
+        inputs:['Scheduled cron event','Webhook payload (Slack / Jira / email)','API trigger with context','Manual operator trigger'],
+        outputs:['Normalised event record','Event type classification','Priority level','Assigned workflow ID'],
+        questions:[
+          'What is the retry behaviour when a webhook payload arrives malformed — silent discard, DLQ, or immediate alert?',
+          'How are duplicate events from the same source (e.g. Jira webhook firing twice on the same update) detected and deduplicated?',
+          'What happens when a manual trigger fires without sufficient context — does the agent request more information or attempt to proceed with inference?',
+          'Is there a circuit breaker that limits trigger volume during an incident flood — and who can activate it?'
+        ],
+        risks:[
+          {label:'Event Flood During Incidents',sev:'high',note:'Operational incidents generate cascading alerts. Without rate limiting at the trigger layer, the agent pipeline can be overwhelmed precisely when it is needed most.'},
+          {label:'Silent Webhook Failures',sev:'medium',note:'Webhook delivery failures from Slack, Jira, or email are often invisible. The automation silently skips events with no alert to the operator.'},
+          {label:'Context-Free Manual Triggers',sev:'medium',note:'Manual triggers without structured context force the agent to infer intent, increasing the risk of taking the wrong action on an ambiguous situation.'}
+        ]
+      },
+      {
+        id:'ops_classify',type:'agent',label:'Classification Agent',sub:'Intent & Routing',zone:'Routing Zone',
+        cx:240,cy:167,w:200,h:72,
+        desc:'Classifies the incoming event by type, urgency, and required action category. Determines which downstream workflow is appropriate — routine automation, human escalation, data enrichment, or reporting. Sets the confidence score that gates autonomous vs. supervised execution paths.',
+        inputs:['Normalised event record','Event taxonomy','Historical event patterns','Workflow routing rules'],
+        outputs:['Event classification label','Urgency tier (P1–P4)','Workflow route','Confidence score','Routing rationale'],
+        questions:[
+          'How is the event taxonomy maintained — and who owns updates when new event types emerge that the model has not seen before?',
+          'What is the minimum confidence score required for autonomous routing vs. requiring human confirmation?',
+          'How does the agent handle events that span multiple categories — does it pick the highest-priority category or surface the ambiguity?',
+          'Is the routing rationale stored and auditable, or is only the classification label persisted?'
+        ],
+        risks:[
+          {label:'Misrouted High-Priority Events',sev:'critical',note:'A P1 incident classified as a P3 routine task receives a delayed, inappropriate response. Misclassification of severity is the highest-impact failure mode in ops automation.'},
+          {label:'Novel Event Type Confusion',sev:'high',note:'The model classifies what it has seen before. A genuinely novel event type gets forced into the closest available category, often incorrectly.'},
+          {label:'Confidence Score Gaming',sev:'medium',note:'If the confidence threshold for autonomous action is poorly calibrated, the agent may express high confidence on exactly the cases where human oversight matters most.'}
+        ]
+      },
+      {
+        id:'d_confidence',type:'decision',label:'Confidence Gate',sub:'Auto vs. Supervised',zone:'Routing Zone',
+        cx:240,cy:287,w:96,h:96,
+        desc:'Routes based on the classification agent\'s confidence score. High-confidence, low-risk events proceed to autonomous execution. Low-confidence or high-stakes events are routed to the human approval queue before any action is taken. The threshold is configurable per event category.',
+        inputs:['Confidence score','Event urgency tier','Risk level config','Category-specific thresholds'],
+        outputs:['High confidence → Autonomous Execution','Low confidence → Human Approval Queue'],
+        questions:[
+          'Who sets the confidence threshold per category — and is there an audit trail for threshold changes?',
+          'Is the threshold static or does it adapt based on recent misclassification history?',
+          'For P1 events, should the threshold be higher (more caution) or lower (faster autonomous response) — and has that been explicitly decided?',
+          'What is the SLA for human review of routed events — and what happens when reviewers are unavailable?'
+        ],
+        risks:[
+          {label:'Threshold Set by Instinct',sev:'high',note:'Most teams set confidence thresholds based on intuition, not empirical error analysis. A threshold that sounds reasonable (80%) may be catastrophically wrong for specific event types.'},
+          {label:'P1 Events Queued for Human Review',sev:'critical',note:'For critical incidents, a human review queue introduces latency at exactly the wrong moment. P1 events may need a separate fast-path that bypasses the queue.'},
+          {label:'Threshold Drift Invisibility',sev:'medium',note:'If thresholds are changed without a change-log, the system behaviour changes invisibly — and post-incident reviews cannot establish what the threshold was at time of the event.'}
+        ]
+      },
+      {
+        id:'ops_human',type:'endpoint',label:'Human Approval Queue',sub:'Supervised Execution',zone:'Escalation',
+        cx:490,cy:251,w:178,h:72,
+        desc:'Holds events that failed the confidence gate. A human operator reviews the classification and proposed action, approves or overrides, and either triggers autonomous execution or takes manual action. Approval decisions feed back as training signals for the classification agent.',
+        inputs:['Classified event + rationale','Proposed action','Risk context','Operator assignment'],
+        outputs:['Approved action → Execution Agent','Overridden action + correction signal','Discarded event + reason code'],
+        questions:[
+          'Are approval decisions structured (select from options) or free-form — and how does that affect feedback signal quality?',
+          'What is the maximum queue depth before an on-call alert fires?',
+          'Is every override captured as a labelled training example — automatically, or only when someone remembers?',
+          'Can an operator approve an action they do not understand — and what guardrails exist for that?'
+        ],
+        risks:[
+          {label:'Rubber-Stamp Approvals',sev:'high',note:'Under alert fatigue, operators approve queue items without meaningful review. The supervision layer becomes a checkbox that adds latency without adding safety.'},
+          {label:'Override Signal Loss',sev:'high',note:'Human overrides are the most valuable training signal the system has. If they are not captured systematically, the model never learns from its worst mistakes.'},
+          {label:'Queue Depth Invisibility',sev:'medium',note:'Without a queue depth monitor and on-call alert, the approval queue silently grows during high-volume periods until someone notices events are backed up.'}
+        ]
+      },
+      {
+        id:'ops_execute',type:'agent',label:'Execution Agent',sub:'Action Taking',zone:'Execution Zone',
+        cx:240,cy:407,w:200,h:72,
+        desc:'Takes the approved or auto-approved action in the target system. Writes to databases, calls external APIs, updates tickets, sends notifications, executes scripts, or triggers downstream workflows. This is the agent that touches production systems — every action here has real-world consequences.',
+        inputs:['Approved action plan','Target system credentials','Action parameters','Idempotency key'],
+        outputs:['Action result (success / partial / failed)','Execution log with timestamps','Target system state change','Rollback token (where supported)'],
+        questions:[
+          'Are all execution actions idempotent — and what happens if the same action fires twice due to a retry?',
+          'Is there a read-only dry-run mode that can validate the action plan before it writes to production?',
+          'What is the blast radius of the most destructive action this agent can take — and is that bounded by design?',
+          'How are partial failures handled — does the agent roll back, continue, or halt and alert?'
+        ],
+        risks:[
+          {label:'Non-Idempotent Actions at Scale',sev:'critical',note:'A retry that fires a non-idempotent action twice — sending two notifications, creating two tickets, updating a record twice — is a production incident caused by the automation itself.'},
+          {label:'Unbounded Blast Radius',sev:'critical',note:'An execution agent with broad permissions can cause wide damage from a single misclassification. Least-privilege scoping of execution credentials is not optional.'},
+          {label:'No Dry-Run Validation',sev:'high',note:'Deploying an execution agent without a dry-run mode means the first test of a new action type is always against production state.'},
+          {label:'Partial Failure Ambiguity',sev:'high',note:'Multi-step actions that partially complete leave systems in intermediate states. Without explicit rollback logic, partial failures require expensive manual investigation.'}
+        ]
+      },
+      {
+        id:'d_result',type:'decision',label:'Result Validation Gate',sub:'Success / Retry / Escalate',zone:'Execution Zone',
+        cx:240,cy:527,w:96,h:96,
+        desc:'Evaluates the execution result. A clean success closes the workflow. A retryable failure triggers exponential-backoff retry up to a configured limit. A terminal failure or an ambiguous result escalates immediately to a human operator with full context.',
+        inputs:['Execution result','Retry count','Error classification','Escalation config'],
+        outputs:['Success → Verification Agent','Retryable → Retry with backoff','Terminal / Ambiguous → Escalation'],
+        questions:[
+          'How does the agent distinguish between a retryable failure (transient network error) and a terminal failure (invalid credentials, permission denied)?',
+          'What is the maximum retry count, the backoff curve, and who configured those values?',
+          'Is an ambiguous result treated as success or failure by default — and is that the right default for this system?',
+          'What context is included in the escalation payload — is it enough for a human to diagnose and act without further investigation?'
+        ],
+        risks:[
+          {label:'Retrying Terminal Errors',sev:'high',note:'Retrying a permission-denied error three times wastes time, fills logs, and delays the escalation that should have happened on the first attempt.'},
+          {label:'Silent Ambiguous Results',sev:'critical',note:'An action that appears to succeed but leaves the target system in an uncertain state is worse than a clean failure — it may go undetected until a downstream process fails days later.'},
+          {label:'Retry Storm',sev:'medium',note:'Without exponential backoff with jitter, concurrent retries from multiple pipeline instances can overwhelm downstream systems already under stress.'}
+        ]
+      },
+      {
+        id:'ops_escalate',type:'endpoint',label:'Escalation Queue',sub:'Terminal Failure Path',zone:'Escalation',
+        cx:490,cy:491,w:178,h:72,
+        desc:'Receives terminal failures, ambiguous results, and actions that exceeded the retry limit. Notifies the on-call operator with full execution context, error details, and a recommended remediation path. Tracks resolution time and links the incident to the triggering event for post-mortem purposes.',
+        inputs:['Failed action context','Error classification','Full execution log','Retry history','Recommended remediation'],
+        outputs:['On-call alert (PagerDuty / Slack)','Incident ticket (Jira)','Resolution tracking','Post-mortem link'],
+        questions:[
+          'Is the on-call alert routed to the right team for this event type — or does everything go to a single generic on-call rotation?',
+          'Does the escalation payload include enough context for the on-call engineer to act without navigating multiple systems?',
+          'Is escalation resolution tracked and closed — or do incidents accumulate in the queue without closure?',
+          'How are repeat escalations from the same event type surfaced as a systemic issue rather than handled as individual incidents?'
+        ],
+        risks:[
+          {label:'Alert Routing to Wrong Team',sev:'high',note:'A database corruption event routed to the frontend on-call engineer creates a gap. Event-type-specific routing is essential and often misconfigured.'},
+          {label:'Context-Poor Alerts',sev:'medium',note:'An alert that says "execution failed" without the event type, the action attempted, the error message, and the affected system makes the on-call experience significantly worse than it needs to be.'},
+          {label:'Repeat Escalation Blindness',sev:'medium',note:'The same misconfiguration triggering the same failure repeatedly is handled as independent incidents rather than diagnosed as a systemic issue that needs a permanent fix.'}
+        ]
+      },
+      {
+        id:'ops_verify',type:'agent',label:'Verification Agent',sub:'Post-Action Check',zone:'Execution Zone',
+        cx:240,cy:647,w:200,h:72,
+        desc:'Verifies that the executed action achieved the intended outcome. Queries the target system state, compares against the expected post-action state, and produces a verification result. Catches cases where an action appeared to succeed but did not produce the intended effect.',
+        inputs:['Expected post-action state','Target system query','Execution log','Action type config'],
+        outputs:['Verification result (confirmed / mismatch / inconclusive)','State delta report','Alert if mismatch detected','Signal to logging agent'],
+        questions:[
+          'How is "expected post-action state" defined — is it hardcoded per action type, inferred dynamically, or generated by the execution agent?',
+          'What happens when the target system is eventually consistent — how long does the verification agent wait before concluding the action failed?',
+          'Can the verification agent itself cause side effects in the target system (e.g. a poorly scoped read that triggers a state change)?',
+          'Are inconclusive verification results treated as success or failure for reporting purposes?'
+        ],
+        risks:[
+          {label:'Eventual Consistency False Failure',sev:'medium',note:'Verifying too quickly after an eventually-consistent write produces false negatives. Without configurable verification delay by action type, the agent flags correct actions as failures.'},
+          {label:'Expected State Hardcoding',sev:'medium',note:'Hardcoded expected states become stale when the target system schema or behaviour changes. A verification agent that is never updated becomes a false-reassurance machine.'},
+          {label:'Verification Overhead at Scale',sev:'medium',note:'Querying target systems after every action adds latency and load. For high-frequency automation, verification costs can exceed execution costs.'}
+        ]
+      },
+      {
+        id:'ops_log',type:'learning',label:'Audit & Learning Agent',sub:'Observability + Feedback',zone:'Observability Zone',
+        cx:240,cy:759,w:200,h:72,
+        desc:'Writes a structured audit log for every pipeline run: trigger event, classification decision, confidence score, execution action, verification result, and resolution status. Identifies patterns in misclassifications, retry rates, and escalations — and surfaces improvement signals for the classification and execution agents.',
+        inputs:['Full pipeline execution record','Operator override decisions','Escalation outcomes','Verification results'],
+        outputs:['Structured audit log per run','Pattern detection alerts (high retry rate, repeat escalations)','Classification improvement signals','Compliance export (SOC 2 / GDPR)'],
+        questions:[
+          'Is the audit log immutable — and is it stored separately from the systems it records actions against?',
+          'How long are audit logs retained, and is that retention period compliant with applicable regulatory requirements?',
+          'Are pattern detection alerts reviewed by a human on a defined cadence — or do they accumulate unseen?',
+          'What is the process for using audit data to improve the classification agent — and how often does that loop actually close?'
+        ],
+        risks:[
+          {label:'Mutable Audit Log',sev:'critical',note:'An audit log that can be modified after the fact — intentionally or by a bug — is not an audit log. Immutability is a hard requirement, not a nice-to-have.'},
+          {label:'Pattern Alerts Nobody Reads',sev:'medium',note:'Automated pattern detection is only valuable if someone reads and acts on it. Alerts that route to a Slack channel nobody monitors are a compliance theatre exercise.'},
+          {label:'Improvement Loop Never Closes',sev:'high',note:'Collecting operator override signals without a defined process for feeding them back into the classification model means the system never improves — it just accumulates evidence of its own mistakes.'}
+        ]
+      }
+    ],
+    edges:[
+      {from:'ops_trigger',to:'ops_classify',type:'main'},
+      {from:'ops_classify',to:'d_confidence',type:'main'},
+      {from:'d_confidence',to:'ops_execute',type:'yes',label:'Auto'},
+      {from:'d_confidence',to:'ops_human',type:'branch',label:'Review'},
+      {from:'ops_human',to:'ops_execute',type:'return_left'},
+      {from:'ops_execute',to:'d_result',type:'main'},
+      {from:'d_result',to:'ops_verify',type:'yes',label:'Success'},
+      {from:'d_result',to:'ops_escalate',type:'branch',label:'Fail'},
+      {from:'d_result',to:'ops_execute',type:'loop'},
+      {from:'ops_verify',to:'ops_log',type:'main'},
+      {from:'ops_escalate',to:'ops_log',type:'side'}
+    ],
+    simFlow:['ops_trigger','ops_classify','d_confidence','ops_execute','d_result','ops_verify','ops_log']
+  },
+  1:{
+    name:'HR Screening AI',
+    nodes:[
+      {
+        id:'req_intake',type:'entry',label:'Job Requisition Intake',sub:'Entry Point',zone:'Intake Zone',
+        cx:240,cy:55,w:200,h:72,
+        desc:'Receives a new job requisition from the hiring manager — role title, team, compensation band, required qualifications, and role-specific notes. This is the source of truth for every downstream decision. Ambiguous or incomplete JDs will silently corrupt all scoring that follows.',
+        inputs:['Hiring manager JD form','HRIS role template','Comp band data','Headcount approval'],
+        outputs:['Raw requisition record','Validation status','Assigned requisition ID'],
+        questions:[
+          'Is the job description structured enough for an agent to parse reliably — or is it free-text prose full of vague aspirational language?',
+          'Who approves the final JD before the pipeline activates — and is that approval enforced technically or just by convention?',
+          'Are compensation bands part of the intake data, and do they inform screening criteria downstream?',
+          'What happens when two open requisitions for the same role exist simultaneously?'
+        ],
+        risks:[
+          {label:'Ambiguous JD as Ground Truth',sev:'high',note:'Every agent downstream uses the parsed JD as its reference. A vague or poorly structured JD means all scoring criteria are unreliable from the start.'},
+          {label:'Unvalidated Headcount',sev:'medium',note:'If headcount approval is not verified at intake, the pipeline can run to completion on a role that was never actually approved.'},
+          {label:'Discriminatory Language in JD',sev:'critical',note:'Phrases like "recent graduate", "energetic team player", or "native English speaker" in source JDs can embed legally protected characteristics into downstream scoring criteria.'}
+        ]
+      },
+      {
+        id:'jd_analysis',type:'agent',label:'JD Analysis Agent',sub:'Requirements Structuring',zone:'Intake Zone',
+        cx:240,cy:167,w:200,h:72,
+        desc:'Parses the raw job description and produces a structured requirements model: must-have vs. nice-to-have skills, years of experience, education requirements, and inferred seniority. This model becomes the scoring rubric for every candidate evaluation that follows.',
+        inputs:['Raw job description','O*NET skills taxonomy','Historical role benchmarks'],
+        outputs:['Structured requirements model','Must-have criteria list','Seniority level estimate','Bias flag indicators'],
+        questions:[
+          'How does the agent distinguish a genuine hard requirement from aspirational "nice to have" language in the JD?',
+          'Does the agent flag requirements that correlate with protected characteristics before the structured model is finalised?',
+          'Who reviews and approves the structured requirements model — or does it pass through unsupervised?',
+          'How is the model versioned so that mid-cycle JD changes don\'t silently shift scoring criteria for already-reviewed candidates?'
+        ],
+        risks:[
+          {label:'Fabricated Requirements',sev:'high',note:'The agent may infer requirements not in the JD — particularly around seniority or education — based on role title pattern-matching from training data.'},
+          {label:'Encoding Proxy Discrimination',sev:'critical',note:'"5+ years experience" as a hard requirement may disproportionately screen out protected age groups. The agent will enforce it as written without surfacing that implication.'},
+          {label:'No Human Review of Rubric',sev:'high',note:'If the structured requirements model passes to screening without a human checkpoint, scoring errors have no correction mechanism before they affect hundreds of candidates.'}
+        ]
+      },
+      {
+        id:'candidate_intake',type:'agent',label:'Candidate Intake Agent',sub:'Multi-Source Ingestion',zone:'Sourcing Zone',
+        cx:240,cy:279,w:200,h:72,
+        desc:'Ingests applications from all active sources — ATS submissions, LinkedIn, employee referrals, agency packs, and direct outreach. Deduplicates across sources, normalises resume formats, and tags each candidate with their source channel for downstream analytics.',
+        inputs:['ATS application feed','LinkedIn recruiter exports','Employee referrals','Agency submissions'],
+        outputs:['Normalised candidate records','Source-channel tags','Duplicate flags','Consent verification status'],
+        questions:[
+          'Are all candidate sources covered by an active data processing consent mechanism before they enter the pipeline?',
+          'Do referred candidates receive the same scoring treatment as direct applicants — or are they fast-tracked?',
+          'How long is candidate data retained after rejection — and is that compliant with GDPR data minimisation principles?',
+          'Can the intake agent distinguish between an active applicant and a passively sourced candidate for consent purposes?'
+        ],
+        risks:[
+          {label:'Consent Compliance Failure',sev:'critical',note:'Processing a candidate\'s data without a valid legal basis under GDPR / CCPA is an immediate regulatory violation. Referrals and sourced candidates are the most common gap.'},
+          {label:'Source-Channel Demographic Skew',sev:'high',note:'If referrals are tagged but not tested for demographic skew, and the pipeline later optimises for "source quality," the company may systematically favour a non-diverse sourcing channel.'},
+          {label:'Normalisation Data Loss',sev:'medium',note:'Non-standard resume formats — PDFs with graphics, international CVs, portfolio documents — may lose critical information during normalisation.'}
+        ]
+      },
+      {
+        id:'resume_screen',type:'agent',label:'Resume Screening Agent',sub:'Initial Scoring',zone:'Screening Zone',
+        cx:240,cy:391,w:200,h:72,
+        desc:'Scores each normalised resume against the structured requirements model. Evaluates skill match, experience depth, career trajectory, and education signals. Produces a shortlist score with a ranked breakdown of which criteria were met, partially met, or missed.',
+        inputs:['Normalised candidate records','Structured requirements model','Historical hiring outcome data'],
+        outputs:['Candidate score (0–100)','Criteria match breakdown','Shortlist recommendation','Confidence level'],
+        questions:[
+          'What training data was the model trained on — and does it reflect the company\'s future needs or just its past hiring patterns?',
+          'Does the agent produce a per-criterion breakdown a human can audit, or a single opaque score?',
+          'How are employment gaps treated — as a neutral data point, a negative signal, or not scored at all?',
+          'Are non-traditional career paths (bootcamp grads, career changers, freelancers) disadvantaged by criteria built for conventional linear careers?'
+        ],
+        risks:[
+          {label:'Historical Bias Amplification',sev:'critical',note:'If trained on past hires, the model learns to replicate historical patterns — including any demographic patterns in who was previously hired or rejected.'},
+          {label:'Employment Gap Penalisation',sev:'high',note:'Gaps caused by caregiving, illness, or redundancy disproportionately affect women and older candidates. Treating them as negative signals may constitute indirect discrimination.'},
+          {label:'Pedigree Proxying',sev:'high',note:'Scoring highly for "prestigious employer" or "top university" correlates with socioeconomic background, not job performance.'},
+          {label:'Invisible Knock-Out Criteria',sev:'medium',note:'If the agent applies hard filters before scoring, candidates may be eliminated without any human ever seeing their application.'}
+        ]
+      },
+      {
+        id:'d_bias',type:'decision',label:'Bias Detection Gate',sub:'Compliance Check',zone:'Compliance Zone',
+        cx:240,cy:513,w:96,h:96,
+        desc:'Runs a fairness audit on the candidate shortlist before it proceeds. Checks for demographic disparity in pass rates across gender, age, ethnicity, and disability proxies. If the shortlist shows statistically significant disparity above a threshold, it is held for human compliance review.',
+        inputs:['Candidate shortlist','Scoring breakdown','Fairness threshold config','Protected characteristic proxies'],
+        outputs:['PASS → Qualification Gate','FLAG → Compliance Review Queue'],
+        questions:[
+          'What statistical test defines "significant disparity" — and who set that threshold, and why?',
+          'Which protected characteristic proxies are being monitored — and are there characteristics the gate currently cannot detect?',
+          'Who sits in the compliance review queue — HR specialist, legal, or recruiter? Do they have the authority to block progression?',
+          'If disparity is detected and reviewed but no cause is found, does the shortlist proceed anyway — or is it blocked pending investigation?'
+        ],
+        risks:[
+          {label:'Proxies Are Unreliable',sev:'high',note:'Name-based inference for gender and ethnicity is inaccurate and may introduce its own errors. Using such proxies without disclosure can itself have legal implications.'},
+          {label:'Gate Set Too Permissive',sev:'critical',note:'A threshold calibrated to avoid false positives may let genuinely biased shortlists through — especially with small candidate pools where statistics are noisy.'},
+          {label:'False Security',sev:'high',note:'Passing this gate does not mean the process is bias-free. It means no statistically detectable disparity was found. A biased process with a small sample size can clear this gate comfortably.'}
+        ]
+      },
+      {
+        id:'compliance_review',type:'endpoint',label:'Compliance Review Queue',sub:'Bias Escalation',zone:'Compliance Zone',
+        cx:490,cy:477,w:178,h:72,
+        desc:'Holds a flagged shortlist pending human review by a compliance specialist. The reviewer examines the scoring breakdown, identifies the likely source of disparity, and either approves progression with documented rationale, requests rescoring with adjusted criteria, or escalates to legal.',
+        inputs:['Flagged shortlist','Disparity report','Scoring breakdown'],
+        outputs:['Approved → back to pipeline','Rescoring request → screening agent','Legal escalation'],
+        questions:[
+          'What documentation is required before a flagged shortlist can be approved for progression?',
+          'Who has authority to approve progression despite a detected disparity — and is that role explicitly limited?',
+          'How are rescoring requests structured — does the agent receive specific criteria adjustments or broad instructions?'
+        ],
+        risks:[
+          {label:'Rubber-Stamp Approvals',sev:'high',note:'Under hiring pressure, compliance reviewers may approve flagged shortlists without meaningful investigation — defeating the entire purpose of the gate.'},
+          {label:'Undocumented Override',sev:'critical',note:'Any approval of a flagged shortlist without a documented rationale creates direct legal exposure if the process is later challenged.'},
+          {label:'Review Bottleneck',sev:'medium',note:'High flag rates create a queue that becomes a hiring velocity problem, which then creates pressure to approve without due diligence.'}
+        ]
+      },
+      {
+        id:'d_qualify',type:'decision',label:'Minimum Bar Gate',sub:'Hard Requirements Check',zone:'Screening Zone',
+        cx:240,cy:635,w:96,h:96,
+        desc:'Applies the non-negotiable hard requirements from the structured requirements model. Only candidates meeting every must-have criterion advance to interview scheduling. Candidates below the bar route to the rejection pool and receive an automated decline.',
+        inputs:['Cleared shortlist','Must-have criteria list','Minimum score threshold'],
+        outputs:['Qualified → Interview Scheduling','Not qualified → Rejection Pool'],
+        questions:[
+          'Were the "must-have" criteria validated by the hiring manager before this gate activated — or were they inferred by the JD agent?',
+          'Is there an exception path for borderline candidates that a human recruiter can flag before rejection?',
+          'Are automated rejection communications reviewed for tone and legal compliance before sending?',
+          'What is the candidate notified of — and does any disclosure about the process create legal exposure?'
+        ],
+        risks:[
+          {label:'Agent-Inferred Hard Requirements',sev:'critical',note:'If the JD agent created the must-have list without human validation, this gate may be enforcing criteria the hiring manager never intended.'},
+          {label:'No Exception Path',sev:'medium',note:'High-potential candidates who miss one hard criterion by a small margin are automatically rejected with no human ever seeing their application.'},
+          {label:'Legal Exposure in Rejection Comms',sev:'high',note:'Automated rejection emails hinting at selection criteria may give rejected candidates grounds for a discrimination complaint if the criteria are later challenged.'}
+        ]
+      },
+      {
+        id:'rejection_pool',type:'endpoint',label:'Rejection Pool',sub:'Automated Decline',zone:'Screening Zone',
+        cx:490,cy:599,w:178,h:72,
+        desc:'Receives candidates who did not meet the minimum bar. Sends an automated decline communication, logs the rejection reason code, and schedules the candidate record for deletion according to the applicable GDPR / CCPA data retention policy.',
+        inputs:['Rejected candidate records','Rejection reason codes','Comms template'],
+        outputs:['Automated decline email','Rejection log entry','Data retention schedule'],
+        questions:[
+          'Do decline emails mention the reason for rejection — and if so, has legal reviewed that language?',
+          'How long are rejected candidate records retained — and is deletion automated or manual?',
+          'Is there a re-engagement path for strong candidates rejected due to timing rather than fit?'
+        ],
+        risks:[
+          {label:'Data Retention Violation',sev:'high',note:'Retaining rejected candidate data beyond the legally permitted period is a GDPR violation. Without automated deletion, records accumulate silently.'},
+          {label:'Candidate Experience Damage',sev:'medium',note:'Generic automated rejections at volume shape the company\'s reputation as an employer of choice — and the damage compounds over hiring cycles.'}
+        ]
+      },
+      {
+        id:'schedule_agent',type:'agent',label:'Interview Scheduling Agent',sub:'Coordination',zone:'Interview Zone',
+        cx:240,cy:755,w:200,h:72,
+        desc:'Coordinates interview scheduling between qualified candidates and the interviewer panel. Proposes available slots, sends invitations, manages confirmations and reschedules, and prepares candidate briefs and interviewer guides ahead of each session.',
+        inputs:['Qualified candidate list','Interviewer calendar feeds','Interview format config','Candidate contact details'],
+        outputs:['Confirmed interview slots','Candidate prep brief','Interviewer guide','Calendar invites'],
+        questions:[
+          'Does the agent have access to all relevant interviewer calendars — or are some panel members excluded due to system gaps?',
+          'How are candidate time zones handled — particularly for international candidates applying to global roles?',
+          'What happens when a candidate doesn\'t respond to scheduling prompts — how many retries before the application is paused?',
+          'Is the interviewer guide auto-generated — and has anyone validated that the questions are legally compliant?'
+        ],
+        risks:[
+          {label:'Illegal Interview Questions',sev:'critical',note:'Auto-generated interviewer guides may include questions about protected characteristics (family plans, nationality, age, disability) that are illegal in many jurisdictions.'},
+          {label:'No-Show Misattribution',sev:'medium',note:'Automated no-show rules may reject candidates who missed a slot due to a broken link or wrong time zone display — not genuine disengagement.'},
+          {label:'Calendar Privacy Exposure',sev:'medium',note:'A scheduling agent reading full calendar content — not just availability slots — may expose confidential meeting information from interviewers.'}
+        ]
+      },
+      {
+        id:'prescreen_agent',type:'agent',label:'Async Pre-Screen Agent',sub:'Structured Assessment',zone:'Interview Zone',
+        cx:240,cy:867,w:200,h:72,
+        desc:'Conducts an asynchronous structured pre-screen: role-relevant questions the candidate responds to via text or recorded video. Scores responses against a rubric for technical accuracy, communication clarity, and role-specific competencies. Results feed the Assessment Gate.',
+        inputs:['Qualified candidate','Question bank (role-specific)','Scoring rubric','Text or video responses'],
+        outputs:['Pre-screen scores per dimension','Response quality summary','Red flag indicators','Recommendation'],
+        questions:[
+          'Are pre-screen questions validated against actual role requirements — or pulled from a generic bank?',
+          'Does the agent score video responses using facial expression or affect analysis — and if so, is that disclosed and legally reviewed?',
+          'Are candidates informed their responses are evaluated by an AI system — and in which jurisdictions is that disclosure legally required?',
+          'How are candidates with disabilities accommodated in an async format — are alternative formats available?'
+        ],
+        risks:[
+          {label:'AI Video Analysis Legal Exposure',sev:'critical',note:'Automated scoring of video using facial movement, tone, or emotional signals is prohibited or heavily regulated in several jurisdictions including Illinois (AIEVA) and under proposed EU AI Act requirements.'},
+          {label:'Disclosure Failure',sev:'high',note:'NYC Local Law 144, the EU AI Act, and others require disclosure of AI use in hiring. Failure to disclose is a direct regulatory violation, not a reputational risk.'},
+          {label:'Accessibility Barrier',sev:'high',note:'Async video or timed text formats may disadvantage candidates with communication-related disabilities — creating both a fairness issue and potential ADA / Equality Act exposure.'},
+          {label:'Question Bank Staleness',sev:'medium',note:'Pre-screen questions drawn from a static bank may not reflect current role requirements or recent changes in the team\'s actual work.'}
+        ]
+      },
+      {
+        id:'d_assess',type:'decision',label:'Pre-Screen Scoring Gate',sub:'Route by Assessment',zone:'Interview Zone',
+        cx:240,cy:989,w:96,h:96,
+        desc:'Routes candidates based on pre-screen results. Candidates scoring above threshold on required dimensions proceed and trigger a hiring manager alert. Candidates below threshold route to the rejection pool with detailed scoring rationale available for review.',
+        inputs:['Pre-screen scores','Threshold config per dimension','Weighting model'],
+        outputs:['Strong fit → Alert Hiring Manager','Below threshold → Rejection Pool'],
+        questions:[
+          'Are the score thresholds validated against actual job performance data — or set intuitively?',
+          'Is a candidate who scores strongly on some dimensions but weakly on others automatically rejected — or does human judgment apply?',
+          'Can hiring managers review borderline candidates before rejection — or does the gate run fully autonomously?',
+          'Is the scoring weighting model documented and auditable for internal or external review?'
+        ],
+        risks:[
+          {label:'Thresholds Without Validation',sev:'high',note:'Thresholds chosen without empirical data on what scores predict job performance are arbitrary — and arbitrary cut-offs in hiring may not survive legal scrutiny.'},
+          {label:'Hidden Dimension Weighting',sev:'medium',note:'If competency dimensions are weighted differently, that reasoning must be defensible. Hidden weighting is a common audit failure point.'},
+          {label:'No Manager Override Path',sev:'high',note:'A fully autonomous gate with no hiring manager review option removes human judgment from a legally consequential hiring decision.'}
+        ]
+      },
+      {
+        id:'hiring_mgr',type:'success',label:'Alert Hiring Manager',sub:'Human Handoff',zone:'Handoff Zone',
+        cx:490,cy:953,w:178,h:72,
+        desc:'Notifies the hiring manager of candidates who cleared all automated stages. Delivers a structured brief per candidate: pre-screen scores, response highlights, requirements match overview, and suggested interview focus areas. The hiring manager owns the final interview and decision.',
+        inputs:['Cleared candidate profiles','Pre-screen score summaries','Requirements match overview','Suggested interview focus'],
+        outputs:['Hiring manager notification','Candidate brief pack','Interview panel invitation','Final decision log'],
+        questions:[
+          'Does the candidate brief make the AI scoring visible — or present a recommendation without disclosing how it was reached?',
+          'Is the hiring manager briefed on the limitations of the AI assessment, or only on the output?',
+          'What documentation is required at final hiring decision — in a form defensible if challenged?'
+        ],
+        risks:[
+          {label:'Automation Bias in Final Decision',sev:'high',note:'Hiring managers who receive a strong AI recommendation are significantly more likely to hire that candidate regardless of what the live interview reveals — anchoring to the AI score.'},
+          {label:'AI Provenance Obscured',sev:'high',note:'If the brief reads like a human assessment, the hiring manager may not realise they are being influenced by an AI-generated scoring model.'},
+          {label:'Undocumented Final Decision',sev:'critical',note:'If the hiring manager\'s final decision lacks documented reasoning, any discrimination complaint triggers a process with no paper trail.'}
+        ]
+      },
+      {
+        id:'outcome_feedback',type:'learning',label:'Outcome Feedback Agent',sub:'Continuous Learning',zone:'Learning Zone',
+        cx:240,cy:1109,w:200,h:72,
+        desc:'Ingests hiring outcomes — offers accepted and declined, 90-day performance reviews, retention data, and hiring manager satisfaction scores — and feeds structured signals back to improve JD analysis, resume screening accuracy, and pre-screen calibration over time.',
+        inputs:['HRIS hire/reject outcomes','90-day performance data','Retention and tenure data','Hiring manager feedback','Offer acceptance/decline reasons'],
+        outputs:['Updated screening model weights','JD quality signals','Pre-screen calibration data','Bias trend report','Drift alerts for human review'],
+        questions:[
+          'What is the lag between a hire and when meaningful performance data is available — and how does that affect feedback loop cadence?',
+          'Are outcome signals reviewed by a human before any model update is applied?',
+          'Is the feedback loop tested for bias amplification — could optimising for "good hire" patterns reinforce existing workforce demographic patterns?',
+          'Who governs this loop — HR, legal, or engineering — and is that clearly documented?'
+        ],
+        risks:[
+          {label:'Bias Amplification Loop',sev:'critical',note:'If historical hires skew toward a particular demographic, optimising for "hires like our best performers" will systematically replicate that pattern with increasing precision across every cycle.'},
+          {label:'Performance Data Lag',sev:'medium',note:'90-day reviews arrive too late for active cohorts. The model may be learning from data six to twelve months behind current needs.'},
+          {label:'No Human Governance of Updates',sev:'high',note:'Automated model updates without a human review cycle mean the system can drift in legally consequential ways with no oversight checkpoint.'},
+          {label:'Disparate Impact at Scale',sev:'critical',note:'A feedback loop that tightens screening criteria toward a historical pattern may be generating increasing disparate impact — and the harm compounds with every hiring cycle.'}
+        ]
+      }
+    ],
+    edges:[
+      {from:'req_intake',to:'jd_analysis',type:'main'},
+      {from:'jd_analysis',to:'candidate_intake',type:'main'},
+      {from:'candidate_intake',to:'resume_screen',type:'main'},
+      {from:'resume_screen',to:'d_bias',type:'main'},
+      {from:'d_bias',to:'d_qualify',type:'yes',label:'Clear'},
+      {from:'d_bias',to:'compliance_review',type:'branch',label:'Flagged'},
+      {from:'compliance_review',to:'d_qualify',type:'return_left'},
+      {from:'d_qualify',to:'schedule_agent',type:'yes',label:'Qualified'},
+      {from:'d_qualify',to:'rejection_pool',type:'branch',label:'Not qualified'},
+      {from:'schedule_agent',to:'prescreen_agent',type:'main'},
+      {from:'prescreen_agent',to:'d_assess',type:'main'},
+      {from:'d_assess',to:'hiring_mgr',type:'yes',label:'Strong fit'},
+      {from:'d_assess',to:'outcome_feedback',type:'main',label:'Below bar'},
+      {from:'hiring_mgr',to:'outcome_feedback',type:'side'}
+    ],
+    simFlow:['req_intake','jd_analysis','candidate_intake','resume_screen','d_bias','d_qualify','schedule_agent','prescreen_agent','d_assess','hiring_mgr','outcome_feedback']
+  }
+};
+
+let activeScenario = 0;
+
+const METRICS = {
+  0:{
+    lead_intake:{
+      latency:{p50:0.3,p95:1.2,unit:'s',note:'Near-instant for well-structured imports; p95 spike from malformed CSV parsing or duplicate-resolution conflicts.',bottleneck:false},
+      tokens:{input:180,output:90,model:'GPT-4o mini',note:'Low token use — mostly schema validation and field normalisation.'},
+      cost:{per_run:0.001,volume:'~$1/day at 1,000 leads'},
+      risk:{score:22,drivers:['Silent dedup failures can create ghost leads','PII ingested before consent is verified']}
+    },
+    research:{
+      latency:{p50:9,p95:48,unit:'s',note:'Dominated by external API calls (Crunchbase, LinkedIn, web scraping). Cache hits cut p50 to ~1.5s; misses on obscure targets drive p95 to 60s+.',bottleneck:true},
+      tokens:{input:3800,output:1400,model:'GPT-4o',note:'Input scales with number of sources scraped. Multi-hop research runs can reach 8k+ input tokens.'},
+      cost:{per_run:0.038,volume:'~$38/day at 1,000 leads'},
+      risk:{score:80,drivers:['Hallucination rate ~3–5% on thin grounding data','External API availability is outside your control','Scraping blocks create silent data gaps']}
+    },
+    d_data:{
+      latency:{p50:0.1,p95:0.4,unit:'s',note:'Rule-based threshold check — no LLM call. Latency is purely compute and DB write.',bottleneck:false},
+      tokens:{input:600,output:80,model:'GPT-4o mini',note:'Minimal — parsing the quality rubric against field completeness scores.'},
+      cost:{per_run:0.003,volume:'~$3/day at 1,000 leads'},
+      risk:{score:44,drivers:['Threshold value is arbitrary without empirical calibration','Silent auto-approve pathway under queue pressure']}
+    },
+    human_flag:{
+      latency:{p50:14400,p95:86400,unit:'s',note:'Entirely human-dependent. p50 assumes 4-hour business-hours review. p95 reflects overnight or weekend arrival with no on-call.',bottleneck:false},
+      tokens:{input:0,output:0,model:'None',note:'No LLM involved. Human analyst works directly in the CRM.'},
+      cost:{per_run:12.0,volume:'~$12 analyst time per reviewed lead (est. 15 min @ $48/hr)'},
+      risk:{score:52,drivers:['Review latency directly degrades lead responsiveness','Inconsistent analyst quality standards']}
+    },
+    qualify:{
+      latency:{p50:1.6,p95:4.2,unit:'s',note:'Scoring against a vector-matched ICP store. Latency grows with ICP rule complexity and intent signal lookup.',bottleneck:false},
+      tokens:{input:2100,output:650,model:'GPT-4o',note:'Input includes enriched lead profile plus ICP criteria prompt. Output is score + SHAP-style breakdown.'},
+      cost:{per_run:0.019,volume:'~$19/day at 1,000 leads'},
+      risk:{score:64,drivers:['ICP definition drift — stale criteria poison every score','Black-box scores kill rep adoption','Historical bias encoded in training win data']}
+    },
+    d_qualify:{
+      latency:{p50:0.05,p95:0.15,unit:'s',note:'Pure threshold comparison against numeric score. No LLM call.',bottleneck:false},
+      tokens:{input:120,output:30,model:'None',note:'No LLM — deterministic routing logic only.'},
+      cost:{per_run:0.0,volume:'Negligible'},
+      risk:{score:28,drivers:['Wrong threshold = silent revenue leakage','Nurture dead-end without re-trigger mechanism']}
+    },
+    nurture:{
+      latency:{p50:0.2,p95:0.6,unit:'s',note:'Queue write and sequence enrolment only. No generation.',bottleneck:false},
+      tokens:{input:0,output:0,model:'None',note:'No LLM. Enrolment is a database write and CRM tag.'},
+      cost:{per_run:0.001,volume:'~$1/day at 1,000 leads routed here'},
+      risk:{score:18,drivers:['Leads enter nurture and are never re-evaluated','Over-nurturing at high volume triggers opt-outs']}
+    },
+    personalize:{
+      latency:{p50:5,p95:14,unit:'s',note:'Long-form generation — email sequence + LinkedIn + call script. Scales with sequence length and persona complexity.',bottleneck:false},
+      tokens:{input:4800,output:3200,model:'GPT-4o',note:'Highest token count in pipeline. System prompt (brand voice + frameworks) + full lead context = large input. Long email drafts = large output.'},
+      cost:{per_run:0.062,volume:'~$62/day at 1,000 leads'},
+      risk:{score:84,drivers:['Fabricated prospect-specific details (fake funding rounds, wrong hires)','Brand voice drift across high-volume runs','Spam trigger language in generated copy','Legal exposure for regulated industry claims']}
+    },
+    d_review:{
+      latency:{p50:7200,p95:28800,unit:'s',note:'Human rep review. p50 assumes same-day review within 2 hours. p95 reflects end-of-day review or rep unavailability.',bottleneck:false},
+      tokens:{input:0,output:0,model:'None',note:'No LLM. Rep reads draft in UI, edits inline, and approves or rejects.'},
+      cost:{per_run:6.4,volume:'~$6.40 rep time per review (est. 8 min @ $48/hr)'},
+      risk:{score:72,drivers:['Review fatigue causes rubber-stamp approvals','Operational pressure to bypass gate entirely','No structured feedback capture from rep edits']}
+    },
+    revise:{
+      latency:{p50:5.5,p95:16,unit:'s',note:'Per-revision latency. With max 3 revisions, worst-case adds 48s to pipeline.',bottleneck:false},
+      tokens:{input:5200,output:3400,model:'GPT-4o',note:'Includes original draft + rejection feedback in input. Each revision cycle is a full regeneration.'},
+      cost:{per_run:0.068,volume:'~$0.068 per revision cycle'},
+      risk:{score:58,drivers:['No hard retry cap = infinite loop risk','Vague rejection feedback = shallow revision that fails again']}
+    },
+    outreach:{
+      latency:{p50:0.5,p95:2.1,unit:'s',note:'Execution latency only — email/LinkedIn API calls. Does not include delivery time or engagement window.',bottleneck:false},
+      tokens:{input:480,output:0,model:'GPT-4o mini',note:'Minimal — send-time optimisation scoring only. Content is pre-approved and sent as-is.'},
+      cost:{per_run:0.004,volume:'~$4/day at 1,000 sends + email service fees'},
+      risk:{score:74,drivers:['CAN-SPAM / GDPR unsubscribe compliance at automation scale','Sender domain reputation degradation from invalid addresses','Over-sequencing damages brand perception']}
+    },
+    d_response:{
+      latency:{p50:0.8,p95:3.2,unit:'s',note:'NLP classification of inbound response. Runs on every engagement event.',bottleneck:false},
+      tokens:{input:1100,output:190,model:'GPT-4o mini',note:'Input includes full response text plus context thread. Output is classification label + confidence score.'},
+      cost:{per_run:0.006,volume:'~$6/day at 1,000 responses classified'},
+      risk:{score:66,drivers:['Misclassified unsubscribe as positive reply = reputational damage','Alert-to-rep latency gap kills conversion probability','Undefined boundary between informing vs acting on behalf of rep']}
+    },
+    alert_rep:{
+      latency:{p50:0.4,p95:1.1,unit:'s',note:'Brief generation + push notification delivery. Near-instant from the pipeline perspective.',bottleneck:false},
+      tokens:{input:2200,output:550,model:'GPT-4o',note:'Input is full lead history + response context. Output is the contextual brief with talking points.'},
+      cost:{per_run:0.014,volume:'~$14/day at 1,000 alerts'},
+      risk:{score:32,drivers:['Alert fatigue from low-quality notifications','Weak brief quality directly impacts conversion outcome']}
+    },
+    feedback:{
+      latency:{p50:35,p95:130,unit:'s',note:'Batch processing — runs asynchronously on closed deals and completed sequences. Not on the hot path.',bottleneck:false},
+      tokens:{input:9000,output:2200,model:'GPT-4o',note:'Batch input includes many outcome records. Expensive per batch but amortised across many leads.'},
+      cost:{per_run:0.056,volume:'~$56/batch (est. 500 outcomes/batch)'},
+      risk:{score:87,drivers:['Proxy metric optimisation (open rate) vs real outcome (revenue)','Enterprise deal lag means learning signals arrive 6–18 months late','Unmonitored drift compounds silently across cycles','Historical bias patterns reinforced with each update']}
+    }
+  },
+  1:{
+    req_intake:{
+      latency:{p50:0.4,p95:1.5,unit:'s',note:'JD intake is straightforward schema capture. Latency spike at p95 from malformed or non-standard JD formats.',bottleneck:false},
+      tokens:{input:320,output:160,model:'GPT-4o mini',note:'Minimal — field extraction and validation only.'},
+      cost:{per_run:0.002,volume:'~$2/day at 100 new reqs'},
+      risk:{score:40,drivers:['Unvalidated headcount approvals can activate the full pipeline on ghost roles','Discriminatory JD language enters as ground truth']}
+    },
+    jd_analysis:{
+      latency:{p50:2.2,p95:6.5,unit:'s',note:'LLM parsing of free-text JD into structured requirements model. Longer and vaguer JDs push toward p95.',bottleneck:false},
+      tokens:{input:2600,output:1600,model:'GPT-4o',note:'Input is full JD plus O*NET taxonomy context. Output is structured requirements model — typically 600–1,200 words.'},
+      cost:{per_run:0.022,volume:'~$22/100 reqs'},
+      risk:{score:84,drivers:['Agent fabricates requirements not in JD based on role title pattern-matching','Proxy discrimination encoded as hard requirements','No human review of generated rubric before it governs scoring']}
+    },
+    candidate_intake:{
+      latency:{p50:1.1,p95:4.0,unit:'s',note:'Per-candidate latency. At 500 applicants, total intake time is ~9 min at p50. PDF parsing is the main variable.',bottleneck:false},
+      tokens:{input:980,output:380,model:'GPT-4o mini',note:'Per candidate. Input is raw resume text; output is normalised candidate record.'},
+      cost:{per_run:0.008,volume:'~$8/100 candidates'},
+      risk:{score:62,drivers:['Consent compliance gap on referrals and sourced candidates','Source-channel demographic skew baked in silently','PDF normalisation data loss on non-standard CV formats']}
+    },
+    resume_screen:{
+      latency:{p50:1.9,p95:5.4,unit:'s',note:'Per-candidate scoring. At 500 applicants, total screening time ~16 min at p50. Scales linearly.',bottleneck:false},
+      tokens:{input:4200,output:850,model:'GPT-4o',note:'Input is normalised resume plus full requirements model. This is the most token-intensive per-candidate step.'},
+      cost:{per_run:0.026,volume:'~$26/100 candidates screened'},
+      risk:{score:91,drivers:['Historical hiring bias directly amplified from training data','Employment gap penalisation = indirect age/gender discrimination','Pedigree proxying correlates with socioeconomic background','Invisible knock-out criteria eliminate candidates before human review']}
+    },
+    d_bias:{
+      latency:{p50:3.1,p95:12.0,unit:'s',note:'Statistical fairness audit across full shortlist. Latency scales with shortlist size and number of characteristic proxies analysed.',bottleneck:false},
+      tokens:{input:5100,output:1250,model:'GPT-4o',note:'Input includes full shortlist scoring data plus fairness evaluation prompt. Output is disparity report.'},
+      cost:{per_run:0.032,volume:'~$32/100 reqs (one audit per shortlist)'},
+      risk:{score:88,drivers:['Proxy-based inference for protected characteristics is unreliable','Permissive threshold lets biased shortlists through','Passing the gate creates false sense of compliance']}
+    },
+    compliance_review:{
+      latency:{p50:7200,p95:86400,unit:'s',note:'Fully human-dependent. Assumes 2-hour p50 in a well-staffed HR team; p95 reflects end-of-day arrival or consultant-only coverage.',bottleneck:false},
+      tokens:{input:0,output:0,model:'None',note:'No LLM. Compliance specialist reviews disparity report and shortlist in HR platform.'},
+      cost:{per_run:40.0,volume:'~$40 specialist time per review (est. 30 min @ $80/hr)'},
+      risk:{score:76,drivers:['Hiring pressure causes rubber-stamp approvals without real investigation','Undocumented override creates direct legal exposure','High flag rate creates bottleneck that incentivises approvals']}
+    },
+    d_qualify:{
+      latency:{p50:0.1,p95:0.3,unit:'s',note:'Hard-requirement threshold check. Near-instant — no LLM call.',bottleneck:false},
+      tokens:{input:950,output:95,model:'GPT-4o mini',note:'Minimal — checking candidate record against must-have criteria list.'},
+      cost:{per_run:0.004,volume:'~$4/100 candidates'},
+      risk:{score:80,drivers:['Must-have list may have been agent-inferred, never human-validated','No exception path for high-potential borderline candidates','Rejection comms language may invite discrimination complaints']}
+    },
+    rejection_pool:{
+      latency:{p50:0.3,p95:1.0,unit:'s',note:'Queue write + automated email generation and send. Fast.',bottleneck:false},
+      tokens:{input:520,output:310,model:'GPT-4o mini',note:'Generating personalised-ish rejection email from template. Low cost per send.'},
+      cost:{per_run:0.004,volume:'~$4/100 rejections + email service'},
+      risk:{score:46,drivers:['Data retention violation if deletion is not automated','Candidate experience damage at volume shapes employer brand']}
+    },
+    schedule_agent:{
+      latency:{p50:1.3,p95:9.0,unit:'s',note:'Calendar API round-trips dominate latency. Multi-panel scheduling with fragmented calendars drives p95.',bottleneck:false},
+      tokens:{input:1600,output:850,model:'GPT-4o',note:'Input includes interviewer availability windows and candidate constraints. Output is proposed slots and confirmation messages.'},
+      cost:{per_run:0.014,volume:'~$14/100 interviews scheduled'},
+      risk:{score:56,drivers:['Auto-generated interviewer guides may include illegal questions','No-show misattribution from broken links or timezone errors','Calendar content exposure beyond availability slots']}
+    },
+    prescreen_agent:{
+      latency:{p50:52,p95:140,unit:'s',note:'Agent-side latency only — question generation and response scoring. Does not include candidate async response time (hours to days).',bottleneck:true},
+      tokens:{input:3100,output:2600,model:'GPT-4o',note:'High token count per candidate — question bank plus full response evaluation across three competency dimensions.'},
+      cost:{per_run:0.031,volume:'~$31/100 pre-screens'},
+      risk:{score:93,drivers:['AI video scoring is prohibited or regulated in multiple jurisdictions (Illinois AIEVA, EU AI Act)','NYC Local Law 144 requires disclosure — failure is a direct regulatory violation','Async format creates accessibility barrier under ADA / Equality Act','Static question bank may not reflect current role requirements']}
+    },
+    d_assess:{
+      latency:{p50:0.5,p95:1.6,unit:'s',note:'Threshold comparison across multi-dimensional pre-screen scores. Fast.',bottleneck:false},
+      tokens:{input:2050,output:310,model:'GPT-4o mini',note:'Input is full pre-screen scoring breakdown. Output is routing decision with rationale.'},
+      cost:{per_run:0.011,volume:'~$11/100 candidates assessed'},
+      risk:{score:74,drivers:['Thresholds set without empirical performance data are arbitrary','Hidden dimension weighting is a common audit failure','No hiring manager override path removes human judgment from legal hiring decision']}
+    },
+    hiring_mgr:{
+      latency:{p50:0.9,p95:2.2,unit:'s',note:'Brief generation is fast. Human response time (scheduling, interviewing) is measured in days — not captured here.',bottleneck:false},
+      tokens:{input:4100,output:1600,model:'GPT-4o',note:'Generating a full candidate brief with score context, highlights, and interview focus areas requires substantial output.'},
+      cost:{per_run:0.029,volume:'~$29/100 candidate briefs'},
+      risk:{score:57,drivers:['Automation bias: strong AI recommendation anchors final human decision','AI provenance obscured in brief reads as human assessment','Undocumented final decision creates legal exposure if challenged']}
+    },
+    outcome_feedback:{
+      latency:{p50:65,p95:320,unit:'s',note:'Batch processing of historical outcomes. Runs offline — not on the hot path. Latency driven by cohort size.',bottleneck:false},
+      tokens:{input:10500,output:3100,model:'GPT-4o',note:'Most expensive step in the pipeline. Large batch input of outcome records. Worth every token if governed correctly — catastrophic if not.'},
+      cost:{per_run:0.068,volume:'~$68/batch (est. 200 outcomes/batch)'},
+      risk:{score:96,drivers:['Bias amplification loop: optimising for past hires systematically replicates demographic patterns','Performance data lag: 90-day reviews arrive too late for active cohorts','Automated model updates without human governance review','Disparate impact compounds with every hiring cycle — harm scales faster than it is detected']}
+    }
+  },
+  2:{
+    lp_context:{
+      latency:{p50:0.8,p95:3.1,unit:'s',note:'Stage 1–3 combined: defaults estimator + topic validation + context capture. Dominated by the research agent web lookup; pure form capture is <200ms.',bottleneck:false},
+      tokens:{input:1400,output:620,model:'GPT-4o mini',note:'Defaults estimator and topic validator are lightweight. Research agent adds tokens when topic lookup requires external grounding.'},
+      cost:{per_run:0.009,volume:'~$9 per 1,000 new users'},
+      risk:{score:42,drivers:['Vague role input corrupts all downstream agents','Fabricated skill defaults set wrong difficulty baseline from lesson 1']}
+    },
+    lp_journey:{
+      latency:{p50:7.2,p95:22,unit:'s',note:'Stage 5 is the single most complex generation call in the onboarding flow — full curriculum hierarchy for up to 360 minutes of content. p95 driven by long target roles with many modules.',bottleneck:true},
+      tokens:{input:3600,output:4800,model:'GPT-4o',note:'High output token count — a full module/lesson hierarchy with descriptive names, durations, topics, and objectives for every lesson is verbose by design.'},
+      cost:{per_run:0.051,volume:'~$51 per 1,000 users onboarded'},
+      risk:{score:78,drivers:['Single-point-of-failure: structural error here cascades to all content generation','Prompt-only enforcement of module/lesson minimums','Thin-data hallucination risk for emerging role types like "AI for Business"']}
+    },
+    lp_content:{
+      latency:{p50:5.8,p95:16,unit:'s',note:'Per-lesson generation. Sessions 2–3 are queued and generated in background immediately after onboarding. Total onboarding content generation time = lessons × p50.',bottleneck:false},
+      tokens:{input:4200,output:2800,model:'GPT-4o',note:'Largest steady-state token cost in the platform. Input includes lesson metadata, user context, company context, and content prompt. Output is 800–1,200 words of structured lesson prose.'},
+      cost:{per_run:0.044,volume:'~$44 per 1,000 lessons generated'},
+      risk:{score:86,drivers:['Confident misinformation in lesson content is indistinguishable from accurate content to the learner','Company context decoration vs. genuine grounding','Stale AI tooling content within 6 months of generation','Background generation race condition if user edits context during queue processing']}
+    },
+    lp_review:{
+      latency:{p50:2.1,p95:6.4,unit:'s',note:'Per-lesson review. Up to 2 retries add 4–13s worst-case per lesson. Review runs synchronously before questions are generated.',bottleneck:false},
+      tokens:{input:3100,output:480,model:'GPT-4o',note:'Input is full lesson content plus review rubric. Output is pass/fail decision plus structured revision guidance.'},
+      cost:{per_run:0.018,volume:'~$18 per 1,000 reviews (more with retries)'},
+      risk:{score:52,drivers:['Structural reviewer only — accurate misinformation passes every time','Retry cap enforced in prompt not code','Silent escalation path when max retries exceeded']}
+    },
+    lp_questions:{
+      latency:{p50:3.4,p95:9.8,unit:'s',note:'Generating three scenario-based questions plus evaluation rubrics per lesson. p95 driven by complex technical lessons requiring detailed rubric construction.',bottleneck:false},
+      tokens:{input:3800,output:2100,model:'GPT-4o',note:'Input is reviewed lesson content plus question generation prompt. Output is three fully-formed questions and rubrics — verbose but necessary for reliable evaluation.'},
+      cost:{per_run:0.033,volume:'~$33 per 1,000 lessons assessed'},
+      risk:{score:48,drivers:['Question–content circular dependency: content errors propagate into questions and rubrics','Assessment monoculture across all lesson types','Rubric calibration drift without human validation layer']}
+    },
+    lp_tts:{
+      latency:{p50:4.1,p95:11,unit:'s',note:'TTS generation time scales with word count. An 1,100-word lesson at typical TTS speeds produces a 7–9 minute audio file. p95 driven by TTS API queue depth.',bottleneck:false},
+      tokens:{input:0,output:0,model:'TTS (non-LLM)',note:'Not an LLM call — TTS is a separate API (e.g. ElevenLabs, Azure TTS, OpenAI TTS). Cost is per-character, not per-token.'},
+      cost:{per_run:0.016,volume:'~$16 per 1,000 lessons (est. $0.015/1k chars at avg 1,050 words)'},
+      risk:{score:28,drivers:['Mispronounced technical terms and product names','Always-on generation creates storage cost for unused audio files','Stale audio after lesson content is corrected post-generation']}
+    },
+    lp_eval:{
+      latency:{p50:2.6,p95:7.4,unit:'s',note:'Per-submission evaluation. Runs on every attempt — unlimited retries mean latency scales with learner retry behaviour.',bottleneck:false},
+      tokens:{input:3200,output:1100,model:'GPT-4o',note:'Input is learner response plus question, rubric, and lesson context. Output is dimensional scores plus improvement guidance — must be detailed to be useful.'},
+      cost:{per_run:0.025,volume:'~$25 per 1,000 assessment attempts'},
+      risk:{score:74,drivers:['LLM evaluation inconsistency: same response, different score on retry','Rubric gaming: keyword matching without genuine understanding','Pass rate becomes B2B proof-of-learning proxy — unreliable signal reported as fact']}
+    },
+    lp_adapt:{
+      latency:{p50:1.2,p95:4.0,unit:'s',note:'Lightweight signal aggregation and recommendation generation. Not on the critical path — runs async after lesson completion.',bottleneck:false},
+      tokens:{input:2400,output:680,model:'GPT-4o mini',note:'Input is session performance summary. Output is a small set of structured adjustment recommendations.'},
+      cost:{per_run:0.013,volume:'~$13 per 1,000 adaptation events'},
+      risk:{score:38,drivers:['Premature adaptation from single-lesson signals','Granular engagement tracking creates learner surveillance tension','Cosmetic adjustments presented as meaningful personalisation']}
+    },
+    lp_analytics:{
+      latency:{p50:3.8,p95:18,unit:'s',note:'Report generation scales with cohort size. Individual dashboards are fast; org-wide aggregation with heat maps is slower. Runs on-demand or scheduled.',bottleneck:false},
+      tokens:{input:5600,output:3200,model:'GPT-4o',note:'Summarising and interpreting learner data at cohort level requires substantial context. Narrative insights are LLM-generated; raw charts are not.'},
+      cost:{per_run:0.052,volume:'~$52 per 1,000 report generations'},
+      risk:{score:65,drivers:['Completion rate misrepresented as skill development to B2B clients','Re-identification risk in small-cohort analytics','Vanity metric optimisation incentive at renewal time']}
+    }
+  },
+  3:{
+    ops_trigger:{
+      latency:{p50:0.05,p95:0.4,unit:'s',note:'Near-instant for scheduled triggers. Webhook triggers add network round-trip; p95 spike from retry logic on malformed payloads.',bottleneck:false},
+      tokens:{input:320,output:140,model:'GPT-4o mini',note:'Event normalisation and classification pre-processing. Low token count — structured data extraction from webhook payload.'},
+      cost:{per_run:0.002,volume:'~$2 per 1,000 triggers'},
+      risk:{score:32,drivers:['Event flood during incidents overwhelms the pipeline at worst possible time','Silent webhook failures create invisible automation gaps']}
+    },
+    ops_classify:{
+      latency:{p50:0.9,p95:3.2,unit:'s',note:'Classification latency is fast but critical. p95 driven by ambiguous events requiring multi-step reasoning.',bottleneck:false},
+      tokens:{input:1800,output:420,model:'GPT-4o',note:'Input includes event payload plus taxonomy and routing rules. Output is classification with rationale — rationale is essential for auditability.'},
+      cost:{per_run:0.013,volume:'~$13 per 1,000 events classified'},
+      risk:{score:82,drivers:['P1 incident misclassified as P3 routine — delayed response is the highest-impact failure mode','Novel event types forced into nearest category, often incorrectly','High confidence scores on exactly the cases needing human oversight']}
+    },
+    d_confidence:{
+      latency:{p50:0.05,p95:0.2,unit:'s',note:'Threshold comparison — no LLM call. Deterministic routing based on confidence score and event category.',bottleneck:false},
+      tokens:{input:0,output:0,model:'None',note:'No LLM. Pure threshold comparison against config values.'},
+      cost:{per_run:0.0,volume:'Negligible'},
+      risk:{score:70,drivers:['Threshold set by intuition not empirical error analysis','P1 events queued for human review introduces latency at critical moments','Threshold changes leave no audit trail']}
+    },
+    ops_human:{
+      latency:{p50:900,p95:7200,unit:'s',note:'Human review. p50 assumes active on-call with 15-min acknowledgement. p95 reflects off-hours or queue backup.',bottleneck:false},
+      tokens:{input:0,output:0,model:'None',note:'No LLM. Human operator reviews and approves in the ops console.'},
+      cost:{per_run:8.0,volume:'~$8 per reviewed event (est. 10 min @ $48/hr)'},
+      risk:{score:62,drivers:['Alert fatigue produces rubber-stamp approvals under high volume','Override signals — the most valuable training data — are not systematically captured','Queue depth has no monitor or on-call alert']}
+    },
+    ops_execute:{
+      latency:{p50:1.4,p95:8.6,unit:'s',note:'Execution latency varies widely by action type. A Slack notification is 200ms; a multi-step database operation is 8s+. p95 driven by external API latency and retries.',bottleneck:false},
+      tokens:{input:1200,output:380,model:'GPT-4o mini',note:'Execution planning for complex actions. Simple CRUD operations may not require an LLM call at all.'},
+      cost:{per_run:0.009,volume:'~$9 per 1,000 executions (LLM only; external API costs additional)'},
+      risk:{score:90,drivers:['Non-idempotent actions fire twice on retry — production incident caused by automation','Unbounded blast radius from broad execution permissions','No dry-run mode — first test of new action type is always against production','Partial failure leaves system in intermediate state requiring manual investigation']}
+    },
+    d_result:{
+      latency:{p50:0.1,p95:0.5,unit:'s',note:'Result evaluation is fast — parsing execution response and applying classification rules.',bottleneck:false},
+      tokens:{input:680,output:190,model:'GPT-4o mini',note:'Error classification requires LLM for ambiguous failure modes. Clean success and clear failures are rule-based.'},
+      cost:{per_run:0.004,volume:'~$4 per 1,000 result evaluations'},
+      risk:{score:76,drivers:['Retrying terminal errors wastes time and delays correct escalation','Silent ambiguous results may persist undetected downstream','Retry storm without exponential backoff with jitter']}
+    },
+    ops_escalate:{
+      latency:{p50:0.6,p95:1.8,unit:'s',note:'Escalation alert generation and dispatch. Fast on the agent side; PagerDuty/Slack delivery adds 1–3s network latency.',bottleneck:false},
+      tokens:{input:2100,output:820,model:'GPT-4o',note:'Generating a useful escalation payload — with context, error summary, and recommended remediation — requires substantial output. A terse alert is cheaper but far less actionable.'},
+      cost:{per_run:0.017,volume:'~$17 per 1,000 escalations (alert quality is worth the cost)'},
+      risk:{score:54,drivers:['Wrong team routed for event type (frontend on-call gets DB corruption alert)','Context-poor alerts make on-call experience worse than necessary','Repeat escalations handled as individual incidents instead of systemic issues']}
+    },
+    ops_verify:{
+      latency:{p50:1.8,p95:12,unit:'s',note:'Verification latency dominated by target system query time and eventual consistency wait. p95 spike from slow external APIs or deliberately delayed verification for eventual-consistency systems.',bottleneck:false},
+      tokens:{input:1400,output:310,model:'GPT-4o mini',note:'State comparison and verification reasoning. Input is expected vs. observed state; output is verification verdict with delta report.'},
+      cost:{per_run:0.008,volume:'~$8 per 1,000 verifications'},
+      risk:{score:44,drivers:['Eventual consistency false failures flag correct actions as broken','Hardcoded expected states become stale after target system changes','Verification overhead at high frequency adds meaningful latency and cost']}
+    },
+    ops_log:{
+      latency:{p50:0.3,p95:1.2,unit:'s',note:'Structured log write is fast. Pattern detection runs async on a sliding window — not on the hot path.',bottleneck:false},
+      tokens:{input:2800,output:960,model:'GPT-4o mini',note:'Pattern detection and insight summarisation. Raw log writing is not an LLM call; pattern analysis is.'},
+      cost:{per_run:0.016,volume:'~$16 per 1,000 pipeline completions'},
+      risk:{score:58,drivers:['Mutable audit log is not a real audit log — immutability is a hard requirement','Pattern detection alerts routed to unmanned Slack channels','Operator override signals never fed back to improve the classification model']}
+    }
+  }
+};
+
+
+let activeNode = null;
+let simActive = false;
+let simStep = 0;
+let simTimer = null;
+const SIM_SEQ = () => SCENARIOS[activeScenario].simFlow;
+
+function getNode(id){ return SCENARIOS[activeScenario].nodes.find(n=>n.id===id); }
+
+function fmtLatency(p50, unit){
+  if(unit==='s'&&p50>=3600){ return (p50/3600).toFixed(1)+'h'; }
+  if(unit==='s'&&p50>=60)  { return (p50/60).toFixed(0)+'m'; }
+  if(unit==='s')            { return p50+'s'; }
+  return p50+unit;
+}
+function riskColor(score){
+  if(score>=81) return '#ef4444';
+  if(score>=61) return '#f97316';
+  if(score>=31) return '#f59e0b';
+  return '#22c55e';
+}
+function riskLabel(score){
+  if(score>=81) return 'Critical';
+  if(score>=61) return 'High';
+  if(score>=31) return 'Medium';
+  return 'Low';
+}
+function latencyBadge(p50,unit){
+  const s=unit==='s'?p50:p50/1000;
+  if(s>=1800) return {cls:'nb-latency-human',label:'human'};
+  if(s>=5)    return {cls:'nb-latency-slow', label:fmtLatency(p50,unit)};
+  if(s>=1)    return {cls:'nb-latency-med',  label:fmtLatency(p50,unit)};
+  return              {cls:'nb-latency-fast', label:fmtLatency(p50,unit)};
+}
+function costBadge(per_run){
+  if(per_run>=5)    return {cls:'nb-cost-hi', label:'$$$'};
+  if(per_run>=0.02) return {cls:'nb-cost-mid',label:'$$'};
+  return                    {cls:'nb-cost-lo', label:'$'};
+}
+function riskBadge(score){
+  if(score>=81) return {cls:'nb-risk-crit',label:'risk:'+score};
+  if(score>=61) return {cls:'nb-risk-hi',  label:'risk:'+score};
+  if(score>=31) return {cls:'nb-risk-med', label:'risk:'+score};
+  return                {cls:'nb-risk-lo',  label:'risk:'+score};
+}
+function nodeBadgesHtml(nodeId){
+  const m=(METRICS[activeScenario]||{})[nodeId];
+  if(!m) return '';
+  const lb=latencyBadge(m.latency.p50,m.latency.unit);
+  const cb=costBadge(m.cost.per_run);
+  const rb=riskBadge(m.risk.score);
+  return `<div class="nd-badges"><span class="nd-badge ${lb.cls}">${lb.label}</span><span class="nd-badge ${cb.cls}">${cb.label}</span><span class="nd-badge ${rb.cls}">${rb.label}</span></div>`;
+}
+function renderMetrics(nodeId){
+  const m=(METRICS[activeScenario]||{})[nodeId];
+  const el=document.getElementById('metricsContent');
+  if(!m){el.innerHTML='<div class="human-note">No metrics data for this node type.</div>';return;}
+  const lat=m.latency, isHuman=lat.p50>=300;
+  const maxLat=isHuman?lat.p95:Math.max(lat.p95,1);
+  const p50pct=Math.min(100,Math.round(lat.p50/maxLat*100));
+  const latColor=lat.p50>=3600?'bf-red':lat.p50>=60?'bf-orange':lat.p50>=5?'bf-amber':'bf-green';
+  const tok=m.tokens, totalTok=tok.input+tok.output;
+  const inPct=totalTok>0?Math.round(tok.input/totalTok*100):0;
+  const tokColor=totalTok>=5000?'bf-orange':totalTok>=2000?'bf-amber':'bf-blue';
+  const cost=m.cost, isHumanCost=cost.per_run>=1;
+  const risk=m.risk, rc=riskColor(risk.score), rl=riskLabel(risk.score);
+  const rFill=risk.score>=81?'bf-red':risk.score>=61?'bf-orange':risk.score>=31?'bf-amber':'bf-green';
+  el.innerHTML=`
+    <div class="m-section">
+      <div class="m-section-title"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Latency</div>
+      <div class="m-card">
+        ${isHuman?`<div class="human-note">Human step. p50: ${fmtLatency(lat.p50,'s')} &nbsp;|&nbsp; p95: ${fmtLatency(lat.p95,'s')}</div>`:`
+        <div class="latency-grid"><span class="bar-label">p50</span><div class="bar-wrap"><div class="bar-fill ${latColor}" style="width:${p50pct}%"></div></div><span class="m-val" style="font-size:11px">${fmtLatency(lat.p50,lat.unit)}</span></div>
+        <div class="latency-grid"><span class="bar-label">p95</span><div class="bar-wrap"><div class="bar-fill ${latColor}" style="width:100%;opacity:.5"></div></div><span class="m-val" style="font-size:11px">${fmtLatency(lat.p95,lat.unit)}</span></div>
+        ${lat.bottleneck?'<div style="font-size:10px;color:#f59e0b;margin-top:5px;font-family:Space Mono,monospace">&#9650; Pipeline bottleneck — highest latency node</div>':''}`}
+        <div class="m-note">${lat.note}</div>
+      </div>
+    </div>
+    <div class="m-section">
+      <div class="m-section-title"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>Token Usage</div>
+      <div class="m-card">
+        ${totalTok===0?`<div class="human-note">No LLM calls — model: ${tok.model}</div>`:`
+        <div class="m-row"><span class="m-key">Model</span><span class="m-val">${tok.model}</span></div>
+        <div class="token-bar-row"><span class="bar-label">Input</span><div class="bar-wrap"><div class="bar-fill ${tokColor}" style="width:${inPct}%"></div></div><span class="m-val" style="font-size:10px">${tok.input.toLocaleString()}</span></div>
+        <div class="token-bar-row"><span class="bar-label">Output</span><div class="bar-wrap"><div class="bar-fill ${tokColor}" style="width:${100-inPct}%;opacity:.55"></div></div><span class="m-val" style="font-size:10px">${tok.output.toLocaleString()}</span></div>
+        <div class="m-row" style="margin-top:6px"><span class="m-key">Total / run</span><span class="m-val">${totalTok.toLocaleString()} tokens</span></div>`}
+        <div class="m-note">${tok.note}</div>
+      </div>
+    </div>
+    <div class="m-section">
+      <div class="m-section-title"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Cost</div>
+      <div class="m-card">
+        <div class="m-row"><span class="m-key">Per run</span><span class="m-val">${isHumanCost?'~$'+cost.per_run.toFixed(2)+' (labor)':'$'+cost.per_run.toFixed(3)}</span></div>
+        <div class="m-row"><span class="m-key">At volume</span><span class="m-val" style="font-size:10px;color:var(--text2)">${cost.volume}</span></div>
+        ${isHumanCost?'<div class="m-note">Human labor cost estimate. Does not include LLM tokens.</div>':''}
+      </div>
+    </div>
+    <div class="m-section">
+      <div class="m-section-title"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Risk Score</div>
+      <div class="m-card">
+        <div class="risk-score-row">
+          <div style="flex:1"><div class="risk-gauge-wrap"><div class="risk-gauge-fill ${rFill}" style="width:${risk.score}%"></div></div><div style="font-size:10px;color:var(--text3);font-family:'Space Mono',monospace;margin-top:3px">${risk.score}/100 &nbsp;·&nbsp; ${rl}</div></div>
+          <div class="risk-score-big" style="color:${rc};margin-left:12px">${risk.score}</div>
+        </div>
+        <div class="risk-driver-list">${risk.drivers.map(d=>`<div class="risk-driver">${d}</div>`).join('')}</div>
+      </div>
+    </div>`;
+}
+function getPipelineTotals(scId){
+  const sc=SCENARIOS[scId], mx=METRICS[scId]||{}, flow=sc.simFlow;
+  let totalLat=0,totalTok=0,totalCost=0,riskSum=0,riskCount=0,bottleneckId=null,bottleneckLat=0;
+  flow.forEach(id=>{
+    const m=mx[id]; if(!m) return;
+    const isHuman=m.latency.p50>=300;
+    if(!isHuman) totalLat+=m.latency.p50;
+    totalTok+=(m.tokens.input+m.tokens.output);
+    totalCost+=m.cost.per_run;
+    if(m.risk.score){riskSum+=m.risk.score;riskCount++;}
+    if(!isHuman&&m.latency.p50>bottleneckLat){bottleneckLat=m.latency.p50;bottleneckId=id;}
+  });
+  return {latency:totalLat,tokens:totalTok,cost:totalCost,risk:riskCount?Math.round(riskSum/riskCount):0,bottleneckId,bottleneckLat};
+}
+function updatePipelineSummary(){
+  const t=getPipelineTotals(activeScenario);
+  document.getElementById('pipeLatency').textContent=fmtLatency(Math.round(t.latency),'s');
+  document.getElementById('pipeTokens').textContent=t.tokens.toLocaleString();
+  document.getElementById('pipeCost').textContent='$'+t.cost.toFixed(3);
+  const rc=riskColor(t.risk);
+  const rv=document.getElementById('pipeRisk');
+  rv.style.color=rc; rv.textContent=t.risk+' / 100';
+  if(t.bottleneckId){
+    const bn=getNode(t.bottleneckId);
+    document.getElementById('pipeBottleneckVal').textContent=fmtLatency(Math.round(t.bottleneckLat),'s');
+    document.getElementById('pipeBottleneckLbl').textContent=bn?bn.label:'Bottleneck';
+  }
+}
+
+function nodeAnchor(n,side){
+  if(n.type==='decision'){
+    if(side==='top')    return {x:n.cx, y:n.cy - n.h/2};
+    if(side==='bottom') return {x:n.cx, y:n.cy + n.h/2};
+    if(side==='left')   return {x:n.cx - n.w/2, y:n.cy};
+    if(side==='right')  return {x:n.cx + n.w/2, y:n.cy};
+  } else {
+    const top = n.cy;
+    const bottom = n.cy + n.h;
+    const left = n.cx - n.w/2;
+    const right = n.cx + n.w/2;
+    if(side==='top')    return {x:n.cx, y:top};
+    if(side==='bottom') return {x:n.cx, y:bottom};
+    if(side==='left')   return {x:left, y:(top+bottom)/2};
+    if(side==='right')  return {x:right, y:(top+bottom)/2};
+  }
+}
+
+function renderFloor(){
+  const sc = SCENARIOS[activeScenario];
+  const canvas = document.getElementById('floorCanvas');
+  const svg = document.getElementById('floorSvg');
+
+  // Compute canvas height
+  let maxY = 0;
+  sc.nodes.forEach(n=>{
+    const bot = n.type==='decision' ? n.cy + n.h/2 : n.cy + n.h;
+    if(bot > maxY) maxY = bot;
+  });
+  const canvasH = maxY + 50;
+  canvas.style.height = canvasH + 'px';
+  svg.setAttribute('height', canvasH);
+  svg.setAttribute('viewBox', `0 0 680 ${canvasH}`);
+
+  // Clear old nodes (keep SVG)
+  canvas.querySelectorAll('.nd,.nd-decision').forEach(el=>el.remove());
+
+  // Create nodes
+  sc.nodes.forEach(n => {
+    const el = document.createElement('div');
+    if(n.type==='decision'){
+      el.className = 'nd-decision';
+      el.style.left = (n.cx - n.w/2) + 'px';
+      el.style.top  = (n.cy - n.h/2) + 'px';
+      el.id = 'nd_' + n.id;
+      el.innerHTML = `
+        <div class="diamond-wrap">
+          <div class="diamond-shape"></div>
+          <div class="diamond-label">${n.label}<br><span style="font-size:9px;font-weight:400;opacity:.7">${n.sub}</span></div>
+        </div>
+        <div class="sim-pulse"></div>`;
+      el.onclick = () => selectNode(n.id);
+    } else {
+      el.className = 'nd';
+      el.style.left = (n.cx - n.w/2) + 'px';
+      el.style.top  = n.cy + 'px';
+      el.id = 'nd_' + n.id;
+      const cls = n.type==='entry'?'nd-entry':n.type==='success'?'nd-success':n.type==='endpoint'?'nd-endpoint':n.type==='revision'?'nd-revision':n.type==='learning'?'nd-learning':'nd-agent';
+      el.innerHTML = `
+        <div class="nd-box ${cls}">
+          <div class="nd-title">${n.label}</div>
+          <div class="nd-sub">${n.sub}</div>
+          <span class="nd-zone">${n.zone}</span>
+          ${nodeBadgesHtml(n.id)}
+        </div>
+        <div class="sim-pulse"></div>`;
+      el.onclick = () => selectNode(n.id);
+    }
+    canvas.appendChild(el);
+  });
+
+  // Draw SVG edges
+  drawEdges(sc);
+  updatePipelineSummary();
+}
+
+function drawEdges(sc){
+  const svg = document.getElementById('floorSvg');
+  // Build node map
+  const nm = {};
+  sc.nodes.forEach(n=>nm[n.id]=n);
+
+  let svgContent = `<defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>`;
+
+  sc.edges.forEach(e => {
+    const fn = nm[e.from];
+    const tn = nm[e.to];
+    if(!fn||!tn) return;
+
+    let path='';
+    let color='rgba(59,130,246,0.3)';
+    let dashed='';
+    let lx='',ly='',ltext='';
+
+    if(e.type==='main' || e.type==='yes'){
+      const a1 = nodeAnchor(fn,'bottom');
+      const a2 = nodeAnchor(tn,'top');
+      const my = (a1.y+a2.y)/2;
+      path = `M ${a1.x} ${a1.y} C ${a1.x} ${my} ${a2.x} ${my} ${a2.x} ${a2.y}`;
+      color = e.type==='yes' ? 'rgba(34,197,94,0.45)' : 'rgba(59,130,246,0.3)';
+      if(e.label){ lx=a2.x+6; ly=a2.y-6; }
+    }
+    else if(e.type==='branch'){
+      const a1 = nodeAnchor(fn,'right');
+      const a2 = nodeAnchor(tn,'left');
+      const mx = (a1.x+a2.x)/2;
+      path = `M ${a1.x} ${a1.y} C ${mx} ${a1.y} ${mx} ${a2.y} ${a2.x} ${a2.y}`;
+      color = 'rgba(100,116,139,0.5)';
+      if(e.label){ lx=a1.x+8; ly=a1.y-7; }
+    }
+    else if(e.type==='return_left'){
+      const a1 = nodeAnchor(fn,'bottom');
+      const a2 = nodeAnchor(tn,'top');
+      path = `M ${a1.x} ${a1.y} C ${a1.x} ${a1.y+26} ${a2.x} ${a2.y-26} ${a2.x} ${a2.y}`;
+      color='rgba(100,116,139,0.4)';
+      dashed='stroke-dasharray="4 3"';
+    }
+    else if(e.type==='loop'){
+      const a1 = nodeAnchor(fn,'top');
+      const a2 = nodeAnchor(tn,'right');
+      path = `M ${a1.x} ${a1.y} C ${a1.x} ${a1.y-24} ${a2.x+32} ${a2.y+24} ${a2.x} ${a2.y}`;
+      color='rgba(249,115,22,0.4)';
+      dashed='stroke-dasharray="5 4"';
+    }
+    else if(e.type==='side'){
+      const a1 = nodeAnchor(fn,'bottom');
+      const a2 = nodeAnchor(tn,'right');
+      path = `M ${a1.x} ${a1.y} C ${a1.x} ${a2.y} ${a2.x+30} ${a2.y} ${a2.x} ${a2.y}`;
+      color='rgba(59,130,246,0.2)';
+      dashed='stroke-dasharray="4 4"';
+    }
+
+    svgContent += `<path d="${path}" fill="none" stroke="${color}" stroke-width="1.5" ${dashed} marker-end="url(#arr)"/>`;
+    if(e.label && lx){
+      svgContent += `<text x="${lx}" y="${ly}" font-size="10" fill="${color.replace('0.3','0.8').replace('0.45','0.9').replace('0.5','0.9')}" font-family="Space Mono, monospace">${e.label}</text>`;
+    }
+  });
+
+  svg.innerHTML = svgContent;
+}
+
+function selectNode(id){
+  // Deselect old
+  if(activeNode){
+    const el = document.getElementById('nd_' + activeNode);
+    if(el) el.classList.remove('active');
+  }
+  activeNode = id;
+  const el = document.getElementById('nd_' + id);
+  if(el) el.classList.add('active');
+
+  const n = getNode(id);
+  if(!n) return;
+
+  document.getElementById('detailEmpty').style.display='none';
+  const body = document.getElementById('detailBody');
+  body.classList.add('show');
+
+  // Type badge
+  const badgeMap = {entry:'tb-entry',agent:'tb-agent',decision:'tb-decision',endpoint:'tb-endpoint',success:'tb-success',learning:'tb-learning',revision:'tb-revision'};
+  const badge = document.getElementById('typeBadge');
+  badge.className = 'type-badge ' + (badgeMap[n.type]||'tb-agent');
+  badge.textContent = n.type.charAt(0).toUpperCase()+n.type.slice(1);
+
+  document.getElementById('dName').textContent = n.label;
+  document.getElementById('dSub').textContent = n.sub + ' · ' + n.zone;
+  document.getElementById('dDesc').textContent = n.desc;
+
+  // I/O
+  const io = document.getElementById('ioGrid');
+  io.innerHTML = `
+    <div class="io-box">
+      <div class="io-lbl">Inputs</div>
+      ${n.inputs.map(i=>`<div class="io-item">${i}</div>`).join('')}
+    </div>
+    <div class="io-box">
+      <div class="io-lbl">Outputs</div>
+      ${n.outputs.map(o=>`<div class="io-item">${o}</div>`).join('')}
+    </div>`;
+
+  // Overview
+  document.getElementById('overviewContent').innerHTML = `
+    <div style="font-size:12.5px;color:var(--text2);line-height:1.7;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;">
+      <strong style="color:var(--text);font-weight:600;display:block;margin-bottom:6px;">What this node does</strong>
+      ${n.desc}
+    </div>
+    <div style="margin-top:10px;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:6px">
+      <div style="font-size:9.5px;font-family:'Space Mono',monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Decision or handoff</div>
+      <div style="font-size:12.5px;color:var(--text2)">${n.outputs.join(' · ')}</div>
+    </div>`;
+
+  // Questions
+  const qList = document.getElementById('questionList');
+  qList.innerHTML = n.questions.map((q,i)=>`
+    <div class="q-item">
+      <span class="q-num">Q${i+1}</span>
+      <span>${q}</span>
+    </div>`).join('');
+
+  // Risks
+  const rList = document.getElementById('riskList');
+  rList.innerHTML = n.risks.map(r=>`
+    <div class="r-item">
+      <div class="r-hdr">
+        <span class="r-name">${r.label}</span>
+        <span class="sev sev-${r.sev}">${r.sev}</span>
+      </div>
+      <div class="r-note">${r.note}</div>
+    </div>`).join('');
+
+  // Reset tabs
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('on'));
+  document.querySelector('.tabs .tab').classList.add('on');
+  document.getElementById('pane-overview').classList.add('on');
+
+  // Metrics
+  renderMetrics(id);
+}
+
+function switchTab(id, el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('pane-'+id).classList.add('on');
+}
+
+function setScenario(id, el){
+  document.querySelectorAll('.sc-chip').forEach(c=>{
+    if(!c.classList.contains('locked')) c.classList.remove('active');
+  });
+  el.classList.add('active');
+  activeScenario = id;
+  activeNode = null;
+  stopSim();
+  document.getElementById('detailEmpty').style.display='flex';
+  document.getElementById('detailBody').classList.remove('show');
+  document.getElementById('floorHed').textContent = SCENARIOS[id].name + ' — Click any node to inspect';
+  renderFloor();
+}
+
+// SIMULATION
+function startSim(){
+  simActive = true;
+  simStep = 0;
+  document.getElementById('simBar').classList.remove('hidden');
+  document.getElementById('floorCol').style.paddingBottom = '80px';
+  showSimStep();
+}
+function stopSim(){
+  clearTimeout(simTimer);
+  simActive = false;
+  document.getElementById('simBar').classList.add('hidden');
+  document.getElementById('floorCol').style.paddingBottom = '';
+  clearAllSim();
+}
+function stepSim(dir){
+  clearTimeout(simTimer);
+  const seq = SIM_SEQ();
+  simStep = Math.max(0, Math.min(seq.length-1, simStep+dir));
+  showSimStep();
+}
+function showSimStep(){
+  const seq = SIM_SEQ();
+  clearAllSim();
+  const id = seq[simStep];
+  const el = document.getElementById('nd_'+id);
+  if(el){
+    el.classList.add('sim-on');
+    el.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+  selectNode(id);
+  const n = getNode(id);
+  document.getElementById('simLbl').textContent = `Step ${simStep+1} of ${seq.length}`;
+  document.getElementById('simNodeLbl').textContent = n?n.label:'';
+  document.getElementById('simFill').style.width = ((simStep+1)/seq.length*100)+'%';
+}
+function clearAllSim(){
+  document.querySelectorAll('.sim-on').forEach(el=>el.classList.remove('sim-on'));
+}
+
+function exportNotes(){
+  const sc = SCENARIOS[activeScenario];
+  let txt = `PRISM AGENT SANDBOX — ${sc.name}\nExported: ${new Date().toLocaleString()}\n\n`;
+  txt += '='.repeat(60)+'\n';
+  sc.nodes.forEach(n=>{
+    txt += `\n▶ ${n.label} (${n.type.toUpperCase()})\n`;
+    txt += `Zone: ${n.zone}\n\n`;
+    txt += `Description:\n${n.desc}\n\n`;
+    txt += `Key Questions:\n`;
+    n.questions.forEach((q,i)=>{ txt += `  ${i+1}. ${q}\n`; });
+    txt += `\nRisks:\n`;
+    n.risks.forEach(r=>{ txt += `  [${r.sev.toUpperCase()}] ${r.label}: ${r.note}\n`; });
+    txt += '\n'+'-'.repeat(60)+'\n';
+  });
+  const blob = new Blob([txt],{type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'prism_agent_sandbox_notes.txt';
+  a.click();
+}
+
+// Init
+renderFloor();
+</script>
+</body>
+</html>
