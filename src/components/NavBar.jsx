@@ -1,4 +1,21 @@
+import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { SignedIn, SignedOut, UserButton } from '@clerk/clerk-react'
+import { useApiKey } from '../hooks/useApiKey.js'
+import ApiKeyModal from './ApiKeyModal.jsx'
+
+const CLERK_ENABLED = Boolean(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY)
+
+function KeyIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="7.5" cy="15.5" r="3.5" />
+      <path d="M10 13l8.5-8.5" />
+      <path d="M16 7l3 3" />
+      <path d="M18.5 4.5l2 2" />
+    </svg>
+  )
+}
 
 const navStyle = `
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
@@ -72,12 +89,41 @@ const navStyle = `
   }
   .nav-glossary:hover { border-color: #94a3b8; color: #94a3b8; }
   .nav-glossary.active { color: #94a3b8; border-color: #94a3b8; }
+
+  .nav-keybtn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid #1e3048;
+    border-radius: 6px;
+    color: #7a9bbf;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .nav-keybtn:hover { border-color: #94a3b8; color: #e2e8f0; }
+  .nav-keybtn-dot {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #34d399;
+    box-shadow: 0 0 0 2px #050810, 0 0 6px rgba(52,211,153,0.6);
+  }
 `
 
 export default function NavBar({ title }) {
   const location = useLocation()
   const isHome = location.pathname === '/'
   const isGlossary = location.pathname === '/glossary'
+  const { hasKey } = useApiKey()
+  const [keyModalOpen, setKeyModalOpen] = useState(false)
 
   return (
     <>
@@ -94,8 +140,29 @@ export default function NavBar({ title }) {
           {(isHome || isGlossary) && (
             <div className="nav-badge">Interactive Learning</div>
           )}
+          {CLERK_ENABLED && (
+            <>
+              <SignedOut>
+                <Link to="/sign-in" className="nav-glossary">Sign in</Link>
+              </SignedOut>
+              <SignedIn>
+                <UserButton afterSignOutUrl="/" />
+              </SignedIn>
+            </>
+          )}
+          <button
+            type="button"
+            className="nav-keybtn"
+            onClick={() => setKeyModalOpen(true)}
+            aria-label={hasKey ? 'API key configured — manage' : 'Set API key'}
+            title={hasKey ? 'API key configured' : 'Set API key'}
+          >
+            <KeyIcon />
+            {hasKey && <span className="nav-keybtn-dot" aria-hidden="true" />}
+          </button>
         </div>
       </nav>
+      <ApiKeyModal open={keyModalOpen} onClose={() => setKeyModalOpen(false)} />
     </>
   )
 }
