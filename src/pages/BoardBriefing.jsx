@@ -118,7 +118,7 @@ const TABS = [
 const INDUSTRIES = ['Financial Services', 'Healthcare', 'Retail', 'Manufacturing', 'Professional Services', 'Other']
 const SIZES = ['50–200', '200–1000', '1000–5000', '5000+']
 
-const SYSTEM_PROMPT = `You are an AI transformation advisor writing a board-ready executive brief. Write in a precise, confident, executive tone. Use the company details provided. Format your response in exactly 4 sections with these exact headers: ## Q1 AI Transformation Summary, ## Key Risks Requiring Board Attention, ## Strategic Recommendations, ## Financial Outlook. Be specific — use the company name, reference their initiatives, give concrete numbers and timeframes. Keep each section to 3–5 sentences.`
+const SYSTEM_PROMPT = `You are a senior AI transformation advisor writing a comprehensive board-ready executive brief. Write with authority and specificity. Use the company name and their exact initiatives throughout. Each section should be substantial — 2-3 paragraphs, not bullet points. Include specific metrics, realistic timeframes, and dollar figures calibrated to the company size and industry. Call out risks by name and explain their business impact. Make recommendations actionable with clear owners and timelines. This brief should be detailed enough that a board member with no AI background understands exactly where the company stands, what's at risk, and what decisions they need to make. Format your response in exactly 4 sections with these exact headers: ## Q1 AI Transformation Summary, ## Key Risks Requiring Board Attention, ## Strategic Recommendations, ## Financial Outlook.`
 
 const SECTION_DEFS = [
   { key: 'summary',         match: 'q1 ai transformation summary',          label: 'Q1 AI Transformation Summary',     tone: 'gold' },
@@ -221,6 +221,14 @@ function buildUserMessage(form) {
 
 export default function BoardBriefing() {
   const [tab, setTab] = useState('overview')
+
+  // Lifted out of GeneratePanel so the brief, form, and streaming state
+  // survive tab switches. Tabs unmount their panels — these hooks must
+  // live in a component that stays mounted.
+  const [form, setForm] = useState({ company: '', industry: '', size: '', initiatives: '', risk: '', budget: '' })
+  const { hasKey } = useApiKey()
+  const chat = useChat({ tier: 'user', systemPrompt: SYSTEM_PROMPT })
+
   return (
     <div className="bb-root">
       <style>{css}</style>
@@ -245,7 +253,14 @@ export default function BoardBriefing() {
 
       <main className="bb-panel">
         {tab === 'overview' && <OverviewPanel />}
-        {tab === 'generate' && <GeneratePanel />}
+        {tab === 'generate' && (
+          <GeneratePanel
+            form={form}
+            setForm={setForm}
+            hasKey={hasKey}
+            chat={chat}
+          />
+        )}
         {tab === 'quality' && <QualityPanel />}
         {tab === 'quiz' && <QuizPanel />}
       </main>
@@ -288,10 +303,8 @@ function OverviewPanel() {
   )
 }
 
-function GeneratePanel() {
-  const { hasKey } = useApiKey()
-  const [form, setForm] = useState({ company: '', industry: '', size: '', initiatives: '', risk: '', budget: '' })
-  const { messages, isStreaming, error, sendMessage, reset } = useChat({ tier: 'user', systemPrompt: SYSTEM_PROMPT })
+function GeneratePanel({ form, setForm, hasKey, chat }) {
+  const { messages, isStreaming, error, sendMessage, reset } = chat
 
   const lastAssistant = messages[messages.length - 1]?.role === 'assistant' ? messages[messages.length - 1].content : ''
   const sections = useMemo(() => parseSections(lastAssistant), [lastAssistant])
