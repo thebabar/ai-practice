@@ -230,6 +230,20 @@ function WorkflowIcon() {
   )
 }
 
+function BoardBriefingIcon() {
+  return (
+    <svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg" width="30" height="30">
+      <rect x="14" y="22" width="62" height="50" rx="5" stroke="#c9a84c" strokeWidth="2.5"/>
+      <path d="M34 22 L34 16 Q34 13 37 13 L53 13 Q56 13 56 16 L56 22" stroke="#c9a84c" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M24 36 L66 36" stroke="#c9a84c" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M24 46 L60 46" stroke="#c9a84c" strokeWidth="2" strokeLinecap="round" strokeOpacity="0.7"/>
+      <path d="M24 56 L52 56" stroke="#c9a84c" strokeWidth="2" strokeLinecap="round" strokeOpacity="0.5"/>
+      <circle cx="68" cy="62" r="8" fill="rgba(201,168,76,0.25)" stroke="#e8c96e" strokeWidth="2"/>
+      <path d="M64 62 L67 65 L72 59" stroke="#e8c96e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  )
+}
+
 const ICON_MAP = {
   'intro-llms': LLMIcon,
   'token-optimization': TokenIcon,
@@ -242,6 +256,7 @@ const ICON_MAP = {
   'image-generation': ImageGenerationIcon,
   'types-of-llms': TypesOfLLMsIcon,
   'workflow-canvas': WorkflowIcon,
+  'board-briefing': BoardBriefingIcon,
 }
 
 const VISUALIZATIONS = [
@@ -359,6 +374,20 @@ const VISUALIZATIONS = [
     iconBg: 'rgba(99,102,241,0.1)',
     glow: 'radial-gradient(ellipse at 0% 0%, rgba(99,102,241,0.08) 0%, transparent 60%)',
     glowColor: 'rgba(99,102,241,0.08)',
+    ready: true,
+  },
+  {
+    path: '/board-briefing',
+    icon: null,
+    tag: 'Executive AI',
+    title: 'Board Briefing Generator',
+    desc: 'Generate a board-ready AI transformation brief from your company data.',
+    pills: ['Brief Generator', 'Risk Analysis', 'Strategic Recommendations'],
+    accent: '#c9a84c',
+    accentDim: 'rgba(201,168,76,0.22)',
+    iconBg: 'rgba(201,168,76,0.1)',
+    glow: 'radial-gradient(ellipse at 0% 0%, rgba(201,168,76,0.08) 0%, transparent 60%)',
+    glowColor: 'rgba(201,168,76,0.1)',
     ready: true,
   },
   // ── Row 3: Deep Learning & Embeddings ────────────────────────────────────────

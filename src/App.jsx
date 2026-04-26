@@ -13,6 +13,7 @@ import ImageGeneration from './pages/ImageGeneration.jsx'
 import TypesOfLLMs from './pages/TypesOfLLMs.jsx'
 import WorkflowCanvas from './pages/WorkflowCanvas.jsx'
 import AgentSimulation from './pages/AgentSimulation.jsx'
+import BoardBriefing from './pages/BoardBriefing.jsx'
 import SignInPage from './pages/SignInPage.jsx'
 import SignUpPage from './pages/SignUpPage.jsx'
 
@@ -34,6 +35,7 @@ function AppRoutes() {
       <Route path="/image-generation" element={<ImageGeneration />} />
       <Route path="/workflow-canvas" element={<WorkflowCanvas />} />
       <Route path="/agent-simulation" element={<AgentSimulation />} />
+      <Route path="/board-briefing" element={<BoardBriefing />} />
       {CLERK_PUBLISHABLE_KEY && (
         <>
           <Route path="/sign-in/*" element={<SignInPage />} />
