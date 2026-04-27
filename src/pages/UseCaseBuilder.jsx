@@ -994,11 +994,18 @@ function DataPane({ active, data, onChange, onAdvance, hasKey }) {
     if (el) el.scrollTop = el.scrollHeight
   }, [chat.messages, chat.isStreaming])
 
+  const userTurns = chat.messages.filter((m) => m.role === 'user').length
+
   const send = () => {
     const text = draft.trim()
     if (!text || chat.isStreaming || !hasKey) return
     chat.sendMessage(text)
     setDraft('')
+  }
+
+  const wrapUp = () => {
+    if (chat.isStreaming || !hasKey) return
+    chat.sendMessage("Based on what we've discussed so far, please produce the structured summary now in the required format with the four headers (## Data Types, ## Quality Assessment, ## Key Constraints, ## Opportunity Signals). No more questions.")
   }
 
   const onKeyDown = (e) => {
@@ -1113,6 +1120,13 @@ function DataPane({ active, data, onChange, onAdvance, hasKey }) {
           </div>
         )}
 
+        {userTurns >= 5 && !data.confirmed && !summaryReady && !chat.isStreaming && (
+          <div className="ucb-footer" style={{ marginTop: 8 }}>
+            <span />
+            <button className="ucb-btn ghost" onClick={wrapUp}>Wrap up — produce summary now</button>
+          </div>
+        )}
+
         {summaryReady && !data.confirmed && (
           <div className="ucb-footer">
             <span />
@@ -1170,11 +1184,18 @@ function UseCasePane({ active, data, onChange, onAdvance, hasKey }) {
     if (el) el.scrollTop = el.scrollHeight
   }, [chat.messages, chat.isStreaming])
 
+  const userTurns = chat.messages.filter((m) => m.role === 'user').length
+
   const send = () => {
     const text = draft.trim()
     if (!text || chat.isStreaming || !hasKey) return
     chat.sendMessage(text)
     setDraft('')
+  }
+
+  const wrapUp = () => {
+    if (chat.isStreaming || !hasKey) return
+    chat.sendMessage("Based on what we've discussed so far, please produce the Use Case Assessment now in the required format with all five headers (## Problem Statement, ## Proposed Solution, ## Feasibility Verdict, ## What's Missing, ## Refined Recommendation). No more questions.")
   }
 
   const onKeyDown = (e) => {
@@ -1284,6 +1305,13 @@ function UseCasePane({ active, data, onChange, onAdvance, hasKey }) {
             >
               {chat.isStreaming ? '…' : 'Send'}
             </button>
+          </div>
+        )}
+
+        {userTurns >= 5 && !data.confirmed && !summaryReady && !chat.isStreaming && (
+          <div className="ucb-footer" style={{ marginTop: 8 }}>
+            <span />
+            <button className="ucb-btn ghost" onClick={wrapUp}>Wrap up — produce assessment now</button>
           </div>
         )}
 
