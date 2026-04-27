@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import NavBar from '../components/NavBar.jsx'
 import { useApiKey } from '../hooks/useApiKey.js'
 import { useChat } from '../hooks/useChat.js'
@@ -321,6 +322,115 @@ const css = `
 .ucb-sum-body { font-size: 14px; color: #c8d4e2; line-height: 1.7; white-space: pre-wrap; }
 .ucb-sum-section.verdict .ucb-sum-body { font-size: 15px; color: #e8eef6; font-weight: 500; }
 
+/* ── Path cards (Step 5) ── */
+.ucb-path-grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
+@media (min-width: 880px) {
+  .ucb-path-grid.two { grid-template-columns: 1fr 1fr; }
+}
+.ucb-path-card {
+  border-radius: 14px; padding: 22px 24px;
+  border: 1px solid;
+  display: flex; flex-direction: column;
+  background: #0a1020;
+}
+.ucb-path-card.learn   { border-color: rgba(251,191,36,0.4); background: linear-gradient(180deg, rgba(251,191,36,0.05), #0a1020 80%); }
+.ucb-path-card.build   { border-color: rgba(52,211,153,0.4); background: linear-gradient(180deg, rgba(52,211,153,0.05), #0a1020 80%); }
+.ucb-path-eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 6px; }
+.ucb-path-card.learn .ucb-path-eyebrow { color: #fbbf24; }
+.ucb-path-card.build .ucb-path-eyebrow { color: #34d399; }
+.ucb-path-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 20px; font-weight: 700; color: #fff; margin: 0 0 12px; letter-spacing: -0.01em; }
+.ucb-path-body { font-size: 14px; color: #c8d4e2; line-height: 1.7; white-space: pre-wrap; flex: 1; margin-bottom: 16px; }
+.ucb-path-cta {
+  align-self: flex-start;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 10px 18px; border-radius: 8px;
+  border: 1px solid; cursor: pointer;
+  text-decoration: none; display: inline-block;
+  transition: all 0.16s;
+}
+.ucb-path-card.learn .ucb-path-cta { border-color: #fbbf24; background: rgba(251,191,36,0.12); color: #fbbf24; }
+.ucb-path-card.learn .ucb-path-cta:hover { background: rgba(251,191,36,0.22); }
+.ucb-path-card.build .ucb-path-cta { border-color: #34d399; background: rgba(52,211,153,0.12); color: #34d399; }
+.ucb-path-card.build .ucb-path-cta:hover { background: rgba(52,211,153,0.22); }
+
+.ucb-path-why {
+  font-size: 14px; color: #d8e0ec; line-height: 1.7;
+  background: rgba(56,189,248,0.05);
+  border-left: 2px solid ${ACCENT};
+  padding: 12px 16px; border-radius: 0 8px 8px 0;
+  margin-bottom: 18px;
+}
+
+/* ── Build guidance cards (Step 6) ── */
+.ucb-build-card {
+  background: #0a1020;
+  border: 1px solid #182338;
+  border-radius: 14px;
+  padding: 22px 24px;
+  margin-bottom: 14px;
+  position: relative;
+}
+.ucb-build-card-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-bottom: 14px;
+}
+.ucb-build-card-title {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 16px; font-weight: 700; color: ${ACCENT};
+  letter-spacing: -0.01em; margin: 0;
+}
+.ucb-copy-btn {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  background: transparent; border: 1px solid #2a3a52;
+  color: #7a8da8; padding: 5px 10px; border-radius: 6px;
+  cursor: pointer; transition: all 0.16s;
+}
+.ucb-copy-btn:hover { border-color: ${ACCENT}; color: ${ACCENT}; }
+.ucb-copy-btn.copied { border-color: #34d399; color: #34d399; }
+.ucb-build-card-body {
+  font-size: 14px; color: #c8d4e2; line-height: 1.75;
+  white-space: pre-wrap;
+}
+
+/* ── Mockup iframe ── */
+.ucb-mockup-card {
+  background: #0a1020;
+  border: 1px solid #182338;
+  border-radius: 14px;
+  padding: 18px 18px 14px;
+  margin-top: 8px;
+}
+.ucb-mockup-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px; gap: 12px;
+}
+.ucb-mockup-title {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 16px; font-weight: 700; color: ${ACCENT};
+  margin: 0;
+}
+.ucb-mockup-link {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: ${ACCENT}; text-decoration: none;
+  border: 1px solid ${ACCENT}; padding: 5px 10px; border-radius: 6px;
+  background: transparent; cursor: pointer; transition: all 0.16s;
+}
+.ucb-mockup-link:hover { background: rgba(56,189,248,0.12); }
+.ucb-mockup-frame {
+  width: 100%; height: 400px; border: 1px solid #1e2a3e;
+  border-radius: 10px; background: #050810;
+  display: block;
+}
+.ucb-mockup-fallback {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; color: #7a8da8;
+  padding: 18px; background: rgba(122,141,168,0.04);
+  border: 1px dashed #2a3a52; border-radius: 8px;
+}
+
 /* ── Stub panel for not-yet-built steps ── */
 .ucb-stub {
   border: 1px dashed #2a3a52; border-radius: 12px;
@@ -448,8 +558,23 @@ export default function UseCaseBuilder() {
             onAdvance={() => advance('usecase', 'path')}
             hasKey={hasKey}
           />
-          <StubPane active={currentStep === 'path'}     num={5} title="Your Path"        />
-          <StubPane active={currentStep === 'build'}    num={6} title="Build Guidance"   />
+          <PathPane
+            active={currentStep === 'path'}
+            data={sessionData.path}
+            onChange={(path) => updateSession({ path })}
+            session={sessionData}
+            onAdvance={() => advance('path', 'build')}
+            markComplete={() => markComplete('path')}
+            hasKey={hasKey}
+          />
+          <BuildPane
+            active={currentStep === 'build'}
+            data={sessionData.buildGuidance}
+            onChange={(buildGuidance) => updateSession({ buildGuidance })}
+            session={sessionData}
+            markComplete={() => markComplete('build')}
+            hasKey={hasKey}
+          />
         </main>
       </div>
     </div>
@@ -1169,6 +1294,422 @@ function UseCasePane({ active, data, onChange, onAdvance, hasKey }) {
           </div>
         )}
       </div>
+    </div>
+  )
+}
+
+/* ── Step 5: Your Path ──────────────────────────────────────────────────── */
+const PATH_SYSTEM_PROMPT = `You are a senior AI advisor making a binary recommendation: should this person learn more before building, or are they ready to build now?
+
+You will be given their profile, calibrated skill level, data situation, and use case assessment. Use ALL of it. Reference their actual situation in your reasoning, not generic advice.
+
+Decision guidance (apply judgment, not blind rules):
+- "Learn First" — skill is Beginner, OR the use case verdict is Not Viable / Needs Refinement, OR the data summary surfaced gaps that would block building.
+- "Go Build" — skill is Intermediate or higher AND the use case is Viable AND the data is workable.
+- "Both" — they can start building but should learn a specific topic in parallel because it will materially affect quality or risk.
+
+Respond in EXACTLY this format. Omit sections that don't apply. No preamble, no closing remarks.
+
+## Recommendation
+<exactly one of: Learn First, Go Build, Both>
+
+## Why
+<1–2 sentences. Reference their actual role, use case, data, and assessment. Concrete, not generic.>
+
+## Learn First Topics
+<Only include if recommendation is "Learn First" or "Both". 3–4 topics, each on its own line as:
+- **Topic name**: 1 sentence on why it matters for THEIR specific use case.>
+
+## Build Readiness Note
+<Only include if recommendation is "Go Build" or "Both". 2–3 sentences on why they're ready and what the main challenge will be.>`
+
+const PATH_HEADERS = [
+  { key: 'recommendation', label: 'Recommendation' },
+  { key: 'why',            label: 'Why' },
+  { key: 'topics',         label: 'Learn First Topics' },
+  { key: 'buildNote',      label: 'Build Readiness Note' },
+]
+
+function buildSessionContext(session, { includePath = false } = {}) {
+  const { profile, skillLevel, dataDiscovery, useCase, path } = session
+  const effectiveLevel = skillLevel.calibrated || skillLevel.selfReported || 'Unknown'
+
+  const dataSummary = dataDiscovery.summary
+    ? [
+        `## Data Types\n${dataDiscovery.summary.dataTypes || ''}`,
+        `## Quality Assessment\n${dataDiscovery.summary.quality || ''}`,
+        `## Key Constraints\n${dataDiscovery.summary.constraints || ''}`,
+        `## Opportunity Signals\n${dataDiscovery.summary.opportunities || ''}`,
+      ].join('\n\n')
+    : '(no data summary captured)'
+
+  const useCaseAssessment = useCase.assessment
+    ? [
+        `## Problem Statement\n${useCase.assessment.problem || ''}`,
+        `## Proposed Solution\n${useCase.assessment.solution || ''}`,
+        `## Feasibility Verdict\n${useCase.assessment.verdict || ''}`,
+        `## What's Missing\n${useCase.assessment.missing || ''}`,
+        `## Refined Recommendation\n${useCase.assessment.recommendation || ''}`,
+      ].join('\n\n')
+    : '(no use case assessment captured)'
+
+  const pathBlock = includePath && path?.recommendation
+    ? [
+        '',
+        '# PATH RECOMMENDATION',
+        `Kind: ${path.recommendation.kind || 'unknown'}`,
+        path.recommendation.why ? `Why: ${path.recommendation.why}` : null,
+      ].filter(Boolean).join('\n')
+    : ''
+
+  return [
+    '# PROFILE',
+    `Role: ${profile.role || '—'}`,
+    `Industry: ${profile.industry || '—'}`,
+    `Company size: ${profile.size || '—'}`,
+    profile.business ? `Business description: ${profile.business}` : null,
+    '',
+    '# SKILL LEVEL',
+    `Self-reported: ${skillLevel.selfReported || '—'}`,
+    `Calibrated: ${skillLevel.calibrated || '(not assessed — Beginner skip path)'}`,
+    skillLevel.observation ? `Calibration observation: ${skillLevel.observation}` : null,
+    `Effective level: ${effectiveLevel}`,
+    '',
+    '# DATA SITUATION',
+    dataSummary,
+    '',
+    '# USE CASE ASSESSMENT',
+    useCaseAssessment,
+    pathBlock,
+  ].filter(Boolean).join('\n')
+}
+
+function buildPathContext(session) {
+  return buildSessionContext(session) + '\n\nNow produce the path recommendation in the required format.'
+}
+
+function buildBuildContext(session) {
+  return buildSessionContext(session, { includePath: true }) + '\n\nNow produce the build guidance in the required format.'
+}
+
+function detectPathKind(recommendationText) {
+  if (!recommendationText) return null
+  const lower = recommendationText.toLowerCase()
+  if (lower.includes('both')) return 'both'
+  if (lower.includes('learn')) return 'learn'
+  if (lower.includes('build')) return 'build'
+  return null
+}
+
+function PathPane({ active, data, onChange, session, onAdvance, markComplete, hasKey }) {
+  const chat = useChat({ tier: 'user', systemPrompt: PATH_SYSTEM_PROMPT })
+  const wasStreamingRef = useRef(false)
+
+  const lastMsg = chat.messages[chat.messages.length - 1]
+  const lastAssistant = lastMsg?.role === 'assistant' ? lastMsg.content : ''
+
+  // When streaming finishes, parse and persist.
+  useEffect(() => {
+    if (wasStreamingRef.current && !chat.isStreaming) {
+      if (lastAssistant) {
+        const parsed = parseStructuredSummary(lastAssistant, PATH_HEADERS)
+        const kind = detectPathKind(parsed.recommendation)
+        if (parsed.recommendation && kind) {
+          onChange({ ...data, recommendation: { ...parsed, kind } })
+        }
+      }
+    }
+    wasStreamingRef.current = chat.isStreaming
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chat.isStreaming])
+
+  const generate = () => {
+    if (!hasKey || chat.isStreaming) return
+    chat.reset()
+    chat.sendMessage(buildPathContext(session))
+  }
+
+  const regenerate = () => {
+    onChange({ ...data, recommendation: null })
+    generate()
+  }
+
+  const onLearnClick = () => { markComplete() }
+  const onBuildClick = () => { onAdvance() }
+
+  const hasResult = data.recommendation
+  const evaluating = chat.isStreaming
+
+  // Pre-flight check — make sure prior steps populated their data.
+  const ready = session.profile.role && session.useCase.assessment
+
+  return (
+    <div className={`ucb-pane${active ? ' active' : ''}`}>
+      <div className="ucb-step-eyebrow">Step 5 of 6</div>
+      <h1 className="ucb-step-title">Your Path</h1>
+      <p className="ucb-step-sub">Based on everything you've shared so far — your profile, skill level, data, and use case — Claude will recommend whether to learn more first or to start building.</p>
+
+      {!hasResult && !evaluating && (
+        <>
+          {!ready && (
+            <div className="ucb-banner">Complete the prior steps first so the recommendation has something to work with.</div>
+          )}
+          {!hasKey && (
+            <div className="ucb-banner">Add your API key in the nav to generate the recommendation.</div>
+          )}
+          {chat.error && <div className="ucb-banner">{friendlyError(chat.error)}</div>}
+          <div className="ucb-footer">
+            <span />
+            <button
+              className="ucb-btn"
+              disabled={!ready || !hasKey}
+              onClick={generate}
+            >
+              Generate Path Recommendation
+            </button>
+          </div>
+        </>
+      )}
+
+      {evaluating && (
+        <div className="ucb-cal-card">
+          <div className="ucb-cal-row">
+            <span className="ucb-cal-label">Working on it</span>
+          </div>
+          <div className="ucb-cal-stream">
+            {lastAssistant || "Reading everything you've shared…"}
+            <span className="ucb-cursor" />
+          </div>
+        </div>
+      )}
+
+      {hasResult && !evaluating && <PathResult rec={data.recommendation} onLearn={onLearnClick} onBuild={onBuildClick} onRegenerate={regenerate} />}
+    </div>
+  )
+}
+
+function PathResult({ rec, onLearn, onBuild, onRegenerate }) {
+  const showLearn = rec.kind === 'learn' || rec.kind === 'both'
+  const showBuild = rec.kind === 'build' || rec.kind === 'both'
+  const twoUp = showLearn && showBuild
+
+  return (
+    <>
+      {rec.why && <div className="ucb-path-why">{rec.why}</div>}
+
+      <div className={`ucb-path-grid${twoUp ? ' two' : ''}`}>
+        {showLearn && (
+          <div className="ucb-path-card learn">
+            <div className="ucb-path-eyebrow">Path A · Learn First</div>
+            <h3 className="ucb-path-title">Build the foundation</h3>
+            <div className="ucb-path-body">{rec.topics || 'Topics will appear here.'}</div>
+            <Link to="/" className="ucb-path-cta" onClick={onLearn}>Build Your Course →</Link>
+          </div>
+        )}
+        {showBuild && (
+          <div className="ucb-path-card build">
+            <div className="ucb-path-eyebrow">Path B · Go Build</div>
+            <h3 className="ucb-path-title">You're ready to start</h3>
+            <div className="ucb-path-body">{rec.buildNote || 'Readiness note will appear here.'}</div>
+            <button type="button" className="ucb-path-cta" onClick={onBuild}>Get Build Guidance →</button>
+          </div>
+        )}
+      </div>
+
+      <div className="ucb-footer">
+        <button className="ucb-btn ghost" onClick={onRegenerate}>Regenerate</button>
+        <span />
+      </div>
+    </>
+  )
+}
+
+/* ── Step 6: Build Guidance ─────────────────────────────────────────────── */
+const BUILD_SYSTEM_PROMPT = `You are a senior AI product advisor. Based on everything you know about this person — their role, industry, business, calibrated skill level, data, use case, and path recommendation — generate practical build guidance. Be specific to their use case. No generic advice.
+
+Respond in EXACTLY this format. Every section is required. No preamble, no closing remarks.
+
+## Problem Statement
+<1 tight paragraph (3–5 sentences) they can paste into any AI tool to explain what they're building. Self-contained — must make sense without other context.>
+
+## Recommended Tool Stack
+<3–4 tools, each on its own line as a markdown bullet:
+- **Tool name**: 1-line reason WHY this tool fits THEIR use case (specific, not generic).>
+
+## Starter Prompts
+<3–5 numbered prompts they can paste into Claude or ChatGPT and get useful work done on their use case. Reference their actual data, their domain, their goal. Each prompt should be substantive (not one-liners).>
+
+## Key Decisions Before You Start
+<3–5 bullets. Decisions they need to make BEFORE writing code — e.g. data privacy posture, hosted vs self-host, eval criteria, success metric, who owns the output. Specific to them.>
+
+## Definition of Done (v1)
+<2–4 sentences in plain language. What does a successful first version look like? What can they show a stakeholder? Concrete and demoable, not aspirational.>
+
+## Mockup
+\`\`\`html
+<Complete self-contained HTML page that shows what their solution UI could look like. Dark theme, professional, realistic. Use only inline <style> CSS — no external dependencies, no CDN imports. Include realistic placeholder content drawn from their use case. Aim for about 80–150 lines of HTML/CSS. Make it look like a real product, not a wireframe.>
+\`\`\``
+
+const BUILD_HEADERS = [
+  { key: 'problem',   label: 'Problem Statement' },
+  { key: 'stack',     label: 'Recommended Tool Stack' },
+  { key: 'prompts',   label: 'Starter Prompts' },
+  { key: 'decisions', label: 'Key Decisions Before You Start' },
+  { key: 'dod',       label: 'Definition of Done' },
+]
+
+function extractMockupHtml(text) {
+  if (!text) return ''
+  const m = text.match(/```html\s*([\s\S]+?)```/i)
+  return m ? m[1].trim() : ''
+}
+
+function BuildPane({ active, data, onChange, session, markComplete, hasKey }) {
+  const chat = useChat({ tier: 'user', systemPrompt: BUILD_SYSTEM_PROMPT })
+  const wasStreamingRef = useRef(false)
+
+  const lastMsg = chat.messages[chat.messages.length - 1]
+  const lastAssistant = lastMsg?.role === 'assistant' ? lastMsg.content : ''
+
+  useEffect(() => {
+    if (wasStreamingRef.current && !chat.isStreaming) {
+      if (lastAssistant) {
+        const sections = parseStructuredSummary(lastAssistant, BUILD_HEADERS)
+        const mockupHtml = extractMockupHtml(lastAssistant)
+        // require at least the prose sections to be present
+        if (hasAllSections(sections, BUILD_HEADERS)) {
+          onChange({ ...data, sections, mockupHtml })
+          markComplete()
+        }
+      }
+    }
+    wasStreamingRef.current = chat.isStreaming
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chat.isStreaming])
+
+  const generate = () => {
+    if (!hasKey || chat.isStreaming) return
+    chat.reset()
+    chat.sendMessage(buildBuildContext(session))
+  }
+
+  const regenerate = () => {
+    onChange({ ...data, sections: null, mockupHtml: null })
+    generate()
+  }
+
+  const evaluating = chat.isStreaming
+  const ready = session.useCase.assessment // sufficient prior context
+
+  return (
+    <div className={`ucb-pane${active ? ' active' : ''}`}>
+      <div className="ucb-step-eyebrow">Step 6 of 6</div>
+      <h1 className="ucb-step-title">Build Guidance</h1>
+      <p className="ucb-step-sub">A concrete starter kit for your use case — problem statement, tool stack, prompts, decisions, and a mockup of what your solution UI could look like.</p>
+
+      {!data.sections && !evaluating && (
+        <>
+          {!ready && <div className="ucb-banner">Complete the prior steps first.</div>}
+          {!hasKey && <div className="ucb-banner">Add your API key in the nav to generate the guidance.</div>}
+          {chat.error && <div className="ucb-banner">{friendlyError(chat.error)}</div>}
+          <div className="ucb-footer">
+            <span />
+            <button
+              className="ucb-btn"
+              disabled={!ready || !hasKey}
+              onClick={generate}
+            >
+              Generate Build Guidance
+            </button>
+          </div>
+        </>
+      )}
+
+      {evaluating && (
+        <div className="ucb-cal-card">
+          <div className="ucb-cal-row">
+            <span className="ucb-cal-label">Generating</span>
+          </div>
+          <div className="ucb-cal-stream">
+            {lastAssistant
+              ? `${lastAssistant.length.toLocaleString()} chars streamed…`
+              : 'Assembling your starter kit…'}
+            <span className="ucb-cursor" />
+          </div>
+        </div>
+      )}
+
+      {data.sections && !evaluating && (
+        <>
+          {BUILD_HEADERS.map((h) => (
+            <BuildCard key={h.key} title={h.label} body={data.sections[h.key]} />
+          ))}
+          <BuildMockup html={data.mockupHtml} />
+          <div className="ucb-footer">
+            <button className="ucb-btn ghost" onClick={regenerate}>Regenerate</button>
+            <span />
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+function BuildCard({ title, body }) {
+  const [copied, setCopied] = useState(false)
+  const onCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(body || '')
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1400)
+    } catch {
+      // ignore
+    }
+  }
+  return (
+    <div className="ucb-build-card">
+      <div className="ucb-build-card-head">
+        <h3 className="ucb-build-card-title">{title}</h3>
+        <button className={`ucb-copy-btn${copied ? ' copied' : ''}`} onClick={onCopy}>
+          {copied ? 'Copied' : 'Copy'}
+        </button>
+      </div>
+      <div className="ucb-build-card-body">{body}</div>
+    </div>
+  )
+}
+
+function BuildMockup({ html }) {
+  if (!html) {
+    return (
+      <div className="ucb-mockup-card">
+        <div className="ucb-mockup-head">
+          <h3 className="ucb-mockup-title">Mockup</h3>
+        </div>
+        <div className="ucb-mockup-fallback">Claude didn't return a mockup this time. Try Regenerate.</div>
+      </div>
+    )
+  }
+
+  const openFullScreen = () => {
+    const blob = new Blob([html], { type: 'text/html' })
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank', 'noopener,noreferrer')
+    setTimeout(() => URL.revokeObjectURL(url), 60_000)
+  }
+
+  return (
+    <div className="ucb-mockup-card">
+      <div className="ucb-mockup-head">
+        <h3 className="ucb-mockup-title">Mockup</h3>
+        <button className="ucb-mockup-link" onClick={openFullScreen}>Open in full screen ↗</button>
+      </div>
+      <iframe
+        className="ucb-mockup-frame"
+        title="Solution UI mockup"
+        srcDoc={html}
+        sandbox="allow-scripts"
+      />
     </div>
   )
 }
