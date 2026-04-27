@@ -14,6 +14,7 @@ import TypesOfLLMs from './pages/TypesOfLLMs.jsx'
 import WorkflowCanvas from './pages/WorkflowCanvas.jsx'
 import AgentSimulation from './pages/AgentSimulation.jsx'
 import BoardBriefing from './pages/BoardBriefing.jsx'
+import UseCaseBuilder from './pages/UseCaseBuilder.jsx'
 import SignInPage from './pages/SignInPage.jsx'
 import SignUpPage from './pages/SignUpPage.jsx'
 
@@ -36,6 +37,7 @@ function AppRoutes() {
       <Route path="/workflow-canvas" element={<WorkflowCanvas />} />
       <Route path="/agent-simulation" element={<AgentSimulation />} />
       <Route path="/board-briefing" element={<BoardBriefing />} />
+      <Route path="/use-case-builder" element={<UseCaseBuilder />} />
       {CLERK_PUBLISHABLE_KEY && (
         <>
           <Route path="/sign-in/*" element={<SignInPage />} />
