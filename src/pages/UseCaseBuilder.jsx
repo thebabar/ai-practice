@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import NavBar from '../components/NavBar.jsx'
 import { useApiKey } from '../hooks/useApiKey.js'
@@ -48,6 +48,13 @@ const css = `
 .ucb-step-item.active { color: #fff; border-left-color: ${ACCENT}; background: rgba(56,189,248,0.06); font-weight: 600; }
 .ucb-step-item.complete { color: #94a3b8; }
 .ucb-step-item.locked { color: #3a4a5e; cursor: not-allowed; }
+.ucb-step-item.skipped { color: #4a5568; cursor: not-allowed; }
+.ucb-step-item.skipped .ucb-step-num { border-color: #3a4a5e; color: #4a5568; background: transparent; }
+.ucb-step-skip-tag {
+  font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: #4a5568; margin-left: 6px;
+}
 .ucb-step-num {
   width: 22px; height: 22px; border-radius: 50%;
   display: inline-flex; align-items: center; justify-content: center;
@@ -436,8 +443,8 @@ const css = `
 const STEPS = [
   { id: 'profile',  num: 1, label: 'Your Profile' },
   { id: 'skill',    num: 2, label: 'Skill Level' },
-  { id: 'data',     num: 3, label: 'Data Discovery' },
-  { id: 'usecase',  num: 4, label: 'Use Case' },
+  { id: 'usecase',  num: 3, label: 'Use Case' },
+  { id: 'data',     num: 4, label: 'Data Discovery' },
   { id: 'path',     num: 5, label: 'Your Path' },
   { id: 'build',    num: 6, label: 'Build Guidance' },
 ]
@@ -459,7 +466,7 @@ const initialSession = () => ({
   profile: { role: '', industry: '', size: '', business: '' },
   skillLevel: { selfReported: '', calibrated: null, observation: '' },
   assessment: { answers: [], complete: false },
-  dataDiscovery: { summary: null, confirmed: false },
+  dataDiscovery: { summary: null, confirmed: false, skipped: false },
   useCase: { assessment: null, confirmed: false },
   path: { recommendation: null },
   buildGuidance: { sections: null, mockupHtml: null },
@@ -469,6 +476,7 @@ export default function UseCaseBuilder() {
   const { hasKey } = useApiKey()
   const [currentStep, setCurrentStep] = useState('profile')
   const [completed, setCompleted] = useState(new Set())
+  const [skipped, setSkipped] = useState(new Set())
   const [sessionData, setSessionData] = useState(initialSession)
 
   const updateSession = (patch) => setSessionData((s) => ({ ...s, ...patch }))
@@ -480,13 +488,46 @@ export default function UseCaseBuilder() {
     return next
   })
 
+  const markSkipped = (id) => setSkipped((s) => {
+    if (s.has(id)) return s
+    const next = new Set(s)
+    next.add(id)
+    return next
+  })
+
+  const clearSkipped = (id) => setSkipped((s) => {
+    if (!s.has(id)) return s
+    const next = new Set(s)
+    next.delete(id)
+    return next
+  })
+
   const goTo = (id) => {
-    if (canNavigateTo(id, completed)) setCurrentStep(id)
+    if (canNavigateTo(id, completed, skipped)) setCurrentStep(id)
   }
 
   const advance = (fromId, toId) => {
     markComplete(fromId)
     setCurrentStep(toId)
+  }
+
+  const handleUseCaseAdvance = (assessment) => {
+    const verdict = (assessment?.verdict || '').trim()
+    if (verdict.startsWith('❌')) {
+      markSkipped('data')
+      setSessionData((s) => ({
+        ...s,
+        dataDiscovery: { ...s.dataDiscovery, skipped: true },
+      }))
+      advance('usecase', 'path')
+    } else {
+      clearSkipped('data')
+      setSessionData((s) => ({
+        ...s,
+        dataDiscovery: { ...s.dataDiscovery, skipped: false },
+      }))
+      advance('usecase', 'data')
+    }
   }
 
   return (
@@ -508,15 +549,21 @@ export default function UseCaseBuilder() {
             {STEPS.map((s) => {
               const isActive = currentStep === s.id
               const isDone = completed.has(s.id)
-              const reachable = canNavigateTo(s.id, completed)
+              const isSkipped = skipped.has(s.id)
+              const reachable = canNavigateTo(s.id, completed, skipped)
+              const cls = `ucb-step-item${isActive ? ' active' : ''}${isDone ? ' complete' : ''}${isSkipped ? ' skipped' : ''}${!reachable && !isSkipped ? ' locked' : ''}`
+              const num = isSkipped ? '–' : isDone ? '✓' : s.num
               return (
                 <li
                   key={s.id}
-                  className={`ucb-step-item${isActive ? ' active' : ''}${isDone ? ' complete' : ''}${!reachable ? ' locked' : ''}`}
+                  className={cls}
                   onClick={() => goTo(s.id)}
                 >
-                  <span className="ucb-step-num">{isDone ? '✓' : s.num}</span>
-                  <span className="ucb-step-label">{s.label}</span>
+                  <span className="ucb-step-num">{num}</span>
+                  <span className="ucb-step-label">
+                    {s.label}
+                    {isSkipped && <span className="ucb-step-skip-tag">Skipped</span>}
+                  </span>
                 </li>
               )
             })}
@@ -534,21 +581,22 @@ export default function UseCaseBuilder() {
             active={currentStep === 'skill'}
             data={sessionData.skillLevel}
             onChange={(skillLevel) => updateSession({ skillLevel })}
-            onAdvance={() => advance('skill', 'data')}
-            hasKey={hasKey}
-          />
-          <DataPane
-            active={currentStep === 'data'}
-            data={sessionData.dataDiscovery}
-            onChange={(dataDiscovery) => updateSession({ dataDiscovery })}
-            onAdvance={() => advance('data', 'usecase')}
+            onAdvance={() => advance('skill', 'usecase')}
             hasKey={hasKey}
           />
           <UseCasePane
             active={currentStep === 'usecase'}
             data={sessionData.useCase}
             onChange={(useCase) => updateSession({ useCase })}
-            onAdvance={() => advance('usecase', 'path')}
+            onAdvance={handleUseCaseAdvance}
+            hasKey={hasKey}
+          />
+          <DataPane
+            active={currentStep === 'data'}
+            data={sessionData.dataDiscovery}
+            onChange={(dataDiscovery) => updateSession({ dataDiscovery })}
+            onAdvance={() => advance('data', 'path')}
+            useCaseAssessment={sessionData.useCase.assessment}
             hasKey={hasKey}
           />
           <PathPane
@@ -574,13 +622,18 @@ export default function UseCaseBuilder() {
   )
 }
 
-function canNavigateTo(id, completed) {
+function canNavigateTo(id, completed, skipped) {
   const idx = STEPS.findIndex((s) => s.id === id)
   if (idx === 0) return true
-  // allowed to revisit a completed step or the immediate next step after the highest completed
   if (completed.has(id)) return true
-  const prevId = STEPS[idx - 1].id
-  return completed.has(prevId)
+  if (skipped && skipped.has(id)) return false
+  // walk back to the most recent non-skipped previous step; that one must be completed
+  for (let i = idx - 1; i >= 0; i--) {
+    const prev = STEPS[i].id
+    if (skipped && skipped.has(prev)) continue
+    return completed.has(prev)
+  }
+  return true
 }
 
 /* ── Step 1: Your Profile ───────────────────────────────────────────────── */
@@ -923,16 +976,30 @@ function SkillPane({ active, data, onChange, onAdvance, hasKey }) {
   )
 }
 
-/* ── Step 3: Data Discovery chat ────────────────────────────────────────── */
+/* ── Step 4: Data Discovery chat ────────────────────────────────────────── */
 const DATA_OPENER = "Let's understand what you're working with. What kinds of data does your organization have access to — and what's actually usable?"
 
-const DATA_SYSTEM_PROMPT = `You are a practical AI advisor interviewing a professional about their organization's data. Ask one focused question at a time. Be conversational but efficient.
+function buildDataSystemPrompt(useCaseAssessment) {
+  const useCaseBlock = useCaseAssessment
+    ? [
+        `Problem: ${useCaseAssessment.problem || '(not captured)'}`,
+        `Proposed solution: ${useCaseAssessment.solution || '(not captured)'}`,
+        `Feasibility verdict: ${useCaseAssessment.verdict || '(not captured)'}`,
+        useCaseAssessment.recommendation ? `Refined recommendation: ${useCaseAssessment.recommendation}` : null,
+      ].filter(Boolean).join('\n')
+    : '(use case not yet captured)'
 
-Cover these areas across the conversation: data types (structured vs unstructured), volume, quality, accessibility, whether data is siloed, and any compliance constraints (HIPAA, GDPR, SOC2, etc).
+  return `You are a practical AI advisor interviewing a professional about their data. You already know their use case:
+
+${useCaseBlock}
+
+Ask data questions that are specific and relevant to that use case — not generic questions about data in general. For example, if their use case is ticket triage, ask about ticket volume, labeling, and history — not about unrelated data types. Ask one focused question at a time.
 
 Your opening greeting "${DATA_OPENER}" has already been delivered to the user. Do NOT greet them again. The first user message you see is their answer to that opener — respond by acknowledging briefly and asking the next focused question.
 
-After 4–6 exchanges with the user, when you have enough material, produce a structured summary. Format the summary in EXACTLY this form (no preamble, no closing remarks):
+After 3-4 exchanges (not 6-8), produce a structured summary with these exact headers: ## Data Types, ## Quality Assessment, ## Key Constraints, ## Opportunity Signals.
+
+Format in EXACTLY this form (no preamble, no closing remarks):
 
 ## Data Types
 <2–4 sentences>
@@ -947,6 +1014,7 @@ After 4–6 exchanges with the user, when you have enough material, produce a st
 <2–4 sentences>
 
 Be direct and honest. If they have very little usable data, say so plainly. Until you produce the summary, keep asking questions.`
+}
 
 const DATA_HEADERS = [
   { key: 'dataTypes',     label: 'Data Types' },
@@ -977,8 +1045,9 @@ function hasAllSections(parsed, headerDefs) {
   return headerDefs.every((h) => parsed[h.key] && parsed[h.key].trim().length > 0)
 }
 
-function DataPane({ active, data, onChange, onAdvance, hasKey }) {
-  const chat = useChat({ tier: 'user', systemPrompt: DATA_SYSTEM_PROMPT })
+function DataPane({ active, data, onChange, onAdvance, hasKey, useCaseAssessment }) {
+  const systemPrompt = useMemo(() => buildDataSystemPrompt(useCaseAssessment), [useCaseAssessment])
+  const chat = useChat({ tier: 'user', systemPrompt })
   const [draft, setDraft] = useState('')
   const scrollRef = useRef(null)
 
@@ -1058,7 +1127,7 @@ function DataPane({ active, data, onChange, onAdvance, hasKey }) {
 
   return (
     <div className={`ucb-pane${active ? ' active' : ''}`}>
-      <div className="ucb-step-eyebrow">Step 3 of 6</div>
+      <div className="ucb-step-eyebrow">Step 4 of 6</div>
       <h1 className="ucb-step-title">Data Discovery</h1>
       <p className="ucb-step-sub">A short conversation about what data your organization actually has — and what's usable. Claude will ask one question at a time and produce a summary when it has enough.</p>
 
@@ -1079,7 +1148,7 @@ function DataPane({ active, data, onChange, onAdvance, hasKey }) {
             <div className="ucb-cal-row">
               <span className="ucb-cal-label" style={{ color: '#34d399' }}>✓ Summary saved</span>
             </div>
-            <div className="ucb-cal-obs">You can keep typing to revise, or continue to Use Case.</div>
+            <div className="ucb-cal-obs">You can keep typing to revise, or continue to Your Path.</div>
             <div className="ucb-footer">
               <button
                 className="ucb-btn ghost"
@@ -1131,7 +1200,7 @@ function DataPane({ active, data, onChange, onAdvance, hasKey }) {
   )
 }
 
-/* ── Step 4: Use Case chat ──────────────────────────────────────────────── */
+/* ── Step 3: Use Case chat ──────────────────────────────────────────────── */
 const USECASE_OPENER = "Now let's talk about what you want to build or improve. Describe the problem you're trying to solve — don't worry about whether it's an AI problem yet."
 
 const USECASE_SYSTEM_PROMPT = `You are a candid, experienced AI advisor. You do not sugarcoat. If an idea is bad, say so directly and explain why. If it needs work, say exactly what's missing. If it's good, say so. Ask one question at a time. Be honest, direct, and constructive.
@@ -1246,7 +1315,7 @@ function UseCasePane({ active, data, onChange, onAdvance, hasKey }) {
 
   return (
     <div className={`ucb-pane${active ? ' active' : ''}`}>
-      <div className="ucb-step-eyebrow">Step 4 of 6</div>
+      <div className="ucb-step-eyebrow">Step 3 of 6</div>
       <h1 className="ucb-step-title">Use Case</h1>
       <p className="ucb-step-sub">Describe what you want to build. Claude will probe, then give you an honest read — including telling you when an idea isn't a good AI use case.</p>
 
@@ -1267,7 +1336,11 @@ function UseCasePane({ active, data, onChange, onAdvance, hasKey }) {
             <div className="ucb-cal-row">
               <span className="ucb-cal-label" style={{ color: '#34d399' }}>✓ Assessment saved</span>
             </div>
-            <div className="ucb-cal-obs">You can keep typing to revise, or continue to Your Path.</div>
+            <div className="ucb-cal-obs">
+              {(data.assessment?.verdict || '').trim().startsWith('❌')
+                ? "You can keep typing to revise, or continue to Your Path. Step 4 (Data Discovery) will be skipped — this isn't a good AI use case, so we'll focus on refining the idea instead."
+                : 'You can keep typing to revise, or continue to Data Discovery.'}
+            </div>
             <div className="ucb-footer">
               <button
                 className="ucb-btn ghost"
@@ -1275,7 +1348,7 @@ function UseCasePane({ active, data, onChange, onAdvance, hasKey }) {
               >
                 Revise
               </button>
-              <button className="ucb-btn" onClick={onAdvance}>Continue →</button>
+              <button className="ucb-btn" onClick={() => onAdvance(data.assessment)}>Continue →</button>
             </div>
           </div>
         ) : null}
@@ -1325,7 +1398,8 @@ const PATH_SYSTEM_PROMPT = `You are a senior AI advisor making a binary recommen
 You will be given their profile, calibrated skill level, data situation, and use case assessment. Use ALL of it. Reference their actual situation in your reasoning, not generic advice.
 
 Decision guidance (apply judgment, not blind rules):
-- "Learn First" — skill is Beginner, OR the use case verdict is Not Viable / Needs Refinement, OR the data summary surfaced gaps that would block building.
+- If the use case verdict is "❌ Not a Good AI Use Case": recommend "Learn First". Acknowledge the ❌ verdict directly in your reasoning. Focus the Learn First Topics on either reframing/refining their problem or finding a better-fitting use case — do NOT recommend building this idea as-is. Note: the Data Discovery step was skipped in this case because there was no point capturing data for an idea that isn't a fit, so do not reference data gaps.
+- "Learn First" — skill is Beginner, OR the use case verdict is Needs Refinement, OR the data summary surfaced gaps that would block building.
 - "Go Build" — skill is Intermediate or higher AND the use case is Viable AND the data is workable.
 - "Both" — they can start building but should learn a specific topic in parallel because it will materially affect quality or risk.
 
@@ -1355,7 +1429,9 @@ function buildSessionContext(session, { includePath = false } = {}) {
   const { profile, skillLevel, dataDiscovery, useCase, path } = session
   const effectiveLevel = skillLevel.calibrated || skillLevel.selfReported || 'Unknown'
 
-  const dataSummary = dataDiscovery.summary
+  const dataSummary = dataDiscovery.skipped
+    ? '(data discovery was skipped because the use case verdict was ❌ Not a Good AI Use Case — focus the recommendation on refining the idea or finding a better use case, not on building)'
+    : dataDiscovery.summary
     ? [
         `## Data Types\n${dataDiscovery.summary.dataTypes || ''}`,
         `## Quality Assessment\n${dataDiscovery.summary.quality || ''}`,
