@@ -431,13 +431,6 @@ const css = `
   border: 1px dashed #2a3a52; border-radius: 8px;
 }
 
-/* ── Stub panel for not-yet-built steps ── */
-.ucb-stub {
-  border: 1px dashed #2a3a52; border-radius: 12px;
-  padding: 32px; color: #6a7e98;
-  font-family: 'IBM Plex Mono', monospace; font-size: 13px;
-  background: rgba(56,189,248,0.02);
-}
 `
 
 const STEPS = [
@@ -1738,17 +1731,6 @@ function BuildMockup({ html }) {
         srcDoc={html}
         sandbox="allow-scripts"
       />
-    </div>
-  )
-}
-
-/* ── Stub for unbuilt steps ─────────────────────────────────────────────── */
-function StubPane({ active, num, title }) {
-  return (
-    <div className={`ucb-pane${active ? ' active' : ''}`}>
-      <div className="ucb-step-eyebrow">Step {num} of 6</div>
-      <h1 className="ucb-step-title">{title}</h1>
-      <div className="ucb-stub">Coming next — this step is being built in a later phase.</div>
     </div>
   )
 }
