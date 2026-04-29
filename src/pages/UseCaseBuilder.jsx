@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import NavBar from '../components/NavBar.jsx'
-import { useApiKey } from '../hooks/useApiKey.js'
+import { useAuth } from '../hooks/useAuth.js'
 import { useChat } from '../hooks/useChat.js'
 
 const ACCENT = '#38bdf8'
@@ -473,7 +473,8 @@ const initialSession = () => ({
 })
 
 export default function UseCaseBuilder() {
-  const { hasKey } = useApiKey()
+  const { isSignedIn } = useAuth()
+  const hasKey = isSignedIn // pro tier authenticates via Clerk session, not a user-supplied API key
   const [currentStep, setCurrentStep] = useState('profile')
   const [completed, setCompleted] = useState(new Set())
   const [skipped, setSkipped] = useState(new Set())
@@ -537,8 +538,8 @@ export default function UseCaseBuilder() {
 
       {!hasKey && (
         <div className="ucb-keybar">
-          <strong>API key required.</strong>
-          <span>This tool uses AI at every step — open the key icon in the nav and paste your Anthropic key to continue past Step 2.</span>
+          <strong>Sign-in required.</strong>
+          <span>Your session ended — refresh to sign back in.</span>
         </div>
       )}
 
@@ -821,7 +822,7 @@ function parseAssessment(text) {
 
 function SkillPane({ active, data, onChange, onAdvance, hasKey }) {
   const [answers, setAnswers] = useState(['', '', '', '', ''])
-  const chat = useChat({ tier: 'user', systemPrompt: ASSESSMENT_SYSTEM_PROMPT })
+  const chat = useChat({ tier: 'pro', systemPrompt: ASSESSMENT_SYSTEM_PROMPT })
   const wasStreamingRef = useRef(false)
 
   const lastMsg = chat.messages[chat.messages.length - 1]
@@ -919,7 +920,7 @@ function SkillPane({ active, data, onChange, onAdvance, hasKey }) {
           ))}
 
           {!hasKey && (
-            <div className="ucb-banner">Add your API key in the nav to run the calibration.</div>
+            <div className="ucb-banner">Sign-in required to run the calibration.</div>
           )}
           {chat.error && <div className="ucb-banner">{friendlyError(chat.error)}</div>}
 
@@ -1047,7 +1048,7 @@ function hasAllSections(parsed, headerDefs) {
 
 function DataPane({ active, data, onChange, onAdvance, hasKey, useCaseAssessment }) {
   const systemPrompt = useMemo(() => buildDataSystemPrompt(useCaseAssessment), [useCaseAssessment])
-  const chat = useChat({ tier: 'user', systemPrompt })
+  const chat = useChat({ tier: 'pro', systemPrompt })
   const [draft, setDraft] = useState('')
   const scrollRef = useRef(null)
 
@@ -1140,7 +1141,7 @@ function DataPane({ active, data, onChange, onAdvance, hasKey, useCaseAssessment
           {chat.messages.map(renderMessage)}
         </div>
 
-        {!hasKey && <div className="ucb-banner">Add your API key in the nav to start the conversation.</div>}
+        {!hasKey && <div className="ucb-banner">Sign-in required to start the conversation.</div>}
         {chat.error && <div className="ucb-banner">{friendlyError(chat.error)}</div>}
 
         {data.confirmed ? (
@@ -1168,7 +1169,7 @@ function DataPane({ active, data, onChange, onAdvance, hasKey, useCaseAssessment
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={onKeyDown}
-              placeholder={hasKey ? 'Type your answer…  (Enter to send, Shift+Enter for newline)' : 'API key required'}
+              placeholder={hasKey ? 'Type your answer…  (Enter to send, Shift+Enter for newline)' : 'Sign-in required'}
               disabled={!hasKey || chat.isStreaming}
             />
             <button
@@ -1237,7 +1238,7 @@ const USECASE_HEADERS = [
 ]
 
 function UseCasePane({ active, data, onChange, onAdvance, hasKey }) {
-  const chat = useChat({ tier: 'user', systemPrompt: USECASE_SYSTEM_PROMPT })
+  const chat = useChat({ tier: 'pro', systemPrompt: USECASE_SYSTEM_PROMPT })
   const [draft, setDraft] = useState('')
   const scrollRef = useRef(null)
 
@@ -1328,7 +1329,7 @@ function UseCasePane({ active, data, onChange, onAdvance, hasKey }) {
           {chat.messages.map(renderMessage)}
         </div>
 
-        {!hasKey && <div className="ucb-banner">Add your API key in the nav to start the conversation.</div>}
+        {!hasKey && <div className="ucb-banner">Sign-in required to start the conversation.</div>}
         {chat.error && <div className="ucb-banner">{friendlyError(chat.error)}</div>}
 
         {data.confirmed ? (
@@ -1360,7 +1361,7 @@ function UseCasePane({ active, data, onChange, onAdvance, hasKey }) {
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={onKeyDown}
-              placeholder={hasKey ? 'Type your answer…  (Enter to send, Shift+Enter for newline)' : 'API key required'}
+              placeholder={hasKey ? 'Type your answer…  (Enter to send, Shift+Enter for newline)' : 'Sign-in required'}
               disabled={!hasKey || chat.isStreaming}
             />
             <button
@@ -1499,7 +1500,7 @@ function detectPathKind(recommendationText) {
 }
 
 function PathPane({ active, data, onChange, session, onAdvance, markComplete, hasKey }) {
-  const chat = useChat({ tier: 'user', systemPrompt: PATH_SYSTEM_PROMPT })
+  const chat = useChat({ tier: 'pro', systemPrompt: PATH_SYSTEM_PROMPT })
   const wasStreamingRef = useRef(false)
 
   const lastMsg = chat.messages[chat.messages.length - 1]
@@ -1662,7 +1663,7 @@ function extractMockupHtml(text) {
 }
 
 function BuildPane({ active, data, onChange, session, markComplete, hasKey }) {
-  const chat = useChat({ tier: 'user', systemPrompt: BUILD_SYSTEM_PROMPT })
+  const chat = useChat({ tier: 'pro', systemPrompt: BUILD_SYSTEM_PROMPT })
   const wasStreamingRef = useRef(false)
 
   const lastMsg = chat.messages[chat.messages.length - 1]
