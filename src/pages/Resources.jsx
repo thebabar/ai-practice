@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import NavBar from '../components/NavBar.jsx'
 import {
-  PlantIcon, RocketLaunchIcon, CodeIcon,
+  PlantIcon, RocketLaunchIcon, CodeIcon, PaintBrushIcon,
   BookOpenIcon, PlayCircleIcon, SealCheckIcon, UsersThreeIcon,
-  QuestionIcon, ArrowSquareOutIcon, CheckIcon, XIcon,
+  QuestionIcon, ArrowSquareOutIcon, CheckIcon, XIcon, ArticleIcon,
 } from '@phosphor-icons/react'
 
 const ACCENT = '#2dd4bf'
@@ -27,8 +27,9 @@ const css = `
 .rs-section-sub { font-size: 16px; color: #3a7a72; line-height: 1.7; margin-bottom: 28px; text-align: center; }
 
 /* Level selector */
-.rs-level-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-@media (max-width: 680px) { .rs-level-grid { grid-template-columns: 1fr; } }
+.rs-level-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+@media (max-width: 980px) { .rs-level-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .rs-level-grid { grid-template-columns: 1fr; } }
 .rs-level-card { background: rgba(45,212,191,0.03); border: 1px solid #11302c; border-radius: 14px; padding: 28px 22px; cursor: pointer; transition: all 0.2s; text-align: center; display: flex; flex-direction: column; align-items: center; }
 .rs-level-card:hover { border-color: ${ACCENT}; background: rgba(45,212,191,0.07); transform: translateY(-3px); box-shadow: 0 16px 44px rgba(0,0,0,0.4), 0 0 32px rgba(45,212,191,0.1); }
 .rs-level-icon { width: 60px; height: 60px; border-radius: 14px; display: flex; align-items: center; justify-content: center; background: rgba(45,212,191,0.1); border: 1px solid rgba(45,212,191,0.2); margin-bottom: 16px; }
@@ -219,9 +220,26 @@ const TRACKS = {
       { q: 'Subagents in Claude Code are useful for…', opts: ['Managing context and delegating specialized tasks', 'Increasing your bill arbitrarily', 'Disabling the main agent', 'Nothing practical'], correct: 0, explanation: 'Subagents keep the main conversation focused by delegating scoped work.' },
     ],
   },
+  claudeDesign: {
+    name: 'Claude Design',
+    Icon: PaintBrushIcon,
+    desc: 'Design with Claude. Build prototypes, slides, one-pagers, websites, and design systems through conversation.',
+    resources: [
+      { id: 'cd1', type: 'Article', source: 'Official', title: 'Introducing Claude Design by Anthropic Labs', provider: 'Anthropic News', desc: "Anthropic's launch post — collaborate with Claude on prototypes, slides, one-pagers, and more.", url: 'https://www.anthropic.com/news/claude-design-anthropic-labs' },
+      { id: 'cd2', type: 'Video', source: 'Official', title: 'Introducing Claude Design', desc: "Anthropic's official intro to Claude Design and what it can create.", youtubeId: 't_LBECIQQqs' },
+      { id: 'cd3', type: 'Video', source: 'Community', title: 'Claude Design: Everything You Can Build in 16 Minutes (5 Real Use Cases)', desc: 'Hands-on walkthrough of five use cases: videos, slides, websites, apps, and a design system.', youtubeId: 'WMnk1LFBMqA' },
+      { id: 'cd4', type: 'Video', source: 'Community', title: 'Claude Design Basics: Master 95% in 10 Minutes', desc: 'A 6-step framework: interface, building, refining, exporting, and Claude Code handoff.', youtubeId: 'X7YMMyd2Qnk' },
+    ],
+    quiz: [
+      { q: 'What is Claude Design?', opts: ['A tool to collaborate with Claude on visual work like prototypes, slides, and one-pagers', 'A code linter', 'A password manager', 'A video conferencing app'], correct: 0, explanation: 'Claude Design is an Anthropic Labs product for creating polished visual work.' },
+      { q: 'How do you refine a design in Claude Design?', opts: ['Through conversation, inline comments, direct edits, or adjustment controls', 'Only by rewriting from scratch', 'By editing raw CSS only', "You can't refine it"], correct: 0, explanation: 'You iterate via chat, inline comments, direct edits, or live adjustment sliders.' },
+      { q: 'Which is a supported export from Claude Design?', opts: ['Canva, PDF, PPTX, or standalone HTML', 'Only PNG', 'Only printed paper', 'No exports'], correct: 0, explanation: 'Designs export to Canva, PDF, PPTX, or HTML, or share via an org URL.' },
+      { q: 'When a design is ready to build, Claude Design can…', opts: ['Package a handoff bundle to pass to Claude Code', 'Email it to a stranger', 'Delete your repo', 'Do nothing further'], correct: 0, explanation: 'It bundles the design for Claude Code to implement with a single instruction.' },
+    ],
+  },
 }
 
-const LEVEL_ORDER = ['beginner', 'intermediate', 'developer']
+const LEVEL_ORDER = ['beginner', 'intermediate', 'developer', 'claudeDesign']
 
 const FILTERS = [
   { key: 'all', label: 'All', test: () => true },
@@ -250,9 +268,9 @@ function saveProgress(ids) {
 
 // ─── Badges ───────────────────────────────────────────────────────────────
 function TypeBadge({ type }) {
-  // Reference items render with the BookOpen icon, like courses.
-  const Icon = type === 'Video' ? PlayCircleIcon : BookOpenIcon
-  const label = type === 'Video' ? 'Video' : type === 'Reference' ? 'Reference' : 'Course'
+  // Reference items render with the BookOpen icon, like courses. Article gets its own icon.
+  const Icon = type === 'Video' ? PlayCircleIcon : type === 'Article' ? ArticleIcon : BookOpenIcon
+  const label = type === 'Video' ? 'Video' : type === 'Article' ? 'Article' : type === 'Reference' ? 'Reference' : 'Course'
   return (
     <span className="rs-badge rs-badge-type">
       <Icon size={16} weight="duotone" color={ACCENT} />
@@ -296,7 +314,9 @@ function ResourceCard({ res, isFirst, completed, onToggle, onPlay }) {
       ) : (
         <a className="rs-course-head" href={res.url} target="_blank" rel="noopener noreferrer">
           <span className="rs-course-head-icon">
-            <BookOpenIcon size={30} weight="duotone" color={ACCENT} />
+            {res.type === 'Article'
+              ? <ArticleIcon size={30} weight="duotone" color={ACCENT} />
+              : <BookOpenIcon size={30} weight="duotone" color={ACCENT} />}
           </span>
           <span>
             <span className="rs-course-head-provider">{res.provider}</span>
@@ -320,7 +340,7 @@ function ResourceCard({ res, isFirst, completed, onToggle, onPlay }) {
             </button>
           ) : (
             <a className="rs-link" href={res.url} target="_blank" rel="noopener noreferrer">
-              {res.type === 'Reference' ? 'Read docs' : 'Open course'}
+              {res.type === 'Reference' ? 'Read docs' : res.type === 'Article' ? 'Read article' : 'Open course'}
               <ArrowSquareOutIcon size={15} weight="bold" color={ACCENT} />
             </a>
           )}
@@ -571,7 +591,7 @@ export default function Resources() {
       <div className="rs-panel">
         {!track ? (
           <div>
-            <div className="rs-section-title">What's your level?</div>
+            <div className="rs-section-title">Choose your path</div>
             <div className="rs-section-sub">Pick a track and we'll lay out an ordered learning path — from your first prompt to building production apps.</div>
 
             <div className="rs-level-grid">
@@ -579,9 +599,11 @@ export default function Resources() {
                 const t = TRACKS[key]
                 const Icon = t.Icon
                 const courses = t.resources.filter(r => r.type === 'Course' || r.type === 'Reference').length
+                const articles = t.resources.filter(r => r.type === 'Article').length
                 const videos = t.resources.filter(r => r.type === 'Video').length
                 const parts = []
                 if (courses) parts.push(`${courses} course${courses > 1 ? 's' : ''}`)
+                if (articles) parts.push(`${articles} article${articles > 1 ? 's' : ''}`)
                 if (videos) parts.push(`${videos} video${videos > 1 ? 's' : ''}`)
                 return (
                   <div key={key} className="rs-level-card" onClick={() => pickLevel(key)}>
@@ -598,7 +620,7 @@ export default function Resources() {
           </div>
         ) : (
           <div>
-            <button className="rs-change-btn" onClick={changeLevel}>← Change level</button>
+            <button className="rs-change-btn" onClick={changeLevel}>← Change path</button>
             <TrackView
               levelKey={level}
               track={track}
