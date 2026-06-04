@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { GraduationCapIcon, ChartScatterIcon, ThermometerSimpleIcon } from '@phosphor-icons/react'
+import { GraduationCapIcon, ChartScatterIcon, ThermometerSimpleIcon, LinkedinLogoIcon } from '@phosphor-icons/react'
 import NavBar from '../components/NavBar.jsx'
 
 const css = `
@@ -19,6 +19,12 @@ const css = `
 .hero-stats { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; }
 .hero-stat-num { font-family: 'IBM Plex Sans', sans-serif; font-size: 28px; font-weight: 900; color: #38bdf8; line-height: 1; }
 .hero-stat-lbl { font-size: 16px; color: #4a6a8a; letter-spacing: 0.12em; text-transform: uppercase; margin-top: 4px; }
+
+.hero-byline { position: relative; display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 40px; font-size: 13px; color: #5a7a9a; letter-spacing: 0.03em; }
+.hero-byline strong { color: #94b8d8; font-weight: 600; }
+.hero-byline-sep { color: #2a4060; }
+.hero-byline-link { display: inline-flex; align-items: center; gap: 6px; color: #7a9bbf; text-decoration: none; transition: color 0.18s; }
+.hero-byline-link:hover { color: #38bdf8; }
 
 .lab-section { max-width: 1100px; margin: 0 auto; padding: 0 24px 100px; }
 .section-header { display: flex; align-items: baseline; gap: 14px; margin-bottom: 28px; }
@@ -435,6 +441,13 @@ export default function Home() {
               <div className="hero-stat-lbl">{l}</div>
             </div>
           ))}
+        </div>
+        <div className="hero-byline">
+          <span>Created by <strong>Babar M Bhatti</strong>, Chief AI Officer, PrismSkills.ai</span>
+          <span className="hero-byline-sep">·</span>
+          <a className="hero-byline-link" href="https://www.linkedin.com/in/bbhatti" target="_blank" rel="noopener noreferrer">
+            <LinkedinLogoIcon size={14} weight="fill" /> LinkedIn
+          </a>
         </div>
       </section>
 
