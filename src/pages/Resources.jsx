@@ -44,6 +44,9 @@ const css = `
 .rs-track-icon { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(45,212,191,0.1); border: 1px solid rgba(45,212,191,0.2); flex-shrink: 0; }
 .rs-track-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 24px; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
 .rs-track-sub { font-size: 14px; color: #3a7a72; line-height: 1.6; margin: 8px 0 22px; }
+.rs-track-access { font-size: 14px; color: #5a9a92; line-height: 1.6; margin: -14px 0 22px; padding: 10px 14px; background: rgba(45,212,191,0.05); border: 1px solid rgba(45,212,191,0.15); border-radius: 8px; }
+.rs-track-access-link { color: ${ACCENT}; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; font-family: 'IBM Plex Mono', monospace; }
+.rs-track-access-link:hover { text-decoration: underline; }
 
 /* Progress */
 .rs-progress-wrap { margin-bottom: 22px; }
@@ -224,6 +227,7 @@ const TRACKS = {
     name: 'Claude Design',
     Icon: PaintBrushIcon,
     desc: 'Design with Claude. Build prototypes, slides, one-pagers, websites, and design systems through conversation.',
+    accessNote: { intro: 'Access Claude Design at', url: 'https://claude.ai/design', label: 'claude.ai/design' },
     resources: [
       { id: 'cd1', type: 'Article', source: 'Official', title: 'Introducing Claude Design by Anthropic Labs', provider: 'Anthropic News', desc: "Anthropic's launch post — collaborate with Claude on prototypes, slides, one-pagers, and more.", url: 'https://www.anthropic.com/news/claude-design-anthropic-labs' },
       { id: 'cd2', type: 'Video', source: 'Official', title: 'Introducing Claude Design', desc: "Anthropic's official intro to Claude Design and what it can create.", youtubeId: 't_LBECIQQqs' },
@@ -492,6 +496,15 @@ function TrackView({ levelKey, track, completedIds, onToggle, onReset, onPlay })
         <div className="rs-track-title">{track.name} Track</div>
       </div>
       <div className="rs-track-sub">{track.desc}</div>
+      {track.accessNote && (
+        <div className="rs-track-access">
+          {track.accessNote.intro}{' '}
+          <a className="rs-track-access-link" href={track.accessNote.url} target="_blank" rel="noopener noreferrer">
+            {track.accessNote.label}
+            <ArrowSquareOutIcon size={13} weight="bold" />
+          </a>
+        </div>
+      )}
 
       {/* Progress */}
       <div className="rs-progress-wrap">
