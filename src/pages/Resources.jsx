@@ -565,7 +565,7 @@ export default function Resources() {
       <div className="rs-hero">
         <div className="rs-eyebrow">Learn Claude</div>
         <h1 className="rs-title">Claude <span>Learning Resources</span></h1>
-        <p className="rs-subtitle">A curated directory of the best official and community resources for learning Claude — organized into a guided path for your level.</p>
+        <p className="rs-subtitle">A curated directory of the best official and community resources for learning AI with Claude and beyond — organized into a guided path for your level.</p>
       </div>
 
       <div className="rs-panel">

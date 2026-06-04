@@ -39,7 +39,7 @@ function AppRoutes() {
       <Route path="/workflow-canvas" element={<WorkflowCanvas />} />
       <Route path="/agent-simulation" element={<AgentSimulation />} />
       <Route path="/board-briefing" element={<BoardBriefing />} />
-      <Route path="/resources" element={<Resources />} />
+      <Route path="/learn-claude" element={<Resources />} />
       <Route path="/use-case-builder" element={<UseCaseBuilderGate />} />
       <Route path="/use-case-builder/verify" element={<UseCaseBuilderVerify />} />
       {CLERK_PUBLISHABLE_KEY && (

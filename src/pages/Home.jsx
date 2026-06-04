@@ -239,17 +239,17 @@ const ICON_MAP = {
   'types-of-llms': TypesOfLLMsIcon,
   'workflow-canvas': WorkflowIcon,
   'board-briefing': BoardBriefingIcon,
-  'resources': ResourcesIcon,
+  'learn-claude': ResourcesIcon,
 }
 
 const VISUALIZATIONS = [
   // ── Row 1: Foundations & Generative ──────────────────────────────────────────
   {
-    path: '/resources',
+    path: '/learn-claude',
     icon: null,
     tag: 'Learn Claude',
     title: 'Claude Learning Resources',
-    desc: 'A curated directory of the best official and community courses and videos for learning Claude — organized into a guided path for your level.',
+    desc: 'Curated official + community resources for learning Claude — as a guided path for your level.',
     pills: ['Beginner', 'Intermediate', 'Developer'],
     accent: '#2dd4bf',
     accentDim: 'rgba(45,212,191,0.2)',
