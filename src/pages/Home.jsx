@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { GraduationCapIcon } from '@phosphor-icons/react'
 import NavBar from '../components/NavBar.jsx'
 
 const css = `
@@ -244,6 +245,10 @@ function BoardBriefingIcon() {
   )
 }
 
+function ResourcesIcon() {
+  return <GraduationCapIcon size={28} weight="duotone" color="#2dd4bf" />
+}
+
 const ICON_MAP = {
   'intro-llms': LLMIcon,
   'token-optimization': TokenIcon,
@@ -257,10 +262,25 @@ const ICON_MAP = {
   'types-of-llms': TypesOfLLMsIcon,
   'workflow-canvas': WorkflowIcon,
   'board-briefing': BoardBriefingIcon,
+  'resources': ResourcesIcon,
 }
 
 const VISUALIZATIONS = [
   // ── Row 1: Foundations & Generative ──────────────────────────────────────────
+  {
+    path: '/resources',
+    icon: null,
+    tag: 'Learn Claude',
+    title: 'Claude Learning Resources',
+    desc: 'A curated directory of the best official and community courses and videos for learning Claude — organized into a guided path for your level.',
+    pills: ['Beginner', 'Intermediate', 'Developer'],
+    accent: '#2dd4bf',
+    accentDim: 'rgba(45,212,191,0.2)',
+    iconBg: 'rgba(45,212,191,0.1)',
+    glow: 'radial-gradient(ellipse at 0% 0%, rgba(45,212,191,0.08) 0%, transparent 60%)',
+    glowColor: 'rgba(45,212,191,0.09)',
+    ready: true,
+  },
   {
     path: '/intro-llms',
     icon: null,
