@@ -32,7 +32,7 @@
 
 ## Project 2: AI Visual Lab (Vercel)
 **Repo:** `thebabar/ai-practice`
-**Deployed:** `ai-practice-eight.vercel.app`
+**Deployed:** `aibitbybot.vercel.app`
 **Local:** `ai-visual-lab/` subfolder
 **Stack:** React + Vite, auto-deploy on push to main
 **Design system:** documented in `CLAUDE.md` — IBM Plex Sans/Mono fonts, `#050810` background, hero → 5–6 tabs → quiz page pattern

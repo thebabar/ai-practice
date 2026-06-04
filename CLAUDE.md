@@ -2,7 +2,7 @@
 
 ## What This Project Is
 A collection of interactive AI learning visualizations built with React + Vite,
-deployed on Vercel at https://ai-practice-eight.vercel.app
+deployed on Vercel at https://aibitbybot.vercel.app
 GitHub repo: https://github.com/thebabar/ai-practice
 
 ---
@@ -159,7 +159,7 @@ Run `npm run build` and read the error. Most common issues:
 - Mismatched variable names between VISUALIZATIONS array and render code
 
 ### Check what's live
-Visit https://ai-practice-eight.vercel.app or check
+Visit https://aibitbybot.vercel.app or check
 https://vercel.com for deployment status.
 
 ---
