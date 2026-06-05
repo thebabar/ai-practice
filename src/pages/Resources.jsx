@@ -223,6 +223,9 @@ const TRACKS = {
       { q: 'What does the Model Context Protocol (MCP) do?', opts: ['Connects Claude to external services via tools, resources, and prompts', 'Compresses images', 'Replaces the API', 'Handles billing'], correct: 0, explanation: 'MCP standardizes how Claude connects to external tools and data.' },
       { q: 'Claude Code is…', opts: ['An agentic coding tool that works from your terminal/IDE', 'A spreadsheet app', 'A password manager', 'A model name'], correct: 0, explanation: 'Claude Code lets developers delegate coding tasks in their dev environment.' },
       { q: 'Subagents in Claude Code are useful for…', opts: ['Managing context and delegating specialized tasks', 'Increasing your bill arbitrarily', 'Disabling the main agent', 'Nothing practical'], correct: 0, explanation: 'Subagents keep the main conversation focused by delegating scoped work.' },
+      { q: 'A Claude Skill is best described as…', opts: ['A reusable instruction package Claude applies automatically when a task is relevant', 'A new subscription tier', 'A keyboard shortcut', 'A frontend framework'], correct: 0, explanation: 'Skills bundle instructions, examples, and supporting files so Claude performs a task consistently across sessions.' },
+      { q: 'A proactive agent workflow with Claude Code typically combines…', opts: ['Scoped tools, clear context, and a planning loop with human checkpoints', 'No instructions and high randomness', 'Disabling all subagents', 'Writing the workflow only in YAML'], correct: 0, explanation: 'Proactive workflows give Claude the tools, context, and guardrails to plan and act on a task without constant re-prompting.' },
+      { q: 'Prompt engineering for production systems is mostly about…', opts: ['Iterative experimentation, clear context, evals, and version control', 'Memorizing magic keywords', 'Always raising temperature to 1', 'Picking the largest model regardless of cost'], correct: 0, explanation: "Treat prompts like code: iterate against evals, version them, and ground them in concrete context — Anthropic's experts emphasize this." },
     ],
   },
   claudeDesign: {
@@ -423,7 +426,7 @@ function TrackQuiz({ quiz, levelKey }) {
         <QuestionIcon size={20} weight="duotone" color={ACCENT} />
         <span className="rs-quiz-head-title">Knowledge Check</span>
       </div>
-      <div className="rs-quiz-sub">4 quick questions to test what you've learned.</div>
+      <div className="rs-quiz-sub">{total} quick questions to test what you've learned.</div>
 
       {done ? (
         <div className="rs-quiz-done">
