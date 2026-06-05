@@ -91,8 +91,8 @@ const css = `
 .rs-course-head { display: flex; align-items: center; gap: 14px; padding: 18px 20px; background: linear-gradient(135deg, rgba(45,212,191,0.1), rgba(45,212,191,0.02)); border-bottom: 1px solid #11302c; cursor: pointer; text-decoration: none; transition: background 0.18s; }
 .rs-course-head:hover { background: linear-gradient(135deg, rgba(45,212,191,0.16), rgba(45,212,191,0.04)); }
 .rs-course-head-icon { width: 46px; height: 46px; border-radius: 10px; background: rgba(45,212,191,0.1); border: 1px solid rgba(45,212,191,0.25); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.rs-course-head-provider { font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; font-weight: 700; color: #c0e8e2; }
-.rs-course-head-instructor { font-size: 12px; color: #4a8a82; font-family: 'IBM Plex Mono', monospace; margin-top: 2px; }
+.rs-course-head-provider { display: block; font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; font-weight: 700; color: #c0e8e2; }
+.rs-course-head-instructor { display: block; font-size: 12px; color: #4a8a82; font-family: 'IBM Plex Mono', monospace; margin-top: 2px; }
 
 /* Card body */
 .rs-card-body { padding: 16px 20px 18px; }
@@ -205,17 +205,18 @@ const TRACKS = {
     Icon: CodeIcon,
     desc: 'Build with Claude. Master the API, Claude Code, MCP, Skills, and subagents from the ground up.',
     resources: [
-      { id: 'd1', type: 'Video', source: 'Official', title: 'AI prompt engineering: A deep dive', desc: 'Anthropic experts on advanced prompting techniques and how prompting evolves.', youtubeId: 'T9aRN5JkmL8' },
-      { id: 'd2', type: 'Course', source: 'Official', title: 'Building with the Claude API', provider: 'Anthropic Academy', desc: 'The full spectrum of working with Anthropic models via the Claude API.', url: 'https://anthropic.skilljar.com/claude-with-the-anthropic-api' },
-      { id: 'd3', type: 'Course', source: 'Official', title: 'Claude Code 101', provider: 'Anthropic Academy', desc: 'Use Claude Code effectively in your daily development workflow.', url: 'https://anthropic.skilljar.com/claude-code-101' },
-      { id: 'd4', type: 'Course', source: 'Official', title: 'Claude Code: A Highly Agentic Coding Assistant', provider: 'DeepLearning.AI × Anthropic', instructor: 'Elie Schoppik (Anthropic)', desc: 'Claude Code best practices: codebases, MCP, parallel sessions, GitHub integration.', url: 'https://learn.deeplearning.ai/courses/claude-code-a-highly-agentic-coding-assistant' },
-      { id: 'd5', type: 'Course', source: 'Official', title: 'Claude Code in Action', provider: 'Anthropic Academy', desc: 'Integrate Claude Code into your development workflow.', url: 'https://anthropic.skilljar.com/claude-code-in-action' },
-      { id: 'd6', type: 'Course', source: 'Official', title: 'Introduction to Model Context Protocol', provider: 'Anthropic Academy', desc: 'Build MCP servers and clients from scratch in Python.', url: 'https://anthropic.skilljar.com/introduction-to-model-context-protocol' },
-      { id: 'd7', type: 'Course', source: 'Official', title: 'Introduction to agent skills', provider: 'Anthropic Academy', desc: 'Build, configure, and share Skills in Claude Code.', url: 'https://anthropic.skilljar.com/introduction-to-agent-skills' },
-      { id: 'd8', type: 'Course', source: 'Official', title: 'Introduction to subagents', provider: 'Anthropic Academy', desc: 'Use and create subagents to manage context and delegate tasks.', url: 'https://anthropic.skilljar.com/introduction-to-subagents' },
-      { id: 'd9', type: 'Course', source: 'Official', title: 'Model Context Protocol: Advanced Topics', provider: 'Anthropic Academy', desc: 'Advanced MCP patterns: sampling, notifications, file system access, transports.', url: 'https://anthropic.skilljar.com/model-context-protocol-advanced-topics' },
-      { id: 'd10', type: 'Course', source: 'Community', title: 'Agentic AI', provider: 'DeepLearning.AI', instructor: 'Andrew Ng', desc: 'Build agentic systems with evals and design patterns. Covers AI broadly, not just Claude.', url: 'https://learn.deeplearning.ai/courses/agentic-ai' },
-      { id: 'd11', type: 'Reference', source: 'Official', title: 'Developer docs', provider: 'Claude Platform', desc: 'Official Claude API and platform documentation.', url: 'https://platform.claude.com/docs' },
+      { id: 'd1', type: 'Course', source: 'Official', title: 'Claude Code 101', provider: 'Anthropic Academy', desc: 'Use Claude Code effectively in your daily development workflow.', url: 'https://anthropic.skilljar.com/claude-code-101' },
+      { id: 'd2', type: 'Course', source: 'Official', title: 'Claude Code in Action', provider: 'Anthropic Academy', desc: 'Integrate Claude Code into your development workflow.', url: 'https://anthropic.skilljar.com/claude-code-in-action' },
+      { id: 'd3', type: 'Video', source: 'Official', title: 'Build a proactive agent workflow with Claude Code', desc: "Anthropic walks through designing a proactive agent workflow using Claude Code's tools and subagents.", youtubeId: 'eSP7PLTXNy8' },
+      { id: 'd4', type: 'Video', source: 'Official', title: 'AI prompt engineering: A deep dive', desc: 'Anthropic experts on advanced prompting techniques and how prompting evolves.', youtubeId: 'T9aRN5JkmL8' },
+      { id: 'd5', type: 'Course', source: 'Official', title: 'Building with the Claude API', provider: 'Anthropic Academy', desc: 'The full spectrum of working with Anthropic models via the Claude API.', url: 'https://anthropic.skilljar.com/claude-with-the-anthropic-api' },
+      { id: 'd6', type: 'Course', source: 'Official', title: 'Claude Code: A Highly Agentic Coding Assistant', provider: 'DeepLearning.AI × Anthropic', instructor: 'Elie Schoppik (Anthropic)', duration: '1h 50m', desc: 'Claude Code best practices: codebases, MCP, parallel sessions, GitHub integration.', url: 'https://learn.deeplearning.ai/courses/claude-code-a-highly-agentic-coding-assistant' },
+      { id: 'd7', type: 'Course', source: 'Official', title: 'Introduction to Model Context Protocol', provider: 'Anthropic Academy', desc: 'Build MCP servers and clients from scratch in Python.', url: 'https://anthropic.skilljar.com/introduction-to-model-context-protocol' },
+      { id: 'd8', type: 'Course', source: 'Official', title: 'Introduction to agent skills', provider: 'Anthropic Academy', desc: 'Build, configure, and share Skills in Claude Code.', url: 'https://anthropic.skilljar.com/introduction-to-agent-skills' },
+      { id: 'd9', type: 'Course', source: 'Official', title: 'Introduction to subagents', provider: 'Anthropic Academy', desc: 'Use and create subagents to manage context and delegate tasks.', url: 'https://anthropic.skilljar.com/introduction-to-subagents' },
+      { id: 'd10', type: 'Course', source: 'Official', title: 'Model Context Protocol: Advanced Topics', provider: 'Anthropic Academy', desc: 'Advanced MCP patterns: sampling, notifications, file system access, transports.', url: 'https://anthropic.skilljar.com/model-context-protocol-advanced-topics' },
+      { id: 'd11', type: 'Course', source: 'Community', title: 'Agentic AI', provider: 'DeepLearning.AI', instructor: 'Andrew Ng', duration: '~8h', desc: 'Build agentic systems with evals and design patterns. Covers AI broadly, not just Claude.', url: 'https://learn.deeplearning.ai/courses/agentic-ai' },
+      { id: 'd12', type: 'Reference', source: 'Official', title: 'Developer docs', provider: 'Claude Platform', desc: 'Official Claude API and platform documentation.', url: 'https://platform.claude.com/docs' },
     ],
     quiz: [
       { q: 'The Claude API lets developers…', opts: ["Integrate Claude's capabilities into their own applications", 'Only use a web chat', 'Train new base models', "Access other companies' private data"], correct: 0, explanation: 'The API is how you build Claude-powered applications programmatically.' },
@@ -325,7 +326,13 @@ function ResourceCard({ res, isFirst, completed, onToggle, onPlay }) {
           </span>
           <span>
             <span className="rs-course-head-provider">{res.provider}</span>
-            {res.instructor && <span className="rs-course-head-instructor">{res.instructor}</span>}
+            {(res.instructor || res.duration) && (
+              <span className="rs-course-head-instructor">
+                {res.instructor}
+                {res.instructor && res.duration && ' · '}
+                {res.duration}
+              </span>
+            )}
           </span>
         </a>
       )}
