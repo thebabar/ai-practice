@@ -1,197 +1,604 @@
 import { useState, useEffect, useRef } from 'react'
 import NavBar from '../components/NavBar.jsx'
+import {
+  EyeIcon, BrainIcon, WrenchIcon, DownloadSimpleIcon, CheckCircleIcon,
+  MagnifyingGlassIcon, CodeIcon, GlobeIcon, FolderIcon, PlugIcon,
+  GearIcon, BracketsCurlyIcon, ScrollIcon, ChatCircleIcon, TargetIcon,
+  PlayIcon, PauseIcon, ArrowCounterClockwiseIcon, ArrowRightIcon,
+} from '@phosphor-icons/react'
+
+const ICON_BY_KEY = {
+  eye: EyeIcon, brain: BrainIcon, wrench: WrenchIcon, download: DownloadSimpleIcon, check: CheckCircleIcon,
+  search: MagnifyingGlassIcon, code: CodeIcon, globe: GlobeIcon, folder: FolderIcon, plug: PlugIcon,
+  gear: GearIcon, brackets: BracketsCurlyIcon, scroll: ScrollIcon, chat: ChatCircleIcon, target: TargetIcon,
+}
+const IconFor = ({ name, ...rest }) => {
+  const C = ICON_BY_KEY[name]
+  return C ? <C {...rest} /> : null
+}
 
 const css = `
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
+/* ── Phase 5b: Agents & Tools rebound to Prism tokens.
+ *  Per §5.3 — blue for deterministic loop steps, orange for tool
+ *  calls / external actions, success for final answers. ─────── */
 
-.ag-root { min-height: 100vh; background: #050810; color: #e0e8f0; font-family: 'IBM Plex Mono', monospace; overflow-x: hidden; }
+.ag-root { min-height: 100vh; background: var(--surface-base); color: var(--text-primary); overflow-x: hidden; }
 
-.ag-hero { text-align: center; padding: 48px 24px 28px; position: relative; }
-.ag-hero::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 700px; height: 320px; background: radial-gradient(ellipse at 50% 0%, rgba(52,211,153,0.1) 0%, transparent 70%); pointer-events: none; }
-.ag-eyebrow { font-size: 16px; letter-spacing: 0.22em; color: #34d399; text-transform: uppercase; margin-bottom: 14px; }
-.ag-title { font-family: 'IBM Plex Sans', sans-serif; font-size: clamp(28px, 5vw, 52px); font-weight: 800; letter-spacing: -0.02em; color: #fff; line-height: 1.05; margin-bottom: 12px; }
-.ag-title span { color: #34d399; }
-.ag-subtitle { font-size: 16px; color: #6a8a7a; max-width: 520px; margin: 0 auto 32px; line-height: 1.8; }
+/* Hero — obsidian + refracted light (§5.2) */
+.ag-hero {
+  position: relative;
+  text-align: center;
+  padding: var(--spacing-7) var(--spacing-4) var(--spacing-6);
+  background: var(--text-primary);
+  color: var(--surface-base);
+  overflow: hidden;
+}
+:root[data-theme="dark"] .ag-hero {
+  background: var(--surface-base);
+  color: var(--text-primary);
+}
+.ag-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-refracted-b);
+  opacity: var(--refracted-opacity-standard);
+  pointer-events: none;
+}
+.ag-hero > * { position: relative; }
+.ag-eyebrow {
+  font: var(--text-weight-label) var(--text-size-caption)/var(--text-lh-caption) var(--font-primary);
+  letter-spacing: 0.08em;
+  color: var(--blue-300);
+  margin-bottom: var(--spacing-3);
+}
+.ag-title {
+  font: var(--text-weight-h1) var(--text-size-h1)/var(--text-lh-h1) var(--font-primary);
+  letter-spacing: var(--text-ls-h1);
+  margin-bottom: var(--spacing-3);
+}
+.ag-subtitle {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  max-width: 540px;
+  margin: 0 auto;
+  opacity: 0.85;
+}
 
-.ag-tabs { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; padding: 0 16px 32px; }
-.ag-tab { background: transparent; border: 1px solid #1a2e22; color: #6a8a7a; font-family: 'IBM Plex Mono', monospace; font-size: 16px; letter-spacing: 0.1em; padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: all 0.18s; text-transform: uppercase; }
-.ag-tab:hover { border-color: #34d399; color: #34d399; }
-.ag-tab.active { background: rgba(52,211,153,0.1); border-color: #34d399; color: #34d399; }
+.ag-tabs-row {
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-5) var(--spacing-4) var(--spacing-6);
+  background: var(--surface-base);
+}
 
-.ag-panel { max-width: 920px; margin: 0 auto; padding: 0 20px 80px; }
-.ag-section-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 8px; }
-.ag-section-sub { font-size: 16px; color: #6a8a7a; margin-bottom: 28px; line-height: 1.8; }
+.ag-panel { max-width: 920px; margin: 0 auto; padding: 0 var(--spacing-4) var(--spacing-7); }
+.ag-section-title {
+  font: var(--text-weight-h2) var(--text-size-h2)/var(--text-lh-h2) var(--font-primary);
+  letter-spacing: var(--text-ls-h2);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-2);
+}
+.ag-section-sub {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-6);
+  max-width: 720px;
+}
 
-.ag-card { background: #080f14; border: 1px solid #0f2018; border-radius: 14px; padding: 24px; margin-bottom: 20px; }
-.ag-card-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #34d399; margin-bottom: 16px; }
+.ag-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-e2);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-5);
+  margin-bottom: var(--spacing-5);
+}
+.ag-card-title {
+  font: var(--text-weight-h3) var(--text-size-h3)/var(--text-lh-h3) var(--font-primary);
+  letter-spacing: var(--text-ls-h3);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-4);
+}
 
 /* ── Agent Loop ── */
 .loop-container { position: relative; display: flex; flex-direction: column; align-items: center; gap: 0; }
+.loop-node {
+  width: 100%;
+  max-width: 520px;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+  border: 1px solid var(--border-default);
+  background: var(--surface-1);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  transition: background-color var(--duration-deliberate) var(--ease-standard), border-color var(--duration-deliberate) var(--ease-standard);
+  position: relative;
+  z-index: 2;
+}
+.loop-node.active { background: var(--node-soft); border-color: var(--node-tint); box-shadow: var(--shadow-e2); }
+.loop-node.done   { opacity: 0.55; }
 
-.loop-node { width: 100%; max-width: 520px; border-radius: 10px; padding: 16px 20px; border: 1px solid; display: flex; align-items: center; gap: 14px; transition: all 0.4s; position: relative; z-index: 2; }
-.loop-node.active { box-shadow: 0 0 30px var(--node-glow); transform: scale(1.02); }
-.loop-node.done { opacity: 0.5; }
+.loop-connector {
+  width: 2px;
+  height: 32px;
+  margin: 0 auto;
+  background: var(--border-default);
+  position: relative;
+  z-index: 1;
+}
+.loop-connector.done { background: var(--blue-300); }
 
-.loop-connector { width: 2px; height: 32px; margin: 0 auto; position: relative; z-index: 1; }
-.loop-connector::after { content: '▼'; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); font-size: 12px; }
-
-.node-icon { font-size: 22px; flex-shrink: 0; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: var(--node-icon-bg); }
+.node-icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--node-soft);
+  color: var(--node-tint);
+}
 .node-content { flex: 1; }
-.node-label { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 4px; }
-.node-desc { font-size: 16px; color: #6a8a7a; line-height: 1.6; }
-.node-output { margin-top: 8px; font-size: 16px; color: var(--node-color); background: var(--node-icon-bg); border: 1px solid var(--node-border); border-radius: 6px; padding: 6px 10px; font-style: italic; line-height: 1.5; }
-
-.loop-badge { position: absolute; right: -12px; top: 50%; transform: translateY(-50%); background: #080f14; border: 1px solid #1a2e22; border-radius: 100px; font-size: 9px; color: #34d399; padding: 3px 8px; letter-spacing: 0.1em; white-space: nowrap; }
-
-.loop-controls { display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
-.loop-btn { background: rgba(52,211,153,0.1); border: 1px solid #34d399; color: #34d399; font-family: 'IBM Plex Mono', monospace; font-size: 16px; padding: 8px 18px; border-radius: 6px; cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.18s; }
-.loop-btn:hover { background: rgba(52,211,153,0.2); }
-.loop-btn.secondary { background: transparent; border-color: #1a2e22; color: #6a8a7a; }
-.loop-btn.secondary:hover { border-color: #34d399; color: #34d399; }
-
-/* ── Tools Grid ── */
-.tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px; }
-
-.tool-card { background: #06100d; border: 1px solid #0f2018; border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
-.tool-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--t-accent), transparent); opacity: 0; transition: opacity 0.2s; }
-.tool-card:hover, .tool-card.selected { border-color: var(--t-accent); }
-.tool-card:hover::before, .tool-card.selected::before { opacity: 1; }
-.tool-card.calling { animation: tool-pulse 0.6s ease-in-out; }
-
-@keyframes tool-pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.04); box-shadow: 0 0 20px var(--t-accent-glow); }
-  100% { transform: scale(1); }
+.node-label {
+  font: var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary);
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.node-desc {
+  font: var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+}
+.node-output {
+  margin-top: var(--spacing-2);
+  font: italic var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-secondary);
+  color: var(--node-tint);
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-2) var(--spacing-3);
 }
 
-.tool-icon { font-size: 20px; margin-bottom: 10px; }
-.tool-name { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #e0e8f0; margin-bottom: 4px; }
-.tool-sig { font-size: 12px; color: var(--t-accent); margin-bottom: 6px; font-style: italic; }
-.tool-desc { font-size: 16px; color: #4a6a5a; line-height: 1.6; }
+.loop-badge {
+  position: absolute;
+  right: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--surface-1);
+  border: 1px solid var(--blue-500);
+  border-radius: 100px;
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
+  color: var(--blue-500);
+  padding: 3px 8px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
 
-.tool-call-sim { background: #020809; border: 1px solid #0f2018; border-radius: 10px; padding: 18px; font-family: 'IBM Plex Mono', monospace; font-size: 16px; line-height: 1.9; }
-.tc-line { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 4px; opacity: 0; transform: translateY(4px); transition: all 0.3s; }
+.loop-controls { display: flex; gap: var(--spacing-2); justify-content: center; margin-top: var(--spacing-5); flex-wrap: wrap; }
+.loop-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  background: var(--blue-500);
+  border: 1px solid var(--blue-500);
+  color: #fff;
+  font: 600 var(--text-size-body)/1 var(--font-primary);
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+}
+.loop-btn:hover { background: #2B6DCC; border-color: #2B6DCC; }
+.loop-btn:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.loop-btn:disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+.loop-btn.secondary {
+  background: transparent;
+  border-color: var(--border-default);
+  color: var(--text-primary);
+}
+.loop-btn.secondary:hover { background: var(--surface-2); border-color: var(--border-strong); }
+
+/* ── Tools Grid (orange = external actions) ── */
+.tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--spacing-3); margin-bottom: var(--spacing-5); }
+.tool-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
+  text-align: left;
+}
+.tool-card:hover    { background: var(--surface-2); border-color: var(--border-strong); }
+.tool-card.selected { background: var(--orange-50); border-color: var(--orange-500); box-shadow: var(--shadow-e2); }
+.tool-card.calling  { background: var(--orange-50); border-color: var(--orange-500); }
+.tool-card:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.tool-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-bottom: var(--spacing-2);
+  color: var(--orange-500);
+}
+.tool-name {
+  font: var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-1);
+}
+.tool-sig {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--text-size-caption);
+  color: var(--orange-500);
+  margin-bottom: var(--spacing-1);
+}
+.tool-desc {
+  font: var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+}
+
+.tool-call-sim {
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--text-size-caption);
+  line-height: 1.9;
+  color: var(--text-primary);
+}
+.tc-line {
+  display: flex;
+  gap: var(--spacing-2);
+  align-items: flex-start;
+  margin-bottom: 4px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity var(--duration-standard) var(--ease-standard), transform var(--duration-standard) var(--ease-standard);
+}
 .tc-line.visible { opacity: 1; transform: translateY(0); }
-.tc-role { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; flex-shrink: 0; margin-top: 2px; }
-.tc-role.llm    { background: rgba(52,211,153,0.12); color: #34d399; border: 1px solid rgba(52,211,153,0.25); }
-.tc-role.tool   { background: rgba(251,191,36,0.1);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.25); }
-.tc-role.system { background: rgba(129,140,248,0.1); color: #818cf8; border: 1px solid rgba(129,140,248,0.25); }
-.tc-role.result { background: rgba(249,115,22,0.1);  color: #f97316; border: 1px solid rgba(249,115,22,0.25); }
-.tc-text { color: #b0c8b8; flex: 1; }
-.tc-text .hl { color: #34d399; }
-.tc-text .hl-y { color: #fbbf24; }
-.tc-text .hl-p { color: #818cf8; }
-.tc-text .hl-o { color: #f97316; }
+.tc-role {
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  margin-top: 2px;
+  border: 1px solid;
+}
+.tc-role.system { background: var(--surface-1);  color: var(--text-tertiary); border-color: var(--border-default); }
+.tc-role.llm    { background: var(--blue-50);    color: var(--blue-500);      border-color: var(--blue-500); }
+.tc-role.tool   { background: var(--orange-50);  color: var(--orange-500);    border-color: var(--orange-500); }
+.tc-role.result { background: var(--orange-50);  color: var(--orange-500);    border-color: var(--orange-100); }
+.tc-text { color: var(--text-primary); flex: 1; }
+.tc-text .hl    { color: var(--orange-500); }
+.tc-text .hl-y  { color: var(--orange-500); }
+.tc-text .hl-p  { color: var(--blue-500); }
+.tc-text .hl-o  { color: var(--orange-300); }
 
-/* ── ReAct ── */
+/* ── ReAct timeline ── */
 .react-timeline { display: flex; flex-direction: column; gap: 0; }
-.react-step { display: flex; gap: 16px; position: relative; }
-.react-step::before { content: ''; position: absolute; left: 19px; top: 44px; bottom: -16px; width: 2px; background: linear-gradient(#0f2018, transparent); }
+.react-step { display: flex; gap: var(--spacing-4); position: relative; }
+.react-step::before {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 44px;
+  bottom: -16px;
+  width: 2px;
+  background: var(--border-default);
+}
 .react-step:last-child::before { display: none; }
+.react-dot {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--react-tint);
+  background: var(--react-soft);
+  color: var(--react-tint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.react-body { flex: 1; padding-bottom: var(--spacing-5); }
+.react-type {
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  margin-bottom: var(--spacing-1);
+  color: var(--react-tint);
+}
+.react-content {
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3) var(--spacing-4);
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+}
+.react-content strong { color: var(--text-primary); }
 
-.react-dot { width: 40px; height: 40px; border-radius: 50%; border: 2px solid; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; margin-top: 2px; }
-.react-body { flex: 1; padding-bottom: 24px; }
-.react-type { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 6px; font-weight: 500; }
-.react-content { background: #06100d; border: 1px solid #0f2018; border-radius: 8px; padding: 12px 16px; font-size: 16px; color: #9abaa8; line-height: 1.7; }
-.react-content strong { color: #e0e8f0; }
-
-/* ── Context Engineering ── */
-.ctx-layers { display: flex; flex-direction: column; gap: 10px; }
-.ctx-layer { border-radius: 10px; padding: 16px 20px; border: 1px solid; cursor: pointer; transition: all 0.2s; }
-.ctx-layer:hover { transform: translateX(4px); }
-.ctx-layer-header { display: flex; align-items: center; gap: 12px; margin-bottom: 0; }
-.ctx-layer.expanded .ctx-layer-header { margin-bottom: 12px; }
-.ctx-layer-icon { font-size: 18px; flex-shrink: 0; }
-.ctx-layer-name { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; flex: 1; }
-.ctx-layer-tokens { font-size: 12px; letter-spacing: 0.08em; padding: 3px 8px; border-radius: 100px; border: 1px solid; }
-.ctx-layer-chevron { font-size: 16px; transition: transform 0.2s; color: #4a6a5a; }
+/* ── Context Engineering layers ── */
+.ctx-layers { display: flex; flex-direction: column; gap: var(--spacing-2); }
+.ctx-layer {
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+  border: 1px solid var(--ctx-border, var(--border-default));
+  background: var(--ctx-bg, var(--surface-1));
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+}
+.ctx-layer:hover { border-color: var(--ctx-tint, var(--border-strong)); }
+.ctx-layer:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.ctx-layer.expanded { border-color: var(--ctx-tint, var(--border-strong)); }
+.ctx-layer-header { display: flex; align-items: center; gap: var(--spacing-3); margin-bottom: 0; }
+.ctx-layer.expanded .ctx-layer-header { margin-bottom: var(--spacing-3); }
+.ctx-layer-icon { display: inline-flex; color: var(--ctx-tint, var(--text-primary)); flex-shrink: 0; }
+.ctx-layer-name {
+  font: var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary);
+  color: var(--text-primary);
+  flex: 1;
+}
+.ctx-layer-tokens {
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
+  padding: 3px 8px;
+  border-radius: 100px;
+  border: 1px solid var(--ctx-tint, var(--border-default));
+  color: var(--ctx-tint, var(--text-secondary));
+  background: var(--surface-1);
+}
+.ctx-layer-chevron {
+  color: var(--text-tertiary);
+  display: inline-flex;
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
 .ctx-layer.expanded .ctx-layer-chevron { transform: rotate(90deg); }
-.ctx-layer-body { font-size: 16px; color: #6a8a7a; line-height: 1.8; border-top: 1px solid; padding-top: 12px; }
-.ctx-layer-body code { background: rgba(52,211,153,0.08); color: #34d399; padding: 1px 5px; border-radius: 3px; font-size: 16px; }
-.ctx-tip { font-size: 16px; margin-top: 8px; padding: 8px 12px; background: rgba(52,211,153,0.05); border-left: 2px solid #34d399; border-radius: 0 6px 6px 0; color: #5a8a6a; line-height: 1.6; }
+.ctx-layer-body {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border-default);
+  padding-top: var(--spacing-3);
+}
+.ctx-code {
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-3);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--text-size-caption);
+  color: var(--text-primary);
+  line-height: 1.7;
+  white-space: pre-wrap;
+  margin: var(--spacing-2) 0;
+}
+.ctx-tip {
+  margin-top: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  background: var(--surface-2);
+  border-left: 2px solid var(--blue-500);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font: var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+}
 
-/* ── Multi-Agent ── */
+/* ── Multi-Agent diagram ── */
 .ma-diagram { position: relative; display: grid; grid-template-columns: 1fr auto 1fr; gap: 0; align-items: start; }
-.ma-agents { display: flex; flex-direction: column; gap: 10px; }
-.ma-agent { background: #06100d; border: 1px solid; border-radius: 10px; padding: 14px 16px; transition: all 0.3s; }
-.ma-agent.active { box-shadow: 0 0 20px var(--a-glow); transform: scale(1.02); }
-.ma-agent-name { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 4px; }
-.ma-agent-role { font-size: 12px; color: #4a6a5a; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+.ma-agents { display: flex; flex-direction: column; gap: var(--spacing-2); }
+.ma-agent {
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3) var(--spacing-4);
+  transition: background-color var(--duration-deliberate) var(--ease-standard), border-color var(--duration-deliberate) var(--ease-standard), box-shadow var(--duration-deliberate) var(--ease-standard);
+}
+.ma-agent.active { background: var(--ma-soft); border-color: var(--ma-tint); box-shadow: var(--shadow-e2); }
+.ma-agent-name {
+  font: var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary);
+  color: var(--ma-tint, var(--text-primary));
+  margin-bottom: var(--spacing-1);
+}
+.ma-agent-role {
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
+  color: var(--text-tertiary);
+  letter-spacing: 0.06em;
+  margin-bottom: var(--spacing-2);
+}
 .ma-agent-tools { display: flex; flex-wrap: wrap; gap: 4px; }
-.ma-tool-tag { font-size: 9px; padding: 2px 6px; border-radius: 3px; border: 1px solid; letter-spacing: 0.06em; }
+.ma-tool-tag {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--text-size-meta);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--ma-tint, var(--border-default));
+  color: var(--ma-tint, var(--text-secondary));
+  background: var(--surface-1);
+}
 
-.ma-center { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 20px; gap: 8px; }
-.ma-orchestrator { background: rgba(52,211,153,0.08); border: 2px solid #34d399; border-radius: 14px; padding: 20px 16px; text-align: center; width: 130px; }
-.ma-orch-icon { font-size: 28px; margin-bottom: 8px; }
-.ma-orch-name { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #34d399; }
-.ma-orch-sub { font-size: 12px; color: #4a6a5a; margin-top: 4px; }
-.ma-arrow { font-size: 18px; color: #1a3a28; }
+.ma-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--spacing-4);
+  gap: var(--spacing-2);
+}
+.ma-orchestrator {
+  background: var(--text-primary);
+  color: var(--surface-base);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+  text-align: center;
+  width: 140px;
+}
+.ma-orch-icon { display: inline-flex; justify-content: center; margin-bottom: var(--spacing-2); }
+.ma-orch-name {
+  font: var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary);
+}
+.ma-orch-sub {
+  font: var(--text-weight-body) var(--text-size-meta)/1.4 var(--font-primary);
+  opacity: 0.7;
+  margin-top: var(--spacing-1);
+}
+.ma-arrow {
+  color: var(--border-strong);
+  display: inline-flex;
+}
 
-.ma-msg { background: #020809; border: 1px solid #0f2018; border-radius: 8px; padding: 10px 14px; font-size: 16px; color: #6a8a7a; line-height: 1.6; margin-top: 14px; min-height: 60px; transition: all 0.3s; }
-.ma-msg strong { color: #34d399; }
+.ma-msg {
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3) var(--spacing-4);
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+  margin-top: var(--spacing-4);
+  min-height: 60px;
+}
+.ma-msg strong { color: var(--text-primary); }
 
 @media (max-width: 600px) {
   .ma-diagram { grid-template-columns: 1fr; }
-  .ma-center { flex-direction: row; padding: 10px 0; }
+  .ma-center { flex-direction: row; padding: var(--spacing-2) 0; }
 }
 
 /* ── Quiz ── */
-.ag-quiz-q { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 16px; line-height: 1.4; }
-.ag-quiz-opts { display: flex; flex-direction: column; gap: 8px; }
-.ag-quiz-opt { background: #06100d; border: 1px solid #0f2018; border-radius: 8px; padding: 12px 16px; font-size: 16px; color: #9abaa8; cursor: pointer; text-align: left; font-family: 'IBM Plex Mono', monospace; transition: all 0.18s; }
-.ag-quiz-opt:hover:not(:disabled) { border-color: #34d399; color: #e0e8f0; }
-.ag-quiz-opt.correct { border-color: #34d399; background: rgba(52,211,153,0.08); color: #34d399; }
-.ag-quiz-opt.wrong   { border-color: #ef4444; background: rgba(239,68,68,0.06); color: #f87171; }
-.ag-quiz-exp { margin-top: 14px; padding: 12px; background: rgba(52,211,153,0.05); border: 1px solid rgba(52,211,153,0.18); border-radius: 8px; font-size: 16px; color: #7ab898; line-height: 1.7; }
-.ag-quiz-next { margin-top: 12px; background: rgba(52,211,153,0.1); border: 1px solid #34d399; color: #34d399; font-family: 'IBM Plex Mono', monospace; font-size: 16px; padding: 9px 18px; border-radius: 6px; cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.18s; }
-.ag-quiz-next:hover { background: rgba(52,211,153,0.2); }
-.ag-progress { background: #0a1810; border-radius: 100px; height: 4px; margin-bottom: 20px; overflow: hidden; }
-.ag-progress-fill { height: 100%; background: linear-gradient(90deg, #34d399, #38bdf8); border-radius: 100px; transition: width 0.4s; }
-.ag-score-num { font-family: 'IBM Plex Sans', sans-serif; font-size: 64px; font-weight: 800; color: #34d399; text-align: center; }
-
-.ag-diff-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 100px; border: 1px solid; margin-bottom: 14px; font-weight: 500; }
-.ag-diff-badge.easy   { color: #34d399; border-color: rgba(52,211,153,0.35);  background: rgba(52,211,153,0.08); }
-.ag-diff-badge.medium { color: #fbbf24; border-color: rgba(251,191,36,0.35);  background: rgba(251,191,36,0.08); }
-.ag-diff-badge.hard   { color: #f87171; border-color: rgba(248,113,113,0.35); background: rgba(239,68,68,0.08); }
+.ag-quiz-q {
+  font: var(--text-weight-h3) var(--text-size-h3)/var(--text-lh-h3) var(--font-primary);
+  letter-spacing: var(--text-ls-h3);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-4);
+}
+.ag-quiz-meta {
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  color: var(--text-tertiary);
+  margin-bottom: var(--spacing-3);
+}
+.ag-quiz-opts { display: flex; flex-direction: column; gap: var(--spacing-2); }
+.ag-quiz-opt {
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3) var(--spacing-4);
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+}
+.ag-quiz-opt:hover:not(:disabled) { background: var(--surface-2); border-color: var(--border-strong); }
+.ag-quiz-opt:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.ag-quiz-opt:disabled { cursor: default; }
+.ag-quiz-opt.correct { border-color: var(--color-success); }
+.ag-quiz-opt.wrong   { border-color: var(--color-error); }
+.ag-quiz-opt-letter {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  color: var(--text-tertiary);
+  margin-right: var(--spacing-2);
+}
+.ag-quiz-exp {
+  margin-top: var(--spacing-4);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+}
+.ag-quiz-next {
+  margin-top: var(--spacing-3);
+  background: var(--orange-500);
+  border: 1px solid var(--orange-500);
+  color: #fff;
+  font: 600 var(--text-size-body)/1 var(--font-primary);
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+}
+.ag-quiz-next:hover { background: #D45C10; border-color: #D45C10; }
+.ag-quiz-next:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.ag-progress {
+  background: var(--surface-3);
+  border-radius: 100px;
+  height: 4px;
+  margin-bottom: var(--spacing-5);
+  overflow: hidden;
+}
+.ag-progress-fill {
+  height: 100%;
+  background: var(--text-primary);
+  border-radius: 100px;
+  transition: width var(--duration-standard) var(--ease-standard);
+}
+.ag-score-num {
+  font: var(--text-weight-h1) var(--text-size-h1)/1 var(--font-primary);
+  letter-spacing: var(--text-ls-h1);
+  color: var(--text-primary);
+  text-align: center;
+  margin: var(--spacing-2) 0;
+}
+.ag-diff-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  padding: 3px 10px;
+  border-radius: 100px;
+  border: 1px solid;
+  background: var(--surface-1);
+  margin-bottom: var(--spacing-3);
+}
+.ag-diff-badge::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.ag-diff-badge.easy   { color: var(--color-success); border-color: var(--color-success); }
+.ag-diff-badge.medium { color: var(--color-warning); border-color: var(--color-warning); }
+.ag-diff-badge.hard   { color: var(--color-info);    border-color: var(--color-info); }
 `
 
 // ── AGENT LOOP STEPS ──────────────────────────────────────────────────────────
+// Per §5.3 — loop core (perceive / think / respond) reads blue; tool
+// interactions (act / observe) read orange. iconKey resolves via IconFor.
 const LOOP_STEPS = [
-  {
-    id: 'perceive', icon: '👁️', label: 'Perceive', color: '#38bdf8', border: '#1a3a5a', bg: '#060e18', iconBg: 'rgba(56,189,248,0.1)', glow: 'rgba(56,189,248,0.15)',
+  { id: 'perceive', iconKey: 'eye',      label: 'Perceive',                 tint: 'var(--blue-500)',    soft: 'var(--blue-50)',
     desc: 'The agent receives its context window — system prompt, memory, tool definitions, and the current user message.',
-    output: '"Research the latest AI papers and summarize the top 3 findings."',
+    output: '"Research the latest AI papers and summarise the top 3 findings."',
   },
-  {
-    id: 'think', icon: '💭', label: 'Think (Reason)', color: '#818cf8', border: '#1e1a5a', bg: '#08071a', iconBg: 'rgba(129,140,248,0.1)', glow: 'rgba(129,140,248,0.15)',
-    desc: 'The LLM reasons about the task. In ReAct-style agents, this step produces a "Thought:" explaining the plan before acting.',
-    output: 'Thought: I should search for recent AI papers, then read the top results, then summarize.',
+  { id: 'think',    iconKey: 'brain',    label: 'Think (reason)',           tint: 'var(--blue-500)',    soft: 'var(--blue-50)',
+    desc: "The LLM reasons about the task. In ReAct-style agents, this step produces a “Thought:” explaining the plan before acting.",
+    output: 'Thought: search for recent AI papers, read the top results, then summarise.',
   },
-  {
-    id: 'act', icon: '🔧', label: 'Act (Tool Call)', color: '#fbbf24', border: '#3a2a00', bg: '#100c00', iconBg: 'rgba(251,191,36,0.08)', glow: 'rgba(251,191,36,0.15)',
+  { id: 'act',      iconKey: 'wrench',   label: 'Act (tool call)',          tint: 'var(--orange-500)',  soft: 'var(--orange-50)',
     desc: 'The agent calls a tool — web search, code execution, database lookup, API call — and waits for the result.',
-    output: 'tool_call: web_search({ query: "top AI papers 2025" })',
+    output: 'tool_call: web_search({ query: "top AI papers 2026" })',
   },
-  {
-    id: 'observe', icon: '📥', label: 'Observe (Tool Result)', color: '#f97316', border: '#3a1800', bg: '#0e0700', iconBg: 'rgba(249,115,22,0.08)', glow: 'rgba(249,115,22,0.15)',
+  { id: 'observe',  iconKey: 'download', label: 'Observe (tool result)',    tint: 'var(--orange-500)',  soft: 'var(--orange-50)',
     desc: 'The tool result is injected back into the context window as a new message. The agent now "sees" the result.',
     output: 'tool_result: ["Attention Is All You Need", "Gemini 1.5", "DeepSeek R1", ...]',
   },
-  {
-    id: 'respond', icon: '✅', label: 'Respond or Loop', color: '#34d399', border: '#0a2e1a', bg: '#030e08', iconBg: 'rgba(52,211,153,0.08)', glow: 'rgba(52,211,153,0.15)',
+  { id: 'respond',  iconKey: 'check',    label: 'Respond or loop',          tint: 'var(--color-success)', soft: 'var(--surface-1)',
     desc: 'If the task is done, the agent returns its final answer. Otherwise, it loops back to Think — calling more tools as needed.',
-    output: 'Final: "Top 3 findings: (1) Long-context models... (2) Reasoning via RL... (3)..."',
+    output: 'Final: "Top 3 findings: (1) Long-context models… (2) Reasoning via RL… (3)…"',
   },
 ]
 
 // ── TOOLS ─────────────────────────────────────────────────────────────────────
+// All tools are external actions → orange per §5.3. The grid stays
+// visually quiet via a single accent rather than a six-colour rainbow.
 const TOOLS = [
-  { id: 'search', icon: '🔍', name: 'web_search', sig: 'search(query: string)', desc: 'Retrieve real-time web results. Essential for grounding agents in current facts.', accent: '#38bdf8', glow: 'rgba(56,189,248,0.2)' },
-  { id: 'code', icon: '💻', name: 'code_exec', sig: 'run_python(code: string)', desc: 'Execute code in a sandbox. Enables calculations, data analysis, and file creation.', accent: '#818cf8', glow: 'rgba(129,140,248,0.2)' },
-  { id: 'memory', icon: '🧠', name: 'memory_recall', sig: 'recall(query: string)', desc: 'Retrieve relevant memories from past interactions stored in a vector database.', accent: '#34d399', glow: 'rgba(52,211,153,0.2)' },
-  { id: 'browser', icon: '🌐', name: 'browse_url', sig: 'fetch(url: string)', desc: 'Fetch and parse the full content of a webpage for deeper research.', accent: '#fbbf24', glow: 'rgba(251,191,36,0.2)' },
-  { id: 'files', icon: '📁', name: 'file_write', sig: 'write(path, content)', desc: 'Create, read, or edit files. Enables agents to produce persistent artifacts.', accent: '#f97316', glow: 'rgba(249,115,22,0.2)' },
-  { id: 'api', icon: '🔌', name: 'api_call', sig: 'call(endpoint, params)', desc: 'Call any external API — Slack, GitHub, databases, payment systems, and more.', accent: '#ec4899', glow: 'rgba(236,72,153,0.2)' },
+  { id: 'search',  iconKey: 'search', name: 'web_search',    sig: 'search(query: string)',    desc: 'Retrieve real-time web results. Essential for grounding agents in current facts.' },
+  { id: 'code',    iconKey: 'code',   name: 'code_exec',     sig: 'run_python(code: string)', desc: 'Execute code in a sandbox. Enables calculations, data analysis, and file creation.' },
+  { id: 'memory',  iconKey: 'brain',  name: 'memory_recall', sig: 'recall(query: string)',    desc: 'Retrieve relevant memories from past interactions stored in a vector database.' },
+  { id: 'browser', iconKey: 'globe',  name: 'browse_url',    sig: 'fetch(url: string)',       desc: 'Fetch and parse the full content of a webpage for deeper research.' },
+  { id: 'files',   iconKey: 'folder', name: 'file_write',    sig: 'write(path, content)',     desc: 'Create, read, or edit files. Enables agents to produce persistent artefacts.' },
+  { id: 'api',     iconKey: 'plug',   name: 'api_call',      sig: 'call(endpoint, params)',   desc: 'Call any external API — Slack, GitHub, databases, payment systems, and more.' },
 ]
 
 const TOOL_CALL_DEMO = [
@@ -206,66 +613,68 @@ const TOOL_CALL_DEMO = [
 ]
 
 // ── ReAct STEPS ───────────────────────────────────────────────────────────────
+// Thought = blue (loop reasoning); Action / Observation = orange (tool path);
+// Final Answer = success (resolution).
 const REACT_STEPS = [
-  { type: 'Thought', color: '#818cf8', dotBg: 'rgba(129,140,248,0.15)', dotBorder: '#818cf8', icon: '💭', content: <span>I need to book a flight from NYC to London next Friday. Let me first check what dates are available.</span> },
-  { type: 'Action', color: '#fbbf24', dotBg: 'rgba(251,191,36,0.1)', dotBorder: '#fbbf24', icon: '🔧', content: <span><strong>search_flights</strong>({`{ from: "NYC", to: "LHR", date: "2025-12-05" }`})</span> },
-  { type: 'Observation', color: '#f97316', dotBg: 'rgba(249,115,22,0.1)', dotBorder: '#f97316', icon: '📥', content: <span>Found 3 flights: BA178 (08:30, $620), AA100 (11:15, $580), VS4 (22:00, $540). All have seats available.</span> },
-  { type: 'Thought', color: '#818cf8', dotBg: 'rgba(129,140,248,0.15)', dotBorder: '#818cf8', icon: '💭', content: <span>VS4 is cheapest. The user didn't specify a budget, but I should confirm before booking. Let me check their preferences first.</span> },
-  { type: 'Action', color: '#fbbf24', dotBg: 'rgba(251,191,36,0.1)', dotBorder: '#fbbf24', icon: '🔧', content: <span><strong>memory_recall</strong>({`{ query: "user flight preferences budget" }`})</span> },
-  { type: 'Observation', color: '#f97316', dotBg: 'rgba(249,115,22,0.1)', dotBorder: '#f97316', icon: '📥', content: <span>Memory: User previously selected business class, prefers morning departures, budget under $800.</span> },
-  { type: 'Thought', color: '#818cf8', dotBg: 'rgba(129,140,248,0.15)', dotBorder: '#818cf8', icon: '💭', content: <span>BA178 morning flight fits preferences. Let me check business class availability and price.</span> },
-  { type: 'Final Answer', color: '#34d399', dotBg: 'rgba(52,211,153,0.1)', dotBorder: '#34d399', icon: '✅', content: <span><strong>Recommended:</strong> BA178 (08:30 Fri Dec 5). Business class available at $1,840 — within typical range. Shall I book?</span> },
+  { type: 'Thought',      iconKey: 'brain',    tint: 'var(--blue-500)',     soft: 'var(--blue-50)',    content: <span>I need to book a flight from NYC to London next Friday. Let me first check what dates are available.</span> },
+  { type: 'Action',       iconKey: 'wrench',   tint: 'var(--orange-500)',   soft: 'var(--orange-50)',  content: <span><strong>search_flights</strong>({`{ from: "NYC", to: "LHR", date: "2026-12-04" }`})</span> },
+  { type: 'Observation',  iconKey: 'download', tint: 'var(--orange-500)',   soft: 'var(--orange-50)',  content: <span>Found 3 flights: BA178 (08:30, $620), AA100 (11:15, $580), VS4 (22:00, $540). All have seats available.</span> },
+  { type: 'Thought',      iconKey: 'brain',    tint: 'var(--blue-500)',     soft: 'var(--blue-50)',    content: <span>VS4 is cheapest. The user didn't specify a budget, but I should confirm before booking. Let me check their preferences first.</span> },
+  { type: 'Action',       iconKey: 'wrench',   tint: 'var(--orange-500)',   soft: 'var(--orange-50)',  content: <span><strong>memory_recall</strong>({`{ query: "user flight preferences budget" }`})</span> },
+  { type: 'Observation',  iconKey: 'download', tint: 'var(--orange-500)',   soft: 'var(--orange-50)',  content: <span>Memory: user previously selected business class, prefers morning departures, budget under $800.</span> },
+  { type: 'Thought',      iconKey: 'brain',    tint: 'var(--blue-500)',     soft: 'var(--blue-50)',    content: <span>BA178 morning flight fits preferences. Let me check business class availability and price.</span> },
+  { type: 'Final answer', iconKey: 'check',    tint: 'var(--color-success)', soft: 'var(--surface-1)', content: <span><strong>Recommended:</strong> BA178 (08:30 Fri Dec 4). Business class available at $1,840 — within typical range. Shall I book?</span> },
 ]
 
 // ── CONTEXT LAYERS ────────────────────────────────────────────────────────────
+// System prompt and memory read as structured input → blue. Tool definitions
+// describe external actions → orange. History + user message stay neutral
+// so no view exceeds the two-signal rule (§5.1).
 const CTX_LAYERS = [
-  {
-    icon: '⚙️', name: 'System Prompt', tokens: '~800 tok', color: '#818cf8', border: 'rgba(129,140,248,0.3)', bg: 'rgba(129,140,248,0.05)', tokenBg: 'rgba(129,140,248,0.1)', tokenBorder: 'rgba(129,140,248,0.3)',
-    body: `The foundation of every agent. Defines the agent's persona, capabilities, constraints, and available tools.\n\nBest practices: Be concise but complete. Define what the agent CAN and CANNOT do. List all tools with clear descriptions.\n\nExample structure:`,
+  { iconKey: 'gear',     name: 'System prompt',         tokens: '~800 tok',   tint: 'var(--blue-500)',   soft: 'var(--blue-50)',
+    body: `The foundation of every agent. Defines the agent's persona, capabilities, constraints, and available tools.\n\nBest practice: be concise but complete. Define what the agent can and can't do. List all tools with clear descriptions.\n\nExample structure:`,
     code: `You are a research assistant.\nTools: web_search, browse_url, code_exec\nRules: Always cite sources. Never make up facts.`,
-    tip: '💡 The system prompt is the most important piece of context. Vague system prompts = unpredictable agents.',
+    tip:  'The system prompt is the most important piece of context. Vague system prompts produce unpredictable agents.',
   },
-  {
-    icon: '🗂️', name: 'Tool Definitions', tokens: '~400 tok', color: '#38bdf8', border: 'rgba(56,189,248,0.3)', bg: 'rgba(56,189,248,0.05)', tokenBg: 'rgba(56,189,248,0.1)', tokenBorder: 'rgba(56,189,248,0.3)',
-    body: `JSON schemas describing each tool — its name, description, and parameters. The model reads these to know when and how to call tools.\n\nCritical: The tool description IS the prompt. Vague descriptions = wrong tool usage.`,
+  { iconKey: 'brackets', name: 'Tool definitions',      tokens: '~400 tok',   tint: 'var(--orange-500)', soft: 'var(--orange-50)',
+    body: `JSON schemas describing each tool — its name, description, and parameters. The model reads these to know when and how to call tools.\n\nCritical: the tool description is the prompt. Vague descriptions mean wrong tool usage.`,
     code: `{\n  "name": "web_search",\n  "description": "Search the web for current info. Use for facts, news, prices.",\n  "parameters": { "query": { "type": "string" } }\n}`,
-    tip: '💡 Spend more time writing tool descriptions than you think you need. They\'re the most leveraged text in your agent.',
+    tip:  'Spend more time writing tool descriptions than you think you need — they are the most leveraged text in your agent.',
   },
-  {
-    icon: '🧠', name: 'Memory / RAG', tokens: '~1,200 tok', color: '#34d399', border: 'rgba(52,211,153,0.3)', bg: 'rgba(52,211,153,0.04)', tokenBg: 'rgba(52,211,153,0.08)', tokenBorder: 'rgba(52,211,153,0.25)',
-    body: `Retrieved context from a vector database — past conversations, documents, user preferences, or domain knowledge. Injected selectively based on relevance to the current task.\n\nTypes: Episodic (past interactions), Semantic (knowledge base), Procedural (how-to guides).`,
+  { iconKey: 'brain',    name: 'Memory / RAG',          tokens: '~1,200 tok', tint: 'var(--blue-300)',   soft: 'var(--blue-50)',
+    body: `Retrieved context from a vector database — past conversations, documents, user preferences, or domain knowledge. Injected selectively based on relevance to the current task.\n\nTypes: episodic (past interactions), semantic (knowledge base), procedural (how-to guides).`,
     code: `# Retrieved from vector DB (similarity > 0.85):\n[User prefs]: Prefers concise answers, UK English\n[Past task]: Built React app on 2024-11-10`,
-    tip: '💡 Only retrieve what\'s relevant. Injecting too much memory dilutes attention and wastes tokens.',
+    tip:  'Only retrieve what is relevant. Injecting too much memory dilutes attention and wastes tokens.',
   },
-  {
-    icon: '📜', name: 'Conversation History', tokens: '~2,000 tok', color: '#fbbf24', border: 'rgba(251,191,36,0.3)', bg: 'rgba(251,191,36,0.04)', tokenBg: 'rgba(251,191,36,0.08)', tokenBorder: 'rgba(251,191,36,0.25)',
-    body: `All prior turns in the session: user messages, agent responses, tool calls, and tool results. Grows with every exchange.\n\nChallenge: Unbounded history eventually overflows the context window. Strategies: sliding window, summarization, or hybrid.`,
+  { iconKey: 'scroll',   name: 'Conversation history',  tokens: '~2,000 tok', tint: 'var(--text-secondary)', soft: 'var(--surface-1)',
+    body: `All prior turns in the session: user messages, agent responses, tool calls, and tool results. Grows with every exchange.\n\nChallenge: unbounded history eventually overflows the context window. Strategies: sliding window, summarisation, or hybrid.`,
     code: `user: "Research AI papers"\nassistant: [tool_call: web_search...]\ntool_result: [...results...]\nassistant: "Here are the top 3..."`,
-    tip: '💡 Summarize old conversation turns rather than truncating them — you preserve meaning while freeing up tokens.',
+    tip:  'Summarise old conversation turns rather than truncating them — you preserve meaning while freeing up tokens.',
   },
-  {
-    icon: '💬', name: 'Current User Message', tokens: '~150 tok', color: '#f97316', border: 'rgba(249,115,22,0.3)', bg: 'rgba(249,115,22,0.04)', tokenBg: 'rgba(249,115,22,0.08)', tokenBorder: 'rgba(249,115,22,0.25)',
-    body: `The immediate input from the user or the task orchestrator. Clear, specific inputs lead to better agent behavior.\n\nContext engineering tip: Inject task-specific context here dynamically rather than bloating the system prompt.`,
-    code: `"Summarize the 3 most-cited AI papers\nfrom the last 6 months. Focus on\npractical applications."`,
-    tip: '💡 The clearer the user message, the less the agent has to "infer" — reducing hallucination risk.',
+  { iconKey: 'chat',     name: 'Current user message',  tokens: '~150 tok',   tint: 'var(--text-primary)',   soft: 'var(--surface-1)',
+    body: `The immediate input from the user or the task orchestrator. Clear, specific inputs lead to better agent behaviour.\n\nContext engineering tip: inject task-specific context here dynamically rather than bloating the system prompt.`,
+    code: `"Summarise the 3 most-cited AI papers\nfrom the last 6 months. Focus on\npractical applications."`,
+    tip:  'The clearer the user message, the less the agent has to infer — reducing hallucination risk.',
   },
 ]
 
 // ── MULTI-AGENT ────────────────────────────────────────────────────────────────
+// Left side = input/computation roles → blue. Right side = output/external-facing
+// roles → orange. Two signals visible at a time + neutral orchestrator.
 const MA_LEFT = [
-  { name: 'Researcher', role: 'Sub-agent', color: '#38bdf8', border: 'rgba(56,189,248,0.3)', glow: 'rgba(56,189,248,0.15)', tools: ['web_search', 'browse_url'] },
-  { name: 'Coder', role: 'Sub-agent', color: '#818cf8', border: 'rgba(129,140,248,0.3)', glow: 'rgba(129,140,248,0.15)', tools: ['code_exec', 'file_write'] },
+  { name: 'Researcher', role: 'Sub-agent', tint: 'var(--blue-500)', soft: 'var(--blue-50)', tools: ['web_search', 'browse_url'] },
+  { name: 'Coder',      role: 'Sub-agent', tint: 'var(--blue-500)', soft: 'var(--blue-50)', tools: ['code_exec', 'file_write'] },
 ]
 const MA_RIGHT = [
-  { name: 'Writer', role: 'Sub-agent', color: '#fbbf24', border: 'rgba(251,191,36,0.3)', glow: 'rgba(251,191,36,0.15)', tools: ['file_write', 'memory'] },
-  { name: 'Reviewer', role: 'Sub-agent', color: '#f97316', border: 'rgba(249,115,22,0.3)', glow: 'rgba(249,115,22,0.15)', tools: ['quality_check', 'api_call'] },
+  { name: 'Writer',   role: 'Sub-agent', tint: 'var(--orange-500)', soft: 'var(--orange-50)', tools: ['file_write', 'memory'] },
+  { name: 'Reviewer', role: 'Sub-agent', tint: 'var(--orange-500)', soft: 'var(--orange-50)', tools: ['quality_check', 'api_call'] },
 ]
 const MA_MESSAGES = [
-  '← Orchestrator assigns tasks to specialized sub-agents based on their capabilities',
-  '→ Researcher returns findings: "Found 5 relevant papers with key results..."',
-  '→ Coder returns: "Script written. Ran analysis. Results: accuracy 94.2%"',
-  '→ Writer returns: "Report draft complete. 1,200 words with citations."',
-  '← Reviewer checks quality, Orchestrator assembles final output for user',
+  'Orchestrator assigns tasks to specialised sub-agents based on their capabilities.',
+  'Researcher returns findings: "Found 5 relevant papers with key results…"',
+  'Coder returns: "Script written. Ran analysis. Results: accuracy 94.2%."',
+  'Writer returns: "Report draft complete. 1,200 words with citations."',
+  'Reviewer checks quality, Orchestrator assembles final output for user.',
 ]
 
 // ── QUIZ ──────────────────────────────────────────────────────────────────────
@@ -372,7 +781,7 @@ function pickQuestion(targetDiff, usedIds, quiz) {
 // ══════════════════════════════════════════════════════════════════════════════
 export default function AgentsTools() {
   const [tab, setTab] = useState(0)
-  const TABS = ['Agent Loop', 'Tool Calling', 'ReAct Pattern', 'Context Layers', 'Multi-Agent', 'Quiz']
+  const TABS = ['Agent loop', 'Tool calling', 'ReAct pattern', 'Context layers', 'Multi-agent', 'Quiz']
 
   // loop
   const [loopStep, setLoopStep] = useState(0)
@@ -488,75 +897,95 @@ export default function AgentsTools() {
       <style>{css}</style>
       <NavBar />
 
-      <div className="ag-hero">
-        <div className="ag-eyebrow">Interactive Guide</div>
-        <h1 className="ag-title">Agents, Tools &<br /><span>Context Engineering</span></h1>
-        <p className="ag-subtitle">How AI agents loop, call tools, and how context engineering determines everything they can perceive, reason about, and do.</p>
-      </div>
+      <header className="ag-hero">
+        <div className="ag-eyebrow">Interactive guide</div>
+        <h1 className="ag-title">Agents, tools, and context</h1>
+        <p className="ag-subtitle">How agents loop, call tools, and how context engineering shapes everything they can perceive, reason about, and do.</p>
+      </header>
 
-      <div className="ag-tabs">
-        {TABS.map((t, i) => (
-          <button key={i} className={`ag-tab${tab === i ? ' active' : ''}`} onClick={() => setTab(i)}>{t}</button>
-        ))}
+      <div className="ag-tabs-row">
+        <div className="prism-tabs" role="tablist" aria-label="Sections">
+          {TABS.map((t, i) => (
+            <button
+              key={i}
+              role="tab"
+              className="prism-tab"
+              aria-selected={tab === i}
+              onClick={() => setTab(i)}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* ── Tab 0: Agent Loop ── */}
       {tab === 0 && (
         <div className="ag-panel">
-          <div className="ag-section-title">The Agent Loop</div>
-          <p className="ag-section-sub">Unlike a single LLM call, agents operate in a loop — perceiving context, reasoning, calling tools, observing results, and repeating until the task is done. Watch it run step by step.</p>
+          <div className="ag-section-title">The agent loop</div>
+          <p className="ag-section-sub">Unlike a single LLM call, agents operate in a loop — perceive, reason, call a tool, observe the result, and repeat until the task is done. Watch it run step by step.</p>
 
           <div className="ag-card">
-            <div className="ag-card-title">// Agent Execution Loop</div>
+            <div className="ag-card-title">Agent execution loop</div>
             <div className="loop-container">
               {LOOP_STEPS.map((step, i) => (
-                <div key={step.id}>
-                  <div className={`loop-node${loopStep === i ? ' active' : ''}${loopStep > i ? ' done' : ''}`}
-                    style={{ background: step.bg, borderColor: loopStep === i ? step.color : step.border, '--node-glow': step.glow, '--node-color': step.color, '--node-icon-bg': step.iconBg, '--node-border': step.border }}>
-                    <div className="node-icon">{step.icon}</div>
+                <div key={step.id} style={{ width: '100%', maxWidth: 520, margin: '0 auto' }}>
+                  <div
+                    className={`loop-node${loopStep === i ? ' active' : ''}${loopStep > i ? ' done' : ''}`}
+                    style={{ '--node-tint': step.tint, '--node-soft': step.soft }}
+                  >
+                    <div className="node-icon"><IconFor name={step.iconKey} size={22} weight="duotone" /></div>
                     <div className="node-content">
-                      <div className="node-label" style={{ color: loopStep >= i ? step.color : '#4a6a5a' }}>{step.label}</div>
+                      <div className="node-label" style={loopStep >= i ? { color: step.tint } : undefined}>{step.label}</div>
                       <div className="node-desc">{step.desc}</div>
-                      {loopStep >= i && (
-                        <div className="node-output" style={{ color: step.color, background: step.iconBg, borderColor: step.border }}>{step.output}</div>
-                      )}
+                      {loopStep >= i && <div className="node-output">{step.output}</div>}
                     </div>
                     {i === LOOP_STEPS.length - 1 && loopStep === i && (
-                      <div className="loop-badge">↺ Loop again?</div>
+                      <div className="loop-badge">
+                        <ArrowCounterClockwiseIcon size={11} weight="bold" /> Loop again?
+                      </div>
                     )}
                   </div>
                   {i < LOOP_STEPS.length - 1 && (
-                    <div className="loop-connector" style={{ background: loopStep > i ? step.color : '#0f2018', color: loopStep > i ? step.color : '#1a2e22' }} />
+                    <div className={`loop-connector${loopStep > i ? ' done' : ''}`} />
                   )}
                 </div>
               ))}
             </div>
             <div className="loop-controls">
               {!loopRunning && loopStep < LOOP_STEPS.length - 1 && (
-                <button className="loop-btn" onClick={() => setLoopRunning(true)}>▶ Auto Run</button>
+                <button className="loop-btn" onClick={() => setLoopRunning(true)}>
+                  <PlayIcon size={14} weight="fill" /> Auto run
+                </button>
               )}
               {!loopRunning && (
-                <button className="loop-btn" onClick={() => setLoopStep(s => Math.min(s + 1, LOOP_STEPS.length - 1))}>Step →</button>
+                <button className="loop-btn secondary" onClick={() => setLoopStep(s => Math.min(s + 1, LOOP_STEPS.length - 1))}>
+                  Step <ArrowRightIcon size={14} weight="bold" />
+                </button>
               )}
               {loopRunning && (
-                <button className="loop-btn secondary" onClick={() => setLoopRunning(false)}>⏸ Pause</button>
+                <button className="loop-btn secondary" onClick={() => setLoopRunning(false)}>
+                  <PauseIcon size={14} weight="fill" /> Pause
+                </button>
               )}
-              <button className="loop-btn secondary" onClick={() => { setLoopStep(0); setLoopRunning(false) }}>↺ Reset</button>
+              <button className="loop-btn secondary" onClick={() => { setLoopStep(0); setLoopRunning(false) }}>
+                <ArrowCounterClockwiseIcon size={14} weight="bold" /> Reset
+              </button>
             </div>
           </div>
 
           <div className="ag-card">
-            <div className="ag-card-title">// Agent vs. Simple LLM Call</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="ag-card-title">Agent vs. simple LLM call</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-3)' }}>
               {[
-                { label: '❌ Simple LLM Call', color: '#f87171', bg: 'rgba(239,68,68,0.05)', border: 'rgba(239,68,68,0.2)', points: ['Single input → single output', 'No tools or external data', 'Relies purely on training knowledge', 'One shot — no self-correction'] },
-                { label: '✅ Agent', color: '#34d399', bg: 'rgba(52,211,153,0.05)', border: 'rgba(52,211,153,0.2)', points: ['Multi-step reasoning loop', 'Calls real tools (search, code, APIs)', 'Grounds answers in live data', 'Self-corrects by observing results'] },
+                { label: 'Simple LLM call', tint: 'var(--color-error)',   soft: 'var(--surface-2)',  points: ['Single input, single output', 'No tools or external data', 'Relies purely on training knowledge', 'One shot — no self-correction'] },
+                { label: 'Agent',            tint: 'var(--color-success)', soft: 'var(--surface-1)',  points: ['Multi-step reasoning loop', 'Calls real tools (search, code, APIs)', 'Grounds answers in live data', 'Self-corrects by observing results'] },
               ].map(col => (
-                <div key={col.label} style={{ background: col.bg, border: `1px solid ${col.border}`, borderRadius: 10, padding: 16 }}>
-                  <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 700, fontSize: 16, color: col.color, marginBottom: 12 }}>{col.label}</div>
+                <div key={col.label} style={{ background: col.soft, border: `1px solid ${col.tint}`, borderRadius: 'var(--radius-md)', padding: 'var(--spacing-4)' }}>
+                  <div style={{ font: 'var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary)', color: col.tint, marginBottom: 'var(--spacing-3)' }}>{col.label}</div>
                   {col.points.map(p => (
-                    <div key={p} style={{ display: 'flex', gap: 8, marginBottom: 7, fontSize: 16, color: '#6a8a7a', lineHeight: 1.5 }}>
-                      <span style={{ color: col.color, flexShrink: 0 }}>▸</span>{p}
+                    <div key={p} style={{ display: 'flex', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-1)', font: 'var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)' }}>
+                      <span style={{ color: col.tint, flexShrink: 0 }}>▸</span>{p}
                     </div>
                   ))}
                 </div>
@@ -569,28 +998,34 @@ export default function AgentsTools() {
       {/* ── Tab 1: Tool Calling ── */}
       {tab === 1 && (
         <div className="ag-panel">
-          <div className="ag-section-title">Tool Calling</div>
-          <p className="ag-section-sub">Tools are what turn an LLM into an agent. The model reads tool definitions, decides which to call, and the result flows back into context. Click a tool to explore it, then watch a live call simulation.</p>
+          <div className="ag-section-title">Tool calling</div>
+          <p className="ag-section-sub">Tools turn an LLM into an agent. The model reads tool definitions, decides which to call, and the result flows back into context. Click a tool to explore it, then watch a live call simulation.</p>
 
           <div className="ag-card">
-            <div className="ag-card-title">// Available Tools</div>
+            <div className="ag-card-title">Available tools</div>
             <div className="tools-grid">
               {TOOLS.map((t, i) => (
-                <div key={t.id} className={`tool-card${selectedTool === i ? ' selected' : ''}${callingTool !== null && demoRunning ? ' calling' : ''}`}
-                  style={{ '--t-accent': t.accent, '--t-accent-glow': t.glow }}
-                  onClick={() => setSelectedTool(i)}>
-                  <div className="tool-icon">{t.icon}</div>
-                  <div className="tool-name" style={{ color: selectedTool === i ? t.accent : '#e0e8f0' }}>{t.name}</div>
+                <button
+                  key={t.id}
+                  type="button"
+                  className={`tool-card${selectedTool === i ? ' selected' : ''}${callingTool !== null && demoRunning ? ' calling' : ''}`}
+                  onClick={() => setSelectedTool(i)}
+                  aria-pressed={selectedTool === i}
+                >
+                  <span className="tool-icon"><IconFor name={t.iconKey} size={24} weight="duotone" /></span>
+                  <div className="tool-name">{t.name}</div>
                   <div className="tool-sig">{t.sig}</div>
                   <div className="tool-desc">{t.desc}</div>
-                </div>
+                </button>
               ))}
             </div>
           </div>
 
           <div className="ag-card">
-            <div className="ag-card-title">// Live Tool Call Simulation</div>
-            <p style={{ fontSize: 16, color: '#6a8a7a', marginBottom: 14, lineHeight: 1.7 }}>Watch how an agent uses <span style={{ color: '#38bdf8' }}>web_search</span> and <span style={{ color: '#38bdf8' }}>browse_url</span> to answer a research question — each tool result feeding back into the agent's context.</p>
+            <div className="ag-card-title">Live tool call simulation</div>
+            <p style={{ font: 'var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)', marginBottom: 'var(--spacing-3)' }}>
+              Watch how an agent uses <span style={{ color: 'var(--orange-500)', fontFamily: 'IBM Plex Mono, ui-monospace, monospace' }}>web_search</span> and <span style={{ color: 'var(--orange-500)', fontFamily: 'IBM Plex Mono, ui-monospace, monospace' }}>browse_url</span> to answer a research question — each tool result feeding back into the agent's context.
+            </p>
             <div className="tool-call-sim">
               {TOOL_CALL_DEMO.map((line, i) => (
                 <div key={i} className={`tc-line${demoLines.includes(i) ? ' visible' : ''}`} style={{ transitionDelay: `${i * 0.05}s` }}>
@@ -599,14 +1034,16 @@ export default function AgentsTools() {
                 </div>
               ))}
               {demoLines.length === 0 && !demoRunning && (
-                <div style={{ color: '#1a3a28', fontSize: 16 }}>// Press "Run Demo" to watch the agent work...</div>
+                <div style={{ color: 'var(--text-tertiary)' }}>Press "Run demo" to watch the agent work…</div>
               )}
             </div>
-            <div style={{ marginTop: 14, display: 'flex', gap: 10 }}>
+            <div style={{ marginTop: 'var(--spacing-3)', display: 'flex', gap: 'var(--spacing-2)' }}>
               <button className="loop-btn" onClick={() => { setDemoLines([]); setTimeout(() => setDemoRunning(true), 100) }} disabled={demoRunning}>
-                {demoRunning ? '⏳ Running...' : '▶ Run Demo'}
+                <PlayIcon size={14} weight="fill" /> {demoRunning ? 'Running…' : 'Run demo'}
               </button>
-              <button className="loop-btn secondary" onClick={() => { setDemoLines([]); setDemoRunning(false) }}>↺ Reset</button>
+              <button className="loop-btn secondary" onClick={() => { setDemoLines([]); setDemoRunning(false) }}>
+                <ArrowCounterClockwiseIcon size={14} weight="bold" /> Reset
+              </button>
             </div>
           </div>
         </div>
@@ -615,17 +1052,19 @@ export default function AgentsTools() {
       {/* ── Tab 2: ReAct ── */}
       {tab === 2 && (
         <div className="ag-panel">
-          <div className="ag-section-title">The ReAct Pattern</div>
-          <p className="ag-section-sub">ReAct (Reason + Act) is the most widely-used agent pattern. The agent alternates between explicit <span style={{ color: '#818cf8' }}>Thought</span> steps and <span style={{ color: '#fbbf24' }}>Action</span> steps, with <span style={{ color: '#f97316' }}>Observations</span> from tool results. This makes reasoning transparent and debuggable.</p>
+          <div className="ag-section-title">The ReAct pattern</div>
+          <p className="ag-section-sub">ReAct (reason + act) is the most widely used agent pattern. The agent alternates between explicit <span style={{ color: 'var(--blue-500)' }}>Thought</span> steps and <span style={{ color: 'var(--orange-500)' }}>Action</span> steps, with <span style={{ color: 'var(--orange-500)' }}>Observations</span> from tool results. This makes reasoning transparent and debuggable.</p>
 
           <div className="ag-card">
-            <div className="ag-card-title">// ReAct Trace — Flight Booking Agent</div>
+            <div className="ag-card-title">ReAct trace — flight booking agent</div>
             <div className="react-timeline">
               {REACT_STEPS.map((step, i) => (
                 <div key={i} className="react-step">
-                  <div className="react-dot" style={{ background: step.dotBg, borderColor: step.dotBorder, color: step.color }}>{step.icon}</div>
+                  <div className="react-dot" style={{ '--react-tint': step.tint, '--react-soft': step.soft }}>
+                    <IconFor name={step.iconKey} size={18} weight="duotone" />
+                  </div>
                   <div className="react-body">
-                    <div className="react-type" style={{ color: step.color }}>{step.type}</div>
+                    <div className="react-type" style={{ '--react-tint': step.tint }}>{step.type}</div>
                     <div className="react-content">{step.content}</div>
                   </div>
                 </div>
@@ -634,19 +1073,19 @@ export default function AgentsTools() {
           </div>
 
           <div className="ag-card">
-            <div className="ag-card-title">// Why ReAct Works</div>
-            <div style={{ display: 'grid', gap: 12 }}>
+            <div className="ag-card-title">Why ReAct works</div>
+            <div style={{ display: 'grid', gap: 'var(--spacing-3)' }}>
               {[
-                ['🔍 Transparent reasoning', 'Every decision has an explicit Thought. You can read the trace and see exactly why the agent did what it did.'],
-                ['🛡️ Reduces hallucination', 'The agent grounds claims in tool results rather than generating from memory. If the tool returns nothing, it knows to say so.'],
-                ['🔄 Self-correcting', 'When an Observation contradicts expectations, the next Thought can adapt the plan — no need for external oversight on every step.'],
-                ['🐛 Debuggable', 'When something goes wrong, the Thought/Action/Observation trail tells you exactly where reasoning broke down.'],
-              ].map(([title, desc]) => (
-                <div key={title} style={{ display: 'flex', gap: 12 }}>
-                  <span style={{ fontSize: 18, flexShrink: 0 }}>{title.split(' ')[0]}</span>
+                { iconKey: 'search',   title: 'Transparent reasoning', desc: 'Every decision has an explicit Thought. You can read the trace and see exactly why the agent did what it did.' },
+                { iconKey: 'check',    title: 'Reduces hallucination', desc: 'The agent grounds claims in tool results rather than generating from memory. If the tool returns nothing, it knows to say so.' },
+                { iconKey: 'brain',    title: 'Self-correcting',       desc: 'When an Observation contradicts expectations, the next Thought can adapt the plan — no need for external oversight on every step.' },
+                { iconKey: 'wrench',   title: 'Debuggable',            desc: 'When something goes wrong, the Thought / Action / Observation trail tells you exactly where reasoning broke down.' },
+              ].map(({ iconKey, title, desc }) => (
+                <div key={title} style={{ display: 'flex', gap: 'var(--spacing-3)' }}>
+                  <span style={{ color: 'var(--blue-500)', flexShrink: 0, marginTop: 2 }}><IconFor name={iconKey} size={20} weight="duotone" /></span>
                   <div>
-                    <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontSize: 16, fontWeight: 700, color: '#e0e8f0', marginBottom: 3 }}>{title.slice(2)}</div>
-                    <div style={{ fontSize: 16, color: '#6a8a7a', lineHeight: 1.6 }}>{desc}</div>
+                    <div style={{ font: 'var(--text-weight-label) var(--text-size-body)/1.4 var(--font-primary)', color: 'var(--text-primary)', marginBottom: 'var(--spacing-1)' }}>{title}</div>
+                    <div style={{ font: 'var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)' }}>{desc}</div>
                   </div>
                 </div>
               ))}
@@ -658,45 +1097,52 @@ export default function AgentsTools() {
       {/* ── Tab 3: Context Layers ── */}
       {tab === 3 && (
         <div className="ag-panel">
-          <div className="ag-section-title">Context Engineering</div>
+          <div className="ag-section-title">Context engineering</div>
           <p className="ag-section-sub">Context engineering is the practice of deliberately designing what information goes into the context window at each step. It's the most important skill in building reliable agents. Click each layer to expand it.</p>
 
           <div className="ag-card">
-            <div className="ag-card-title">// Agent Context Window Anatomy</div>
-            <div style={{ fontSize: 16, color: '#6a8a7a', marginBottom: 16, lineHeight: 1.7 }}>
-              A typical agent context window has 5 layers. Together they define everything the agent can perceive.
-              Total: <span style={{ color: '#34d399', fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 700 }}>~4,550 tokens</span> before any tool results.
+            <div className="ag-card-title">Agent context window anatomy</div>
+            <div style={{ font: 'var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)', marginBottom: 'var(--spacing-4)' }}>
+              A typical agent context window has five layers. Together they define everything the agent can perceive.
+              Total: <strong style={{ color: 'var(--text-primary)' }}>~4,550 tokens</strong> before any tool results.
             </div>
 
             {/* Stacked bar */}
-            <div style={{ display: 'flex', height: 32, borderRadius: 8, overflow: 'hidden', marginBottom: 20, border: '1px solid #0f2018' }}>
+            <div style={{ display: 'flex', height: 32, borderRadius: 'var(--radius-sm)', overflow: 'hidden', marginBottom: 'var(--spacing-5)', border: '1px solid var(--border-default)' }}>
               {CTX_LAYERS.map((l, i) => {
                 const widths = [17, 9, 26, 44, 4]
-                return <div key={i} style={{ width: `${widths[i]}%`, background: l.bg, borderRight: i < CTX_LAYERS.length - 1 ? `1px solid #0a1810` : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: l.color, letterSpacing: '0.06em', overflow: 'hidden', whiteSpace: 'nowrap', padding: '0 4px' }}>
-                  {widths[i] > 10 ? l.name.split(' ')[0] : ''}
-                </div>
+                return (
+                  <div key={i} style={{ width: `${widths[i]}%`, background: l.tint, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', font: 'var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary)', overflow: 'hidden', whiteSpace: 'nowrap', padding: '0 4px' }}>
+                    {widths[i] > 10 ? l.name.split(' ')[0] : ''}
+                  </div>
+                )
               })}
             </div>
 
             <div className="ctx-layers">
               {CTX_LAYERS.map((layer, i) => (
-                <div key={i} className={`ctx-layer${expandedCtx === i ? ' expanded' : ''}`}
-                  style={{ background: layer.bg, borderColor: expandedCtx === i ? layer.color : layer.border, '--l-color': layer.color }}
-                  onClick={() => setExpandedCtx(expandedCtx === i ? null : i)}>
+                <button
+                  key={i}
+                  type="button"
+                  className={`ctx-layer${expandedCtx === i ? ' expanded' : ''}`}
+                  style={{ '--ctx-tint': layer.tint, '--ctx-bg': layer.soft, '--ctx-border': layer.tint, textAlign: 'left', width: '100%' }}
+                  onClick={() => setExpandedCtx(expandedCtx === i ? null : i)}
+                  aria-expanded={expandedCtx === i}
+                >
                   <div className="ctx-layer-header">
-                    <span className="ctx-layer-icon">{layer.icon}</span>
-                    <span className="ctx-layer-name" style={{ color: layer.color }}>{layer.name}</span>
-                    <span className="ctx-layer-tokens" style={{ color: layer.color, background: layer.tokenBg, borderColor: layer.tokenBorder }}>{layer.tokens}</span>
-                    <span className="ctx-layer-chevron">▶</span>
+                    <span className="ctx-layer-icon"><IconFor name={layer.iconKey} size={20} weight="duotone" /></span>
+                    <span className="ctx-layer-name">{layer.name}</span>
+                    <span className="ctx-layer-tokens">{layer.tokens}</span>
+                    <span className="ctx-layer-chevron"><ArrowRightIcon size={14} weight="bold" /></span>
                   </div>
                   {expandedCtx === i && (
-                    <div className="ctx-layer-body" style={{ borderColor: layer.border, color: '#7a9a88' }}>
-                      <p style={{ marginBottom: 12 }}>{layer.body}</p>
-                      <div style={{ background: '#020809', border: `1px solid ${layer.border}`, borderRadius: 6, padding: 12, fontFamily: "'DM Mono',monospace", fontSize: 16, color: layer.color, lineHeight: 1.7, whiteSpace: 'pre-wrap', marginBottom: 10 }}>{layer.code}</div>
+                    <div className="ctx-layer-body">
+                      <p style={{ marginBottom: 'var(--spacing-3)', whiteSpace: 'pre-wrap' }}>{layer.body}</p>
+                      <div className="ctx-code">{layer.code}</div>
                       <div className="ctx-tip">{layer.tip}</div>
                     </div>
                   )}
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -706,66 +1152,70 @@ export default function AgentsTools() {
       {/* ── Tab 4: Multi-Agent ── */}
       {tab === 4 && (
         <div className="ag-panel">
-          <div className="ag-section-title">Multi-Agent Systems</div>
-          <p className="ag-section-sub">For complex tasks, multiple specialized agents collaborate under an orchestrator. Each agent has its own context, tools, and role — the orchestrator delegates, collects results, and assembles the final output.</p>
+          <div className="ag-section-title">Multi-agent systems</div>
+          <p className="ag-section-sub">For complex tasks, multiple specialised agents collaborate under an orchestrator. Each agent has its own context, tools, and role — the orchestrator delegates, collects results, and assembles the final output.</p>
 
           <div className="ag-card">
-            <div className="ag-card-title">// Orchestrator + Sub-Agents</div>
+            <div className="ag-card-title">Orchestrator and sub-agents</div>
             <div className="ma-diagram">
               <div className="ma-agents">
                 {MA_LEFT.map(a => (
-                  <div key={a.name} className={`ma-agent${maActive?.name === a.name ? ' active' : ''}`}
-                    style={{ borderColor: maActive?.name === a.name ? a.color : 'rgba(255,255,255,0.06)', '--a-glow': a.glow }}>
-                    <div className="ma-agent-name" style={{ color: a.color }}>{a.name}</div>
+                  <div
+                    key={a.name}
+                    className={`ma-agent${maActive?.name === a.name ? ' active' : ''}`}
+                    style={{ '--ma-tint': a.tint, '--ma-soft': a.soft }}
+                  >
+                    <div className="ma-agent-name">{a.name}</div>
                     <div className="ma-agent-role">{a.role}</div>
                     <div className="ma-agent-tools">
-                      {a.tools.map(t => <span key={t} className="ma-tool-tag" style={{ color: a.color, background: `${a.color}10`, borderColor: `${a.color}30` }}>{t}</span>)}
+                      {a.tools.map(t => <span key={t} className="ma-tool-tag">{t}</span>)}
                     </div>
                   </div>
                 ))}
               </div>
 
               <div className="ma-center">
-                <div className="ma-arrow">⟷</div>
+                <span className="ma-arrow"><ArrowRightIcon size={16} weight="bold" /></span>
                 <div className="ma-orchestrator">
-                  <div className="ma-orch-icon">🎯</div>
+                  <div className="ma-orch-icon"><TargetIcon size={28} weight="duotone" /></div>
                   <div className="ma-orch-name">Orchestrator</div>
-                  <div className="ma-orch-sub">Plans & delegates</div>
+                  <div className="ma-orch-sub">Plans and delegates</div>
                 </div>
-                <div className="ma-arrow">⟷</div>
+                <span className="ma-arrow"><ArrowRightIcon size={16} weight="bold" /></span>
               </div>
 
               <div className="ma-agents">
                 {MA_RIGHT.map(a => (
-                  <div key={a.name} className={`ma-agent${maActive?.name === a.name ? ' active' : ''}`}
-                    style={{ borderColor: maActive?.name === a.name ? a.color : 'rgba(255,255,255,0.06)', '--a-glow': a.glow }}>
-                    <div className="ma-agent-name" style={{ color: a.color }}>{a.name}</div>
+                  <div
+                    key={a.name}
+                    className={`ma-agent${maActive?.name === a.name ? ' active' : ''}`}
+                    style={{ '--ma-tint': a.tint, '--ma-soft': a.soft }}
+                  >
+                    <div className="ma-agent-name">{a.name}</div>
                     <div className="ma-agent-role">{a.role}</div>
                     <div className="ma-agent-tools">
-                      {a.tools.map(t => <span key={t} className="ma-tool-tag" style={{ color: a.color, background: `${a.color}10`, borderColor: `${a.color}30` }}>{t}</span>)}
+                      {a.tools.map(t => <span key={t} className="ma-tool-tag">{t}</span>)}
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="ma-msg">
-              <strong>→ </strong>{MA_MESSAGES[maStep % MA_MESSAGES.length]}
-            </div>
+            <div className="ma-msg">{MA_MESSAGES[maStep % MA_MESSAGES.length]}</div>
           </div>
 
           <div className="ag-card">
-            <div className="ag-card-title">// When to Use Multi-Agent</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="ag-card-title">When to use multi-agent</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-3)' }}>
               {[
-                { label: '✅ Use Multi-Agent When', color: '#34d399', bg: 'rgba(52,211,153,0.05)', border: 'rgba(52,211,153,0.2)', points: ['Task requires parallel work streams', 'Subtasks need specialized expertise', 'One context window isn\'t large enough', 'You want fault isolation between steps'] },
-                { label: '⚠️ Avoid When', color: '#fbbf24', bg: 'rgba(251,191,36,0.05)', border: 'rgba(251,191,36,0.2)', points: ['Single-step tasks (over-engineering)', 'Latency is critical (agents add overhead)', 'Debugging is already hard (adds complexity)', 'Cost is constrained (multiple LLM calls)'] },
+                { label: 'Use multi-agent when',  tint: 'var(--color-success)', soft: 'var(--surface-1)', points: ['Task requires parallel work streams', 'Subtasks need specialised expertise', "One context window isn't large enough", 'You want fault isolation between steps'] },
+                { label: 'Avoid when',            tint: 'var(--color-warning)', soft: 'var(--surface-1)', points: ['Single-step tasks (over-engineering)', 'Latency is critical (agents add overhead)', 'Debugging is already hard (adds complexity)', 'Cost is constrained (multiple LLM calls)'] },
               ].map(col => (
-                <div key={col.label} style={{ background: col.bg, border: `1px solid ${col.border}`, borderRadius: 10, padding: 16 }}>
-                  <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 700, fontSize: 16, color: col.color, marginBottom: 10 }}>{col.label}</div>
+                <div key={col.label} style={{ background: col.soft, border: `1px solid ${col.tint}`, borderRadius: 'var(--radius-md)', padding: 'var(--spacing-4)' }}>
+                  <div style={{ font: 'var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary)', color: col.tint, marginBottom: 'var(--spacing-3)' }}>{col.label}</div>
                   {col.points.map(p => (
-                    <div key={p} style={{ display: 'flex', gap: 8, marginBottom: 6, fontSize: 16, color: '#6a8a7a', lineHeight: 1.5 }}>
-                      <span style={{ color: col.color, flexShrink: 0 }}>▸</span>{p}
+                    <div key={p} style={{ display: 'flex', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-1)', font: 'var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)' }}>
+                      <span style={{ color: col.tint, flexShrink: 0 }}>▸</span>{p}
                     </div>
                   ))}
                 </div>
@@ -778,42 +1228,56 @@ export default function AgentsTools() {
       {/* ── Tab 5: Quiz ── */}
       {tab === 5 && (
         <div className="ag-panel">
-          <div className="ag-section-title">Quick Quiz</div>
-          <p className="ag-section-sub">Test your understanding of agents, tool calling, and context engineering.</p>
+          <div className="ag-section-title">Quick quiz</div>
+          <p className="ag-section-sub">Six questions to check what stuck. The next question is picked from a harder or easier pool based on how you do.</p>
           {!done ? (
             <div className="ag-card">
               {currentQ && (
                 <>
                   <div className="ag-progress"><div className="ag-progress-fill" style={{ width: `${(qNum / SESSION_SIZE) * 100}%` }} /></div>
-                  <div style={{ fontSize: 16, color: '#4a6a5a', marginBottom: 16 }}>QUESTION {qNum + 1} / {SESSION_SIZE}</div>
-                  <span className={`ag-diff-badge ${currentQ.difficulty}`}>⬤ {currentQ.difficulty}</span>
+                  <div className="ag-quiz-meta">Question {qNum + 1} of {SESSION_SIZE}</div>
+                  <span className={`ag-diff-badge ${currentQ.difficulty}`}>{currentQ.difficulty}</span>
                   <div className="ag-quiz-q">{currentQ.q}</div>
-                  <div className="ag-quiz-opts">
+                  <div className="ag-quiz-opts" role="radiogroup">
                     {currentQ.opts.map((opt, i) => (
-                      <button key={i} disabled={chosen !== null}
+                      <button
+                        key={i}
+                        disabled={chosen !== null}
+                        role="radio"
+                        aria-checked={chosen === i}
                         className={`ag-quiz-opt${chosen !== null && i === currentQ.correct ? ' correct' : ''}${chosen === i && i !== currentQ.correct ? ' wrong' : ''}`}
-                        onClick={() => handleQuiz(i)}>
-                        {['A','B','C','D'][i]}. {opt}
+                        onClick={() => handleQuiz(i)}
+                      >
+                        <span className="ag-quiz-opt-letter">{['A','B','C','D'][i]}.</span>
+                        {opt}
                       </button>
                     ))}
                   </div>
                   {chosen !== null && (
                     <>
                       <div className="ag-quiz-exp">{currentQ.explanation}</div>
-                      <button className="ag-quiz-next" onClick={nextQ}>{qNum + 1 < SESSION_SIZE ? 'Next Question →' : 'See Results →'}</button>
+                      <button className="ag-quiz-next" onClick={nextQ}>
+                        {qNum + 1 < SESSION_SIZE ? 'Next question' : 'See results'}
+                      </button>
                     </>
                   )}
                 </>
               )}
             </div>
           ) : (
-            <div className="ag-card" style={{ textAlign: 'center', padding: 40 }}>
-              <div style={{ fontSize: 16, color: '#4a6a5a', marginBottom: 12, letterSpacing: '0.12em' }}>FINAL SCORE</div>
+            <div className="ag-card" style={{ textAlign: 'center', padding: 'var(--spacing-7)' }}>
+              <div className="ag-quiz-meta" style={{ textAlign: 'center' }}>Final score</div>
               <div className="ag-score-num">{score}/{SESSION_SIZE}</div>
-              <div style={{ fontSize: 16, color: '#6a8a7a', marginTop: 8 }}>
-                {score >= SESSION_SIZE ? 'Perfect! You understand agents deeply. 🤖' : score >= SESSION_SIZE / 2 ? 'Good work! Revisit the tricky sections. 📚' : 'Keep exploring — agents take time to click. 💪'}
+              <div style={{ font: 'var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)', marginTop: 'var(--spacing-2)' }}>
+                {score >= SESSION_SIZE
+                  ? 'You understand agents deeply.'
+                  : score >= SESSION_SIZE / 2
+                    ? 'Solid run. Worth a quick re-read of the trickier sections.'
+                    : 'Agents take a couple of passes to click. Try a tab you skipped, then retake.'}
               </div>
-              <button className="ag-quiz-next" style={{ marginTop: 24 }} onClick={retake}>Retake Quiz ↺</button>
+              <button className="ag-quiz-next" style={{ marginTop: 'var(--spacing-6)' }} onClick={retake}>
+                Retake quiz
+              </button>
             </div>
           )}
         </div>
