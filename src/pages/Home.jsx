@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   GraduationCapIcon, ChartScatterIcon, ThermometerSimpleIcon, LinkedinLogoIcon,
@@ -251,6 +252,65 @@ const css = `
   transition: transform var(--duration-fast) var(--ease-standard);
 }
 .gl-utility-link:hover .gl-utility-arrow { transform: translateX(3px); }
+
+/* View-mode toggle — segmented control, on-theme */
+.view-toggle-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--spacing-3) var(--spacing-4) var(--spacing-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+.view-toggle {
+  display: inline-flex;
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  gap: 2px;
+}
+.view-toggle-btn {
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  letter-spacing: 0.04em;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard),
+              color var(--duration-fast) var(--ease-standard),
+              box-shadow var(--duration-fast) var(--ease-standard);
+}
+.view-toggle-btn:hover { color: var(--text-primary); }
+.view-toggle-btn:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.view-toggle-btn.active {
+  background: var(--surface-2);
+  color: var(--text-primary);
+  box-shadow: inset 0 0 0 1px var(--orange-300);
+}
+.view-toggle-helper {
+  font: var(--text-weight-body) var(--text-size-caption)/1.4 var(--font-primary);
+  color: var(--text-tertiary);
+  text-align: center;
+}
+
+/* Category section */
+.category-section { max-width: 1100px; margin: 0 auto; padding: 0 var(--spacing-4) var(--spacing-6); }
+.category-header { margin-bottom: var(--spacing-5); }
+.category-label {
+  font: var(--text-weight-h3) var(--text-size-h3)/var(--text-lh-h3) var(--font-primary);
+  letter-spacing: var(--text-ls-h3);
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-1);
+}
+.category-desc {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+  margin: 0;
+}
 `
 
 // Phosphor icons, outlined / duotone, 28px. Card differentiation is icon
@@ -273,26 +333,67 @@ const ICON_MAP = {
   'glossary':             BookOpenIcon,
 }
 
-// Card data — no per-card palette. Differentiation is icon + tag.
-const VISUALIZATIONS = [
-  { path: '/learn-claude',         tag: 'Learn Claude',     title: 'Claude learning resources',          desc: 'Curated official and community resources for learning Claude — a guided path for your level.',                                pills: ['Beginner', 'Intermediate', 'Developer'],                                                ready: true },
-  { path: '/intro-llms',           tag: 'Foundations',      title: 'Introduction to LLMs',               desc: 'Understand how large language models work — from next-token prediction to emergent abilities.',                              pills: ['What is an LLM?', 'How LLMs learn', 'Tokens and context', 'Prompts and responses', 'Limitations'], ready: true },
-  { path: '/types-of-llms',        tag: 'LLM landscape',    title: 'Types of LLMs',                      desc: 'Compare encoder, decoder, and encoder-decoder architectures, and understand when to use GPT, BERT, T5, and multimodal models.', pills: ['Decoder-only', 'Encoder-only', 'Encoder-decoder', 'Multimodal', 'Model selection'],          ready: true },
-  { path: '/image-generation',     tag: 'Generative AI',    title: 'Image generation',                   desc: 'See how diffusion models turn text prompts into images — from noise to pixels, CFG scale, samplers, and prompt craft.',          pills: ['Diffusion process', 'Prompt craft', 'CFG scale', 'Samplers', 'Quiz'],                       ready: true },
-  { path: '/agents-tools',         tag: 'Agentic AI',       title: 'Agents, tools, and context',         desc: 'See how agents think in loops, call tools, and how context engineering shapes every decision they make.',                     pills: ['Agent loop', 'Tool calling', 'ReAct pattern', 'Context engineering', 'Multi-agent'],         ready: true },
-  { path: '/workflow-canvas',      tag: 'AI tools',         title: 'Workflow canvas',                    desc: 'Design AI-ready workflows on a drag-and-drop canvas. Map human and AI tasks and get an automation readiness report.',           pills: ['Visual builder', 'Node types', 'AI readiness', 'Automation score'],                         ready: true },
-  { path: '/token-optimization',   tag: 'LLM fundamentals', title: 'Token optimisation',                  desc: 'Understand how LLMs tokenise text, what tokens cost, and how to dramatically reduce your API spend.',                          pills: ['Live tokeniser', 'Cost calculator', 'KV cache', 'Context windows', 'Quiz'],                  ready: true },
-  { path: '/temperature-sampling', tag: 'LLM fundamentals', title: 'Temperature and sampling',           desc: 'See how temperature, top-K, and top-P shape LLM output distributions — and why it matters for your use case.',                pills: ['Temperature', 'Top-K', 'Top-P nucleus', 'Comparison', 'Live sampler', 'Quiz'],               ready: true },
-  { path: '/rag',                  tag: 'LLM architecture', title: 'Retrieval-augmented generation',     desc: 'See how RAG pipelines retrieve, chunk, and inject knowledge into LLM prompts.',                                              pills: ['Pipeline', 'Chunking', 'Retrieval', 'Prompt assembly', 'RAG vs fine-tuning'],                ready: true },
-  { path: '/agent-simulation',     tag: 'AI agents',        title: 'Agent simulation sandbox',           desc: 'Walk a real agent pipeline — inspect every node, explore risks, latency, and cost, then run the happy path step by step.',     pills: ['Agent workflows', 'Decision gates', 'Risk analysis', 'Latency and cost', 'Human-in-the-loop'], ready: true },
-  { path: '/board-briefing',       tag: 'Executive AI',     title: 'Board briefing generator',           desc: 'Generate a board-ready AI transformation brief from your company data.',                                                      pills: ['Brief generator', 'Risk analysis', 'Strategic recommendations'],                              ready: true },
-  { path: '/neural-networks',      tag: 'Deep learning',    title: 'Neural networks',                    desc: 'Watch signals flow through a network, see activations, and understand how back-propagation trains weights.',                    pills: ['Overview', 'Forward pass', 'Activations', 'Backprop', 'Gradient descent'],                   ready: true },
-  { path: '/vector-embeddings',    tag: 'Embeddings',       title: 'Vector embeddings',                  desc: 'Explore how words and concepts map to high-dimensional vectors, and why semantic similarity works.',                          pills: ['Word vectors', 'Cosine similarity', 'Semantic search', 'RAG', 'Quiz'],                       ready: true },
+// Category metadata — used by section headers and the view-mode toggle.
+const CATEGORIES = [
+  { id: 'learning-resources', label: 'Learning Resources',        description: 'Where to start — curated courses and videos.' },
+  { id: 'agents',             label: 'Agents',                     description: 'Building systems that act.' },
+  { id: 'generative-ai',      label: 'Generative AI',              description: 'How models produce output.' },
+  { id: 'how-tech-works',     label: 'How the Technology Works',   description: 'The foundations under the hood.' },
 ]
 
+// View-mode → category ordering.
+const MODE_ORDER = {
+  explore: ['learning-resources', 'agents', 'generative-ai', 'how-tech-works'],
+  path:    ['learning-resources', 'how-tech-works', 'generative-ai', 'agents'],
+}
+
+const VIEW_MODE_KEY = 'home-view-mode'
+
+// Card data — no per-card palette. Differentiation is icon + tag.
+const VISUALIZATIONS = [
+  { path: '/learn-claude',         category: 'learning-resources', tag: 'Learn Claude',     title: 'Claude learning resources',          desc: 'Curated official and community resources for learning Claude — a guided path for your level.',                                pills: ['Beginner', 'Intermediate', 'Developer'],                                                ready: true },
+  { path: '/intro-llms',           category: 'how-tech-works',     tag: 'Foundations',      title: 'Introduction to LLMs',               desc: 'Understand how large language models work — from next-token prediction to emergent abilities.',                              pills: ['What is an LLM?', 'How LLMs learn', 'Tokens and context', 'Prompts and responses', 'Limitations'], ready: true },
+  { path: '/types-of-llms',        category: 'how-tech-works',     tag: 'LLM landscape',    title: 'Types of LLMs',                      desc: 'Compare encoder, decoder, and encoder-decoder architectures, and understand when to use GPT, BERT, T5, and multimodal models.', pills: ['Decoder-only', 'Encoder-only', 'Encoder-decoder', 'Multimodal', 'Model selection'],          ready: true },
+  { path: '/image-generation',     category: 'generative-ai',      tag: 'Generative AI',    title: 'Image generation',                   desc: 'See how diffusion models turn text prompts into images — from noise to pixels, CFG scale, samplers, and prompt craft.',          pills: ['Diffusion process', 'Prompt craft', 'CFG scale', 'Samplers', 'Quiz'],                       ready: true },
+  { path: '/agents-tools',         category: 'agents',             tag: 'Agentic AI',       title: 'Agents, tools, and context',         desc: 'See how agents think in loops, call tools, and how context engineering shapes every decision they make.',                     pills: ['Agent loop', 'Tool calling', 'ReAct pattern', 'Context engineering', 'Multi-agent'],         ready: true },
+  { path: '/workflow-canvas',      category: 'agents',             tag: 'AI tools',         title: 'Workflow canvas',                    desc: 'Design AI-ready workflows on a drag-and-drop canvas. Map human and AI tasks and get an automation readiness report.',           pills: ['Visual builder', 'Node types', 'AI readiness', 'Automation score'],                         ready: true },
+  { path: '/token-optimization',   category: 'generative-ai',      tag: 'LLM fundamentals', title: 'Token optimisation',                  desc: 'Understand how LLMs tokenise text, what tokens cost, and how to dramatically reduce your API spend.',                          pills: ['Live tokeniser', 'Cost calculator', 'KV cache', 'Context windows', 'Quiz'],                  ready: true },
+  { path: '/temperature-sampling', category: 'generative-ai',      tag: 'LLM fundamentals', title: 'Temperature and sampling',           desc: 'See how temperature, top-K, and top-P shape LLM output distributions — and why it matters for your use case.',                pills: ['Temperature', 'Top-K', 'Top-P nucleus', 'Comparison', 'Live sampler', 'Quiz'],               ready: true },
+  { path: '/rag',                  category: 'generative-ai',      tag: 'LLM architecture', title: 'Retrieval-augmented generation',     desc: 'See how RAG pipelines retrieve, chunk, and inject knowledge into LLM prompts.',                                              pills: ['Pipeline', 'Chunking', 'Retrieval', 'Prompt assembly', 'RAG vs fine-tuning'],                ready: true },
+  { path: '/agent-simulation',     category: 'agents',             tag: 'AI agents',        title: 'Agent simulation sandbox',           desc: 'Walk a real agent pipeline — inspect every node, explore risks, latency, and cost, then run the happy path step by step.',     pills: ['Agent workflows', 'Decision gates', 'Risk analysis', 'Latency and cost', 'Human-in-the-loop'], ready: true },
+  { path: '/board-briefing',       category: 'learning-resources', tag: 'Executive AI',     title: 'Board briefing generator',           desc: 'Generate a board-ready AI transformation brief from your company data.',                                                      pills: ['Brief generator', 'Risk analysis', 'Strategic recommendations'],                              ready: true },
+  { path: '/neural-networks',      category: 'how-tech-works',     tag: 'Deep learning',    title: 'Neural networks',                    desc: 'Watch signals flow through a network, see activations, and understand how back-propagation trains weights.',                    pills: ['Overview', 'Forward pass', 'Activations', 'Backprop', 'Gradient descent'],                   ready: true },
+  { path: '/vector-embeddings',    category: 'how-tech-works',     tag: 'Embeddings',       title: 'Vector embeddings',                  desc: 'Explore how words and concepts map to high-dimensional vectors, and why semantic similarity works.',                          pills: ['Word vectors', 'Cosine similarity', 'Semantic search', 'RAG', 'Quiz'],                       ready: true },
+]
+
+function resolveInitialViewMode() {
+  if (typeof window === 'undefined') return 'explore'
+  try {
+    const stored = localStorage.getItem(VIEW_MODE_KEY)
+    if (stored === 'explore' || stored === 'path') return stored
+  } catch { /* ignore */ }
+  return 'explore'
+}
+
 export default function Home() {
-  const ready = VISUALIZATIONS.filter(v => v.ready)
-  const coming = VISUALIZATIONS.filter(v => !v.ready)
+  const [viewMode, setViewMode] = useState(resolveInitialViewMode)
+
+  useEffect(() => {
+    try { localStorage.setItem(VIEW_MODE_KEY, viewMode) } catch { /* ignore */ }
+  }, [viewMode])
+
+  // Group cards by category, ready before coming-soon within each category.
+  const cardsByCategory = CATEGORIES.reduce((acc, c) => {
+    const cards = VISUALIZATIONS.filter(v => v.category === c.id)
+    const ready = cards.filter(v => v.ready)
+    const coming = cards.filter(v => !v.ready)
+    acc[c.id] = [...ready, ...coming]
+    return acc
+  }, {})
+
+  const orderedCategories = MODE_ORDER[viewMode]
+    .map(id => CATEGORIES.find(c => c.id === id))
+    .filter(Boolean)
 
   return (
     <div className="home">
@@ -330,44 +431,75 @@ export default function Home() {
         </Link>
       </div>
 
-      <div className="lab-section">
-        <div className="section-header">
-          <span className="section-label">Live now</span>
-          <div className="section-line" />
+      <div className="view-toggle-wrap">
+        <div className="view-toggle" role="tablist" aria-label="Browsing mode">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={viewMode === 'explore'}
+            className={`view-toggle-btn${viewMode === 'explore' ? ' active' : ''}`}
+            onClick={() => setViewMode('explore')}
+          >
+            Explore
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={viewMode === 'path'}
+            className={`view-toggle-btn${viewMode === 'path' ? ' active' : ''}`}
+            onClick={() => setViewMode('path')}
+          >
+            Learning path
+          </button>
         </div>
-        <div className="viz-grid">
-          {ready.map(v => {
-            const Icon = v.path && ICON_MAP[v.path.replace('/', '')]
-            return (
-              <Link key={v.title} to={v.path} className="viz-card">
-                <div className="card-icon-wrap">
-                  {Icon ? <Icon size={28} weight="duotone" /> : null}
-                </div>
-                <div className="card-tag">{v.tag}</div>
-                <div className="card-title">{v.title}</div>
-                <div className="card-desc">{v.desc}</div>
-                <div className="card-pills">{v.pills.map(p => <span key={p} className="card-pill">{p}</span>)}</div>
-                <span className="card-arrow"><ArrowRightIcon size={18} weight="bold" /></span>
-              </Link>
-            )
-          })}
-          {coming.map(v => {
-            const Icon = v.path && ICON_MAP[v.path.replace('/', '')]
-            return (
-              <div key={v.title} className="viz-card coming-soon" style={{ position: 'relative' }}>
-                <div className="coming-label">Coming soon</div>
-                <div className="card-icon-wrap">
-                  {Icon ? <Icon size={28} weight="duotone" /> : null}
-                </div>
-                <div className="card-tag">{v.tag}</div>
-                <div className="card-title">{v.title}</div>
-                <div className="card-desc">{v.desc}</div>
-                <div className="card-pills">{v.pills.map(p => <span key={p} className="card-pill">{p}</span>)}</div>
-              </div>
-            )
-          })}
+        <div className="view-toggle-helper">
+          Explore = what people want today · Learning path = foundations first.
         </div>
       </div>
+
+      {orderedCategories.map(cat => {
+        const cards = cardsByCategory[cat.id] || []
+        if (cards.length === 0) return null
+        return (
+          <section key={cat.id} className="category-section">
+            <div className="category-header">
+              <h2 className="category-label">{cat.label}</h2>
+              <p className="category-desc">{cat.description}</p>
+            </div>
+            <div className="viz-grid">
+              {cards.map(v => {
+                const Icon = v.path && ICON_MAP[v.path.replace('/', '')]
+                if (v.ready) {
+                  return (
+                    <Link key={v.title} to={v.path} className="viz-card">
+                      <div className="card-icon-wrap">
+                        {Icon ? <Icon size={28} weight="duotone" /> : null}
+                      </div>
+                      <div className="card-tag">{v.tag}</div>
+                      <div className="card-title">{v.title}</div>
+                      <div className="card-desc">{v.desc}</div>
+                      <div className="card-pills">{v.pills.map(p => <span key={p} className="card-pill">{p}</span>)}</div>
+                      <span className="card-arrow"><ArrowRightIcon size={18} weight="bold" /></span>
+                    </Link>
+                  )
+                }
+                return (
+                  <div key={v.title} className="viz-card coming-soon" style={{ position: 'relative' }}>
+                    <div className="coming-label">Coming soon</div>
+                    <div className="card-icon-wrap">
+                      {Icon ? <Icon size={28} weight="duotone" /> : null}
+                    </div>
+                    <div className="card-tag">{v.tag}</div>
+                    <div className="card-title">{v.title}</div>
+                    <div className="card-desc">{v.desc}</div>
+                    <div className="card-pills">{v.pills.map(p => <span key={p} className="card-pill">{p}</span>)}</div>
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+        )
+      })}
 
       <footer className="lab-footer">
         <div style={{ marginBottom: 'var(--spacing-1)' }}>
