@@ -5,19 +5,65 @@ import NavBar from '../components/NavBar.jsx'
 const css = `
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
-.ts-root { min-height: 100vh; background: #050810; color: #e0e8f0; font-family: 'IBM Plex Mono', monospace; overflow-x: hidden; }
+/* ── Phase 4a: Prism shell + hero. Tab content below still uses
+ *  the legacy neon classes; those land in Phase 4b/4c. ──────── */
 
-.ts-hero { text-align: center; padding: 48px 24px 28px; position: relative; }
-.ts-hero::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 700px; height: 320px; background: radial-gradient(ellipse at 50% 0%, rgba(236,72,153,0.09) 0%, transparent 70%); pointer-events: none; }
-.ts-eyebrow { font-size: 16px; letter-spacing: 0.22em; color: #ec4899; text-transform: uppercase; margin-bottom: 14px; }
-.ts-title { font-family: 'IBM Plex Sans', sans-serif; font-size: clamp(28px, 5vw, 52px); font-weight: 800; letter-spacing: -0.02em; color: #fff; line-height: 1.05; margin-bottom: 12px; }
-.ts-title span { color: #ec4899; }
-.ts-subtitle { font-size: 16px; color: #7a5a6a; max-width: 540px; margin: 0 auto 32px; line-height: 1.8; }
+.ts-root {
+  min-height: 100vh;
+  background: var(--surface-base);
+  color: var(--text-primary);
+  overflow-x: hidden;
+}
 
-.ts-tabs { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; padding: 0 16px 32px; }
-.ts-tab { background: transparent; border: 1px solid #2a1222; color: #7a5a6a; font-family: 'IBM Plex Mono', monospace; font-size: 16px; letter-spacing: 0.1em; padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: all 0.18s; text-transform: uppercase; }
-.ts-tab:hover { border-color: #ec4899; color: #ec4899; }
-.ts-tab.active { background: rgba(236,72,153,0.1); border-color: #ec4899; color: #ec4899; }
+/* Obsidian + refracted-light hero (§5.2).
+ * Light: obsidian block, warm-white text, refracted gradient overlay.
+ * Dark:  skip the obsidian block; lay the gradient on --surface-base. */
+.ts-hero {
+  position: relative;
+  text-align: center;
+  padding: var(--spacing-7) var(--spacing-4) var(--spacing-6);
+  background: var(--text-primary);
+  color: var(--surface-base);
+  overflow: hidden;
+}
+:root[data-theme="dark"] .ts-hero {
+  background: var(--surface-base);
+  color: var(--text-primary);
+}
+.ts-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-refracted-b);
+  opacity: var(--refracted-opacity-standard);
+  pointer-events: none;
+}
+.ts-hero > * { position: relative; }
+
+.ts-eyebrow {
+  font: var(--text-weight-label) var(--text-size-caption)/var(--text-lh-caption) var(--font-primary);
+  letter-spacing: 0.08em;
+  color: var(--orange-300);
+  margin-bottom: var(--spacing-3);
+}
+.ts-title {
+  font: var(--text-weight-h1) var(--text-size-h1)/var(--text-lh-h1) var(--font-primary);
+  letter-spacing: var(--text-ls-h1);
+  margin-bottom: var(--spacing-3);
+}
+.ts-subtitle {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  max-width: 540px;
+  margin: 0 auto;
+  opacity: 0.85;
+}
+
+.ts-tabs-row {
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-5) var(--spacing-4) var(--spacing-6);
+  background: var(--surface-base);
+}
 
 .ts-panel { max-width: 920px; margin: 0 auto; padding: 0 20px 80px; }
 .ts-section-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 8px; }
@@ -309,7 +355,7 @@ function pickQuestion(targetDiff, usedIds, quiz) {
 // ═════════════════════════════════════════════════════════════════════════════
 export default function TemperatureSampling() {
   const [tab, setTab] = useState(0)
-  const TABS = ['Temperature', 'Top-K Sampling', 'Top-P (Nucleus)', 'Comparison', 'Live Sampler', 'Quiz']
+  const TABS = ['Temperature', 'Top-K', 'Top-P (nucleus)', 'Comparison', 'Live sampler', 'Quiz']
 
   // Temperature tab
   const [temp, setTemp] = useState(1.0)
@@ -421,16 +467,26 @@ export default function TemperatureSampling() {
       <style>{css}</style>
       <NavBar />
 
-      <div className="ts-hero">
-        <div className="ts-eyebrow">Interactive Guide</div>
-        <h1 className="ts-title">Temperature &<br /><span>Sampling</span></h1>
-        <p className="ts-subtitle">How randomness, temperature, and sampling strategies control what LLMs say — and how to tune them for your use case.</p>
-      </div>
+      <header className="ts-hero">
+        <div className="ts-eyebrow">Interactive guide</div>
+        <h1 className="ts-title">Temperature &amp; sampling</h1>
+        <p className="ts-subtitle">Tune temperature, top-K, and top-P to control LLM output — from deterministic facts to creative chaos.</p>
+      </header>
 
-      <div className="ts-tabs">
-        {TABS.map((t, i) => (
-          <button key={i} className={`ts-tab${tab === i ? ' active' : ''}`} onClick={() => setTab(i)}>{t}</button>
-        ))}
+      <div className="ts-tabs-row">
+        <div className="prism-tabs" role="tablist" aria-label="Sections">
+          {TABS.map((t, i) => (
+            <button
+              key={i}
+              role="tab"
+              className="prism-tab"
+              aria-selected={tab === i}
+              onClick={() => setTab(i)}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* ── Tab 0: Temperature ── */}
