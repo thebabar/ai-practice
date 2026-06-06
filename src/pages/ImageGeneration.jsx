@@ -1,5 +1,21 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import NavBar from '../components/NavBar.jsx'
+import {
+  PencilSimpleIcon, TextAaIcon, WindIcon, ArrowsClockwiseIcon, ImageIcon,
+  PlayIcon, StopIcon, ArrowRightIcon, ArrowLeftIcon,
+} from '@phosphor-icons/react'
+
+const PIPELINE_ICON = {
+  pencil: PencilSimpleIcon,
+  text: TextAaIcon,
+  wind: WindIcon,
+  cycle: ArrowsClockwiseIcon,
+  image: ImageIcon,
+}
+const PipelineIcon = ({ name, ...rest }) => {
+  const C = PIPELINE_ICON[name]
+  return C ? <C {...rest} /> : null
+}
 
 // ─── constants ───────────────────────────────────────────────────────────────
 const GRID_SIZE = 20
@@ -197,12 +213,14 @@ const QUALITIES = ['8k uhd', 'highly detailed', 'masterpiece', 'award-winning ph
 const NEGATIVES_LIST = ['blurry', 'low quality', 'distorted', 'watermark', 'text', 'duplicate', 'deformed hands', 'overexposed']
 
 // ─── CFG data ─────────────────────────────────────────────────────────────────
+// CFG ramp reads low → high adherence: blue (loose, exploratory) →
+// success (sweet spot) → orange (over-literal) → error (distorted).
 const CFG_BANDS = [
-  { range: [1, 3],   label: 'Highly Creative',  color: '#60a5fa', desc: 'The model loosely interprets your prompt, often producing dreamlike or unexpected results. Good for exploration and happy accidents.' },
-  { range: [4, 6],   label: 'Creative Balance',  color: '#34d399', desc: 'Follows the prompt with artistic freedom. Good for stylized outputs with room to surprise. Try this for artistic styles.' },
-  { range: [7, 11],  label: 'Standard Range',    color: '#fbbf24', desc: 'Strong prompt adherence while maintaining visual coherence. The sweet spot for most use cases — start here.' },
-  { range: [12, 15], label: 'High Adherence',    color: '#f97316', desc: 'Very literal prompt interpretation. Maximum control but less variety. Minor artifacts may start appearing.' },
-  { range: [16, 20], label: 'Over-guided',        color: '#f87171', desc: 'Overly literal — produces distorted colors, extreme contrasts, and unnatural artifacts. Generally avoid.' },
+  { range: [1, 3],   label: 'Highly creative', color: 'var(--blue-500)',     desc: 'The model loosely interprets your prompt, often producing dreamlike or unexpected results. Good for exploration and happy accidents.' },
+  { range: [4, 6],   label: 'Creative balance', color: 'var(--blue-300)',    desc: 'Follows the prompt with artistic freedom. Good for stylised outputs with room to surprise. Try this for artistic styles.' },
+  { range: [7, 11],  label: 'Standard range',  color: 'var(--color-success)', desc: 'Strong prompt adherence while maintaining visual coherence. The sweet spot for most use cases — start here.' },
+  { range: [12, 15], label: 'High adherence',  color: 'var(--orange-500)',   desc: 'Very literal prompt interpretation. Maximum control but less variety. Minor artefacts may start appearing.' },
+  { range: [16, 20], label: 'Over-guided',     color: 'var(--color-error)',  desc: 'Overly literal — produces distorted colours, extreme contrasts, and unnatural artefacts. Generally avoid.' },
 ]
 function getCfgBand(v) { return CFG_BANDS.find(b => v >= b.range[0] && v <= b.range[1]) || CFG_BANDS[2] }
 
@@ -217,117 +235,417 @@ const SAMPLERS = [
 
 // ─── styles ───────────────────────────────────────────────────────────────────
 const css = `
-  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
+/* ── ImageGeneration migrated to Prism tokens.
+ *  Per §5.3 — text → embed → noise → denoise → image. The pipeline reads
+ *  blue (structured transformation); CFG semantic ramp expresses
+ *  low→high adherence. Pink page identity dropped. ──────────── */
 
-  .ig-root { min-height: 100vh; background: #050810; color: #e0e8f0; font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; }
+.ig-root { min-height: 100vh; background: var(--surface-base); color: var(--text-primary); }
 
-  .ig-hero { max-width: 860px; margin: 0 auto; padding: 56px 28px 36px; text-align: center; }
-  .ig-hero-tag { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: #e879f9; background: rgba(232,121,249,0.1); border: 1px solid rgba(232,121,249,0.25); padding: 4px 14px; border-radius: 100px; margin-bottom: 20px; }
-  .ig-hero h1 { font-size: 40px; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 14px; color: #fff; }
-  .ig-hero h1 span { color: #e879f9; }
-  .ig-hero p { font-size: 16px; color: #7a9bbf; max-width: 580px; margin: 0 auto; line-height: 1.65; }
+.ig-hero {
+  position: relative;
+  text-align: center;
+  padding: var(--spacing-7) var(--spacing-4) var(--spacing-6);
+  background: var(--text-primary);
+  color: var(--surface-base);
+  overflow: hidden;
+}
+:root[data-theme="dark"] .ig-hero {
+  background: var(--surface-base);
+  color: var(--text-primary);
+}
+.ig-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-refracted-b);
+  opacity: var(--refracted-opacity-standard);
+  pointer-events: none;
+}
+.ig-hero > * { position: relative; }
+.ig-hero-tag {
+  display: inline-block;
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
+  letter-spacing: 0.08em;
+  color: var(--blue-300);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.16);
+  padding: 4px 14px;
+  border-radius: 100px;
+  margin-bottom: var(--spacing-4);
+}
+.ig-hero h1 {
+  font: var(--text-weight-h1) var(--text-size-h1)/var(--text-lh-h1) var(--font-primary);
+  letter-spacing: var(--text-ls-h1);
+  margin: 0 0 var(--spacing-3);
+}
+.ig-hero p {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  max-width: 580px;
+  margin: 0 auto;
+  opacity: 0.85;
+}
 
-  .ig-tabs { display: flex; gap: 4px; max-width: 860px; margin: 0 auto; padding: 0 28px; border-bottom: 1px solid rgba(255,255,255,0.06); overflow-x: auto; }
-  .ig-tab { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: #4a6a8a; background: none; border: none; cursor: pointer; padding: 12px 16px; border-bottom: 2px solid transparent; transition: all 0.18s; white-space: nowrap; }
-  .ig-tab:hover { color: #b0c8e0; }
-  .ig-tab.active { color: #e879f9; border-bottom-color: #e879f9; }
+.ig-tabs-row {
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-5) var(--spacing-4) var(--spacing-6);
+  background: var(--surface-base);
+  overflow-x: auto;
+}
 
-  .ig-content { max-width: 860px; margin: 0 auto; padding: 36px 28px 80px; }
-  .ig-section-title { font-size: 22px; font-weight: 700; color: #fff; margin: 0 0 8px; }
-  .ig-section-sub { font-size: 15px; color: #7a9bbf; margin: 0 0 28px; line-height: 1.6; }
+.ig-content { max-width: 920px; margin: 0 auto; padding: 0 var(--spacing-4) var(--spacing-7); }
+.ig-section-title {
+  font: var(--text-weight-h2) var(--text-size-h2)/var(--text-lh-h2) var(--font-primary);
+  letter-spacing: var(--text-ls-h2);
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-2);
+}
+.ig-section-sub {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+  margin: 0 0 var(--spacing-6);
+  max-width: 720px;
+}
 
-  /* Pipeline */
-  .ig-pipeline { display: flex; align-items: stretch; overflow-x: auto; padding-bottom: 8px; margin-bottom: 32px; }
-  .ig-pipeline-step { flex: 1; min-width: 120px; background: #0d1628; border: 1px solid #1e3048; border-radius: 12px; padding: 16px 12px; text-align: center; }
-  .ig-pipeline-icon { font-size: 26px; margin-bottom: 8px; }
-  .ig-pipeline-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #e879f9; margin-bottom: 6px; }
-  .ig-pipeline-name { font-size: 13px; font-weight: 600; color: #e0e8f0; margin-bottom: 6px; }
-  .ig-pipeline-desc { font-size: 11px; color: #7a9bbf; line-height: 1.5; }
-  .ig-pipeline-arrow { color: rgba(232,121,249,0.4); font-size: 20px; padding: 0 6px; display: flex; align-items: center; flex-shrink: 0; }
+/* Pipeline */
+.ig-pipeline { display: flex; align-items: stretch; overflow-x: auto; padding-bottom: var(--spacing-1); margin-bottom: var(--spacing-7); }
+.ig-pipeline-step {
+  flex: 1;
+  min-width: 130px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4) var(--spacing-3);
+  text-align: center;
+}
+.ig-pipeline-icon {
+  display: inline-flex;
+  margin-bottom: var(--spacing-2);
+  color: var(--blue-500);
+}
+.ig-pipeline-label {
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  margin-bottom: var(--spacing-1);
+}
+.ig-pipeline-name {
+  font: var(--text-weight-label) var(--text-size-caption)/1.2 var(--font-primary);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-1);
+}
+.ig-pipeline-desc {
+  font: var(--text-weight-body) var(--text-size-meta)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+}
+.ig-pipeline-arrow {
+  color: var(--text-tertiary);
+  padding: 0 var(--spacing-1);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
 
-  .ig-stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 28px; }
-  .ig-stat-card { background: #0d1628; border: 1px solid #1e3048; border-radius: 12px; padding: 18px; text-align: center; }
-  .ig-stat-num { font-size: 28px; font-weight: 800; color: #e879f9; margin-bottom: 4px; font-family: 'IBM Plex Mono', monospace; }
-  .ig-stat-lbl { font-size: 12px; color: #7a9bbf; letter-spacing: 0.05em; }
+.ig-stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-3); margin-bottom: var(--spacing-6); }
+.ig-stat-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+  text-align: center;
+}
+.ig-stat-num {
+  font: var(--text-weight-h1) var(--text-size-h2)/1 var(--font-primary);
+  letter-spacing: var(--text-ls-h2);
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+}
+.ig-stat-lbl {
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  color: var(--text-tertiary);
+  letter-spacing: 0.05em;
+}
 
-  .ig-model-chip { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #b0c8e0; background: #0d1628; border: 1px solid #1e3048; border-radius: 6px; padding: 6px 14px; }
+.ig-model-chip {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--text-size-caption);
+  color: var(--text-secondary);
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-1) var(--spacing-3);
+}
 
-  /* Diffusion */
-  .ig-diff-grid { display: grid; border-radius: 6px; overflow: hidden; border: 1px solid rgba(232,121,249,0.2); }
-  .ig-diff-controls { display: flex; align-items: center; gap: 10px; margin: 14px 0 10px; flex-wrap: wrap; }
-  .ig-diff-btn { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; padding: 7px 16px; border-radius: 7px; border: 1px solid; cursor: pointer; transition: all 0.18s; background: none; }
-  .ig-diff-btn.fwd { color: #e879f9; border-color: rgba(232,121,249,0.4); }
-  .ig-diff-btn.fwd:hover { background: rgba(232,121,249,0.08); }
-  .ig-diff-btn.rev { color: #34d399; border-color: rgba(52,211,153,0.4); }
-  .ig-diff-btn.rev:hover { background: rgba(52,211,153,0.08); }
-  .ig-diff-btn.stop { color: #f87171; border-color: rgba(248,113,113,0.4); }
-  .ig-diff-btn.stop:hover { background: rgba(248,113,113,0.08); }
-  .ig-diff-step-label { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #7a9bbf; margin-left: auto; }
-  .ig-diff-progress { height: 4px; background: #1e3048; border-radius: 2px; overflow: hidden; margin-bottom: 6px; }
-  .ig-diff-progress-fill { height: 100%; background: #e879f9; transition: width 0.08s linear; border-radius: 2px; }
+/* Diffusion */
+.ig-diff-grid {
+  display: grid;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border-default);
+}
+.ig-diff-controls { display: flex; align-items: center; gap: var(--spacing-2); margin: var(--spacing-3) 0; flex-wrap: wrap; }
+.ig-diff-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  font: 600 var(--text-size-body)/1 var(--font-primary);
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-md);
+  border: 1px solid;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+  background: transparent;
+}
+.ig-diff-btn:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.ig-diff-btn.fwd  { color: #fff; background: var(--orange-500); border-color: var(--orange-500); }
+.ig-diff-btn.fwd:hover  { background: #D45C10; border-color: #D45C10; }
+.ig-diff-btn.rev  { color: #fff; background: var(--blue-500); border-color: var(--blue-500); }
+.ig-diff-btn.rev:hover  { background: #2B6DCC; border-color: #2B6DCC; }
+.ig-diff-btn.stop { color: var(--color-error); border-color: var(--color-error); }
+.ig-diff-btn.stop:hover { background: var(--surface-2); }
+.ig-diff-step-label {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--text-size-caption);
+  color: var(--text-secondary);
+  margin-left: auto;
+}
+.ig-diff-progress {
+  height: 4px;
+  background: var(--surface-3);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: var(--spacing-1);
+}
+.ig-diff-progress-fill {
+  height: 100%;
+  background: var(--text-primary);
+  transition: width 0.08s linear;
+  border-radius: 2px;
+}
 
-  /* Prompt */
-  .ig-prompt-display { background: #050d1a; border: 1px solid rgba(232,121,249,0.3); border-radius: 10px; padding: 14px 18px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #e0e8f0; line-height: 1.8; margin-bottom: 22px; min-height: 56px; white-space: pre-wrap; }
-  .ig-prompt-cat-title { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #4a6a8a; margin-bottom: 8px; }
-  .ig-prompt-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
-  .ig-prompt-chip { font-size: 13px; color: #7a9bbf; background: #0d1628; border: 1px solid #1e3048; border-radius: 20px; padding: 5px 14px; cursor: pointer; transition: all 0.15s; }
-  .ig-prompt-chip:hover { border-color: rgba(232,121,249,0.4); color: #e0e8f0; }
-  .ig-prompt-chip.sel-s { color: #e879f9; border-color: rgba(232,121,249,0.5); background: rgba(232,121,249,0.08); }
-  .ig-prompt-chip.sel-st { color: #38bdf8; border-color: rgba(56,189,248,0.5); background: rgba(56,189,248,0.08); }
-  .ig-prompt-chip.sel-l { color: #fbbf24; border-color: rgba(251,191,36,0.5); background: rgba(251,191,36,0.08); }
-  .ig-prompt-chip.sel-q { color: #34d399; border-color: rgba(52,211,153,0.5); background: rgba(52,211,153,0.08); }
-  .ig-prompt-chip.sel-n { color: #f87171; border-color: rgba(248,113,113,0.5); background: rgba(248,113,113,0.08); }
+/* Prompt */
+.ig-prompt-display {
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3) var(--spacing-4);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--text-size-caption);
+  color: var(--text-primary);
+  line-height: 1.8;
+  margin-bottom: var(--spacing-5);
+  min-height: 56px;
+  white-space: pre-wrap;
+}
+.ig-prompt-cat-title {
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  margin-bottom: var(--spacing-2);
+}
+.ig-prompt-chips { display: flex; flex-wrap: wrap; gap: var(--spacing-2); margin-bottom: var(--spacing-4); }
+.ig-prompt-chip {
+  font: var(--text-weight-body) var(--text-size-caption)/1 var(--font-primary);
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: 100px;
+  padding: var(--spacing-1) var(--spacing-3);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
+}
+.ig-prompt-chip:hover { background: var(--surface-2); border-color: var(--border-strong); color: var(--text-primary); }
+.ig-prompt-chip:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+/* Selected chips: subject + quality use Prism signal palette; style /
+ * lighting / negative reuse neutral fill + signal border for clarity. */
+.ig-prompt-chip.sel-s,
+.ig-prompt-chip.sel-q { background: var(--text-primary); border-color: var(--text-primary); color: var(--surface-base); }
+.ig-prompt-chip.sel-st { background: var(--blue-50);   border-color: var(--blue-500);   color: var(--blue-500); }
+.ig-prompt-chip.sel-l  { background: var(--orange-50); border-color: var(--orange-500); color: var(--orange-500); }
+.ig-prompt-chip.sel-n  { background: var(--surface-1); border-color: var(--color-error); color: var(--color-error); }
 
-  /* CFG */
-  .ig-cfg-value { font-family: 'IBM Plex Mono', monospace; font-size: 64px; font-weight: 700; line-height: 1; margin-bottom: 6px; }
-  .ig-cfg-slider { width: 100%; margin: 14px 0; accent-color: #e879f9; }
-  .ig-cfg-slider-labels { display: flex; justify-content: space-between; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #4a6a8a; margin-bottom: 20px; }
-  .ig-cfg-band { border-radius: 12px; padding: 18px 22px; border: 1px solid; margin-bottom: 20px; transition: all 0.2s; }
-  .ig-cfg-spectrum { display: flex; border-radius: 6px; overflow: hidden; height: 8px; margin-bottom: 6px; }
+/* CFG */
+.ig-cfg-value {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 56px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: var(--spacing-1);
+}
+.ig-cfg-slider {
+  width: 100%;
+  margin: var(--spacing-3) 0;
+  accent-color: var(--blue-500);
+}
+.ig-cfg-slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--text-size-meta);
+  color: var(--text-tertiary);
+  margin-bottom: var(--spacing-5);
+}
+.ig-cfg-band {
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4) var(--spacing-5);
+  border: 1px solid;
+  margin-bottom: var(--spacing-5);
+  background: var(--surface-1);
+}
+.ig-cfg-spectrum { display: flex; border-radius: var(--radius-sm); overflow: hidden; height: 8px; margin-bottom: var(--spacing-1); }
 
-  /* Samplers */
-  .ig-samplers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin-bottom: 24px; }
-  .ig-sampler-card { background: #0d1628; border: 1px solid #1e3048; border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.18s; }
-  .ig-sampler-card:hover { border-color: rgba(232,121,249,0.3); }
-  .ig-sampler-card.active { border-color: #e879f9; background: rgba(232,121,249,0.06); }
-  .ig-sampler-name { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 500; color: #e879f9; margin-bottom: 6px; }
-  .ig-sampler-desc { font-size: 12px; color: #7a9bbf; line-height: 1.5; margin-bottom: 10px; }
-  .ig-bar-row { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #4a6a8a; font-family: 'IBM Plex Mono', monospace; margin-bottom: 5px; }
-  .ig-bar-bg { flex: 1; height: 5px; background: #1e3048; border-radius: 3px; overflow: hidden; }
-  .ig-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+/* Samplers */
+.ig-samplers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: var(--spacing-3); margin-bottom: var(--spacing-6); }
+.ig-sampler-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+}
+.ig-sampler-card:hover { background: var(--surface-2); border-color: var(--border-strong); }
+.ig-sampler-card:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.ig-sampler-card.active { background: var(--blue-50); border-color: var(--blue-500); box-shadow: var(--shadow-e1); }
+.ig-sampler-name {
+  font: var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-1);
+}
+.ig-sampler-desc {
+  font: var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-3);
+}
+.ig-bar-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--text-size-meta);
+  color: var(--text-tertiary);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  margin-bottom: 5px;
+}
+.ig-bar-bg { flex: 1; height: 5px; background: var(--surface-3); border-radius: 3px; overflow: hidden; }
+.ig-bar-fill { height: 100%; border-radius: 3px; transition: width var(--duration-deliberate) var(--ease-standard); }
 
-  /* Quiz */
-  .ig-quiz-wrap { max-width: 640px; margin: 0 auto; }
-  .ig-diff-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 100px; border: 1px solid; margin-bottom: 14px; font-weight: 500; }
-  .ig-diff-badge.easy   { color: #34d399; border-color: rgba(52,211,153,0.35);  background: rgba(52,211,153,0.08); }
-  .ig-diff-badge.medium { color: #fbbf24; border-color: rgba(251,191,36,0.35);  background: rgba(251,191,36,0.08); }
-  .ig-diff-badge.hard   { color: #f87171; border-color: rgba(248,113,113,0.35); background: rgba(239,68,68,0.08); }
-  .ig-quiz-progress { height: 4px; background: #1e3048; border-radius: 2px; margin-bottom: 22px; overflow: hidden; }
-  .ig-quiz-progress-fill { height: 100%; background: #e879f9; border-radius: 2px; transition: width 0.3s; }
-  .ig-quiz-counter { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #4a6a8a; margin-bottom: 10px; }
-  .ig-quiz-q { font-size: 18px; font-weight: 600; color: #e0e8f0; margin-bottom: 20px; line-height: 1.5; }
-  .ig-quiz-opt { width: 100%; text-align: left; background: #0d1628; border: 1px solid #1e3048; border-radius: 9px; padding: 13px 18px; margin-bottom: 10px; font-size: 15px; color: #b0c8e0; cursor: pointer; transition: all 0.15s; font-family: 'IBM Plex Sans', sans-serif; }
-  .ig-quiz-opt:hover:not(:disabled) { border-color: rgba(232,121,249,0.4); color: #e0e8f0; }
-  .ig-quiz-opt.correct { border-color: #34d399; background: rgba(52,211,153,0.08); color: #34d399; }
-  .ig-quiz-opt.wrong   { border-color: #f87171; background: rgba(248,113,113,0.08); color: #f87171; }
-  .ig-quiz-explanation { background: #0d1628; border-left: 3px solid #e879f9; border-radius: 0 8px 8px 0; padding: 14px 18px; margin-top: 16px; font-size: 14px; color: #b0c8e0; line-height: 1.6; }
-  .ig-quiz-next { margin-top: 18px; padding: 11px 28px; background: #e879f9; color: #000; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'IBM Plex Sans', sans-serif; }
-  .ig-quiz-next:hover { background: #f0a0ff; }
-  .ig-quiz-done { text-align: center; padding: 40px 20px; }
-  .ig-quiz-score { font-size: 56px; font-weight: 800; color: #e879f9; margin-bottom: 8px; font-family: 'IBM Plex Mono', monospace; }
-  .ig-quiz-score-sub { font-size: 16px; color: #7a9bbf; margin-bottom: 28px; }
-  .ig-quiz-retake { padding: 11px 28px; background: none; border: 1px solid #e879f9; color: #e879f9; border-radius: 8px; font-size: 14px; cursor: pointer; font-family: 'IBM Plex Sans', sans-serif; }
-  .ig-quiz-retake:hover { background: rgba(232,121,249,0.08); }
+/* Quiz */
+.ig-quiz-wrap { max-width: 720px; margin: 0 auto; }
+.ig-diff-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  padding: 3px 10px;
+  border-radius: 100px;
+  border: 1px solid;
+  background: var(--surface-1);
+  margin-bottom: var(--spacing-3);
+}
+.ig-diff-badge::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.ig-diff-badge.easy   { color: var(--color-success); border-color: var(--color-success); }
+.ig-diff-badge.medium { color: var(--color-warning); border-color: var(--color-warning); }
+.ig-diff-badge.hard   { color: var(--color-info);    border-color: var(--color-info); }
+.ig-quiz-progress { height: 4px; background: var(--surface-3); border-radius: 2px; margin-bottom: var(--spacing-5); overflow: hidden; }
+.ig-quiz-progress-fill {
+  height: 100%;
+  background: var(--text-primary);
+  border-radius: 2px;
+  transition: width var(--duration-standard) var(--ease-standard);
+}
+.ig-quiz-counter {
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  margin-bottom: var(--spacing-2);
+}
+.ig-quiz-q {
+  font: var(--text-weight-h3) var(--text-size-h3)/var(--text-lh-h3) var(--font-primary);
+  letter-spacing: var(--text-ls-h3);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-5);
+}
+.ig-quiz-opt {
+  width: 100%;
+  text-align: left;
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3) var(--spacing-4);
+  margin-bottom: var(--spacing-2);
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+}
+.ig-quiz-opt:hover:not(:disabled) { background: var(--surface-2); border-color: var(--border-strong); }
+.ig-quiz-opt:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.ig-quiz-opt.correct { border-color: var(--color-success); }
+.ig-quiz-opt.wrong   { border-color: var(--color-error); }
+.ig-quiz-explanation {
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3) var(--spacing-4);
+  margin-top: var(--spacing-4);
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+}
+.ig-quiz-next {
+  margin-top: var(--spacing-5);
+  padding: var(--spacing-2) var(--spacing-5);
+  background: var(--orange-500);
+  border: 1px solid var(--orange-500);
+  color: #fff;
+  border-radius: var(--radius-md);
+  font: 600 var(--text-size-body)/1 var(--font-primary);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+}
+.ig-quiz-next:hover { background: #D45C10; border-color: #D45C10; }
+.ig-quiz-next:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.ig-quiz-done { text-align: center; padding: var(--spacing-7) var(--spacing-4); }
+.ig-quiz-score {
+  font: var(--text-weight-h1) var(--text-size-h1)/1 var(--font-primary);
+  letter-spacing: var(--text-ls-h1);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-2);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+}
+.ig-quiz-score-sub {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-6);
+}
+.ig-quiz-retake {
+  padding: var(--spacing-2) var(--spacing-5);
+  background: transparent;
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+  border-radius: var(--radius-md);
+  font: 600 var(--text-size-body)/1 var(--font-primary);
+  cursor: pointer;
+}
+.ig-quiz-retake:hover { background: var(--surface-2); border-color: var(--border-strong); }
 
-  @media (max-width: 600px) {
-    .ig-hero h1 { font-size: 28px; }
-    .ig-pipeline { flex-direction: column; }
-    .ig-pipeline-arrow { transform: rotate(90deg); padding: 4px 0; align-self: center; }
-    .ig-stats-row { grid-template-columns: 1fr 1fr; }
-  }
+@media (max-width: 600px) {
+  .ig-pipeline { flex-direction: column; }
+  .ig-pipeline-arrow { transform: rotate(90deg); padding: var(--spacing-1) 0; align-self: center; }
+  .ig-stats-row { grid-template-columns: 1fr 1fr; }
+}
 `
 
-const TABS = ['How It Works', 'Diffusion', 'Prompt Craft', 'CFG Scale', 'Samplers', 'Quiz']
+const TABS = ['How it works', 'Diffusion', 'Prompt craft', 'CFG scale', 'Samplers', 'Quiz']
 
 export default function ImageGeneration() {
   const [tab, setTab] = useState(0)
@@ -430,18 +748,26 @@ export default function ImageGeneration() {
       <style>{css}</style>
       <NavBar />
 
-      {/* Hero */}
-      <div className="ig-hero">
+      <header className="ig-hero">
         <div className="ig-hero-tag">Lesson 8 · Generative AI</div>
-        <h1>How AI <span>Generates Images</span></h1>
+        <h1>How AI generates images</h1>
         <p>From a text prompt to a photorealistic image — explore diffusion models, prompt engineering, and the math behind visual AI generation.</p>
-      </div>
+      </header>
 
-      {/* Tabs */}
-      <div className="ig-tabs">
-        {TABS.map((t, i) => (
-          <button key={t} className={`ig-tab${tab === i ? ' active' : ''}`} onClick={() => setTab(i)}>{t}</button>
-        ))}
+      <div className="ig-tabs-row">
+        <div className="prism-tabs" role="tablist" aria-label="Sections">
+          {TABS.map((t, i) => (
+            <button
+              key={t}
+              role="tab"
+              className="prism-tab"
+              aria-selected={tab === i}
+              onClick={() => setTab(i)}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="ig-content">
@@ -449,26 +775,26 @@ export default function ImageGeneration() {
         {/* ── Tab 0: How It Works ── */}
         {tab === 0 && (
           <>
-            <h2 className="ig-section-title">From Words to Pixels</h2>
+            <h2 className="ig-section-title">From words to pixels</h2>
             <p className="ig-section-sub">Modern image generation uses diffusion — progressively removing noise from random static, guided by your text prompt through every step.</p>
 
             <div className="ig-pipeline">
               {[
-                { icon: '✏️', label: 'Input',  name: 'Text Prompt',        desc: '"A glowing forest at dawn, digital art, golden hour"' },
+                { iconKey: 'pencil', label: 'Input',  name: 'Text prompt',        desc: '"A glowing forest at dawn, digital art, golden hour."' },
                 null,
-                { icon: '🔤', label: 'Step 1', name: 'Text Encoder (CLIP)',  desc: 'Converts prompt into a vector embedding the model understands' },
+                { iconKey: 'text',   label: 'Step 1', name: 'Text encoder (CLIP)', desc: 'Converts prompt into a vector embedding the model understands.' },
                 null,
-                { icon: '🌫️', label: 'Step 2', name: 'Latent Noise',        desc: 'Starts from pure random noise in compressed latent space' },
+                { iconKey: 'wind',   label: 'Step 2', name: 'Latent noise',       desc: 'Starts from pure random noise in compressed latent space.' },
                 null,
-                { icon: '🔁', label: 'Step 3', name: 'U-Net Denoiser',       desc: 'Iteratively removes noise over 20–50 steps, guided by the prompt' },
+                { iconKey: 'cycle',  label: 'Step 3', name: 'U-Net denoiser',     desc: 'Iteratively removes noise over 20–50 steps, guided by the prompt.' },
                 null,
-                { icon: '🖼️', label: 'Output', name: 'VAE Decoder',          desc: 'Expands the denoised latent back to full image pixels' },
+                { iconKey: 'image',  label: 'Output', name: 'VAE decoder',        desc: 'Expands the denoised latent back to full image pixels.' },
               ].map((step, i) =>
                 step === null
-                  ? <div key={i} className="ig-pipeline-arrow">→</div>
+                  ? <div key={i} className="ig-pipeline-arrow"><ArrowRightIcon size={16} weight="bold" /></div>
                   : (
                     <div key={i} className="ig-pipeline-step">
-                      <div className="ig-pipeline-icon">{step.icon}</div>
+                      <div className="ig-pipeline-icon"><PipelineIcon name={step.iconKey} size={26} weight="duotone" /></div>
                       <div className="ig-pipeline-label">{step.label}</div>
                       <div className="ig-pipeline-name">{step.name}</div>
                       <div className="ig-pipeline-desc">{step.desc}</div>
@@ -480,30 +806,30 @@ export default function ImageGeneration() {
             <div className="ig-stats-row">
               <div className="ig-stat-card">
                 <div className="ig-stat-num">20–50</div>
-                <div className="ig-stat-lbl">Denoising Steps</div>
+                <div className="ig-stat-lbl">Denoising steps</div>
               </div>
               <div className="ig-stat-card">
                 <div className="ig-stat-num">4–8s</div>
-                <div className="ig-stat-lbl">Generation Time (GPU)</div>
+                <div className="ig-stat-lbl">Generation time (GPU)</div>
               </div>
               <div className="ig-stat-card">
                 <div className="ig-stat-num">860M+</div>
-                <div className="ig-stat-lbl">U-Net Parameters</div>
+                <div className="ig-stat-lbl">U-Net parameters</div>
               </div>
             </div>
 
-            <div style={{ marginBottom: 20 }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: '#e0e8f0', marginBottom: 12 }}>Popular Models</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+            <div style={{ marginBottom: 'var(--spacing-5)' }}>
+              <div style={{ font: 'var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary)', color: 'var(--text-primary)', marginBottom: 'var(--spacing-3)' }}>Popular models</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-2)' }}>
                 {['Stable Diffusion', 'DALL-E 3', 'Midjourney', 'Flux', 'Adobe Firefly', 'Imagen 3'].map(m => (
                   <div key={m} className="ig-model-chip">{m}</div>
                 ))}
               </div>
             </div>
 
-            <div style={{ background: '#0d1628', border: '1px solid #1e3048', borderRadius: 12, padding: 18 }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: '#e0e8f0', marginBottom: 8 }}>Why "diffusion"?</div>
-              <div style={{ fontSize: 13, color: '#7a9bbf', lineHeight: 1.65 }}>
+            <div style={{ background: 'var(--surface-1)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-4)' }}>
+              <div style={{ font: 'var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary)', color: 'var(--text-primary)', marginBottom: 'var(--spacing-2)' }}>Why "diffusion"?</div>
+              <div style={{ font: 'var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)' }}>
                 The name comes from physics — like ink diffusing into water (hard to reverse), adding noise to an image is easy. The model learns to reverse that process, transforming random noise into structured, meaningful images guided by your prompt. Training on billions of image-text pairs teaches it what a "glowing forest" or "cyberpunk city" looks like.
               </div>
             </div>
@@ -513,10 +839,10 @@ export default function ImageGeneration() {
         {/* ── Tab 1: Diffusion Process ── */}
         {tab === 1 && (
           <>
-            <h2 className="ig-section-title">The Diffusion Process</h2>
+            <h2 className="ig-section-title">The diffusion process</h2>
             <p className="ig-section-sub">Forward diffusion destroys an image by adding noise. Reverse diffusion reconstructs it. The model learns this reverse process from billions of examples.</p>
 
-            <div style={{ display: 'flex', gap: 28, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 'var(--spacing-6)', alignItems: 'flex-start', flexWrap: 'wrap' }}>
               <div>
                 <div
                   className="ig-diff-grid"
@@ -528,31 +854,43 @@ export default function ImageGeneration() {
                 </div>
 
                 <div className="ig-diff-controls">
-                  <button className="ig-diff-btn fwd" onClick={playForward}>▶ Add Noise</button>
-                  <button className="ig-diff-btn rev" onClick={playReverse}>▶ Remove Noise</button>
-                  {diffPlaying && <button className="ig-diff-btn stop" onClick={stopDiff}>■ Stop</button>}
-                  <span className="ig-diff-step-label">Step {diffStep}/{TOTAL_STEPS}</span>
+                  <button className="ig-diff-btn fwd" onClick={playForward}>
+                    <PlayIcon size={14} weight="fill" /> Add noise
+                  </button>
+                  <button className="ig-diff-btn rev" onClick={playReverse}>
+                    <PlayIcon size={14} weight="fill" /> Remove noise
+                  </button>
+                  {diffPlaying && (
+                    <button className="ig-diff-btn stop" onClick={stopDiff}>
+                      <StopIcon size={14} weight="fill" /> Stop
+                    </button>
+                  )}
+                  <span className="ig-diff-step-label">Step {diffStep} / {TOTAL_STEPS}</span>
                 </div>
 
                 <div className="ig-diff-progress">
                   <div className="ig-diff-progress-fill" style={{ width: `${(diffStep / TOTAL_STEPS) * 100}%` }} />
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, fontFamily: 'IBM Plex Mono', color: '#4a6a8a' }}>
-                  <span>Clean Image</span><span>Pure Noise</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--text-size-meta)', fontFamily: 'IBM Plex Mono, ui-monospace, monospace', color: 'var(--text-tertiary)' }}>
+                  <span>Clean image</span><span>Pure noise</span>
                 </div>
               </div>
 
               <div style={{ flex: 1, minWidth: 200 }}>
-                <div style={{ background: '#0d1628', border: '1px solid #1e3048', borderRadius: 12, padding: 18, marginBottom: 14 }}>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: '#e879f9', marginBottom: 8 }}>→ Add Noise (Training)</div>
-                  <div style={{ fontSize: 13, color: '#7a9bbf', lineHeight: 1.65 }}>
-                    During <strong style={{ color: '#b0c8e0' }}>training</strong>, the model sees images at every noise level. It learns to predict what noise was added at each timestep — like learning to recognize a painting buried under layers of static.
+                <div style={{ background: 'var(--surface-1)', border: '1px solid var(--orange-500)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-4)', marginBottom: 'var(--spacing-3)' }}>
+                  <div style={{ font: 'var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary)', color: 'var(--orange-500)', marginBottom: 'var(--spacing-2)', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    <ArrowRightIcon size={14} weight="bold" /> Add noise (training)
+                  </div>
+                  <div style={{ font: 'var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)' }}>
+                    During <strong style={{ color: 'var(--text-primary)' }}>training</strong>, the model sees images at every noise level. It learns to predict what noise was added at each timestep — like learning to recognise a painting buried under layers of static.
                   </div>
                 </div>
-                <div style={{ background: '#0d1628', border: '1px solid #1e3048', borderRadius: 12, padding: 18 }}>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: '#34d399', marginBottom: 8 }}>← Remove Noise (Generation)</div>
-                  <div style={{ fontSize: 13, color: '#7a9bbf', lineHeight: 1.65 }}>
-                    During <strong style={{ color: '#b0c8e0' }}>generation</strong>, the model starts from pure random noise and subtracts a little predicted noise at each step — guided by your text prompt via cross-attention. After ~25 steps, a coherent image emerges.
+                <div style={{ background: 'var(--surface-1)', border: '1px solid var(--blue-500)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-4)' }}>
+                  <div style={{ font: 'var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary)', color: 'var(--blue-500)', marginBottom: 'var(--spacing-2)', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    <ArrowLeftIcon size={14} weight="bold" /> Remove noise (generation)
+                  </div>
+                  <div style={{ font: 'var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)' }}>
+                    During <strong style={{ color: 'var(--text-primary)' }}>generation</strong>, the model starts from pure random noise and subtracts a little predicted noise at each step — guided by your text prompt via cross-attention. After ~25 steps, a coherent image emerges.
                   </div>
                 </div>
               </div>
@@ -563,25 +901,31 @@ export default function ImageGeneration() {
         {/* ── Tab 2: Prompt Craft ── */}
         {tab === 2 && (
           <>
-            <h2 className="ig-section-title">Prompt Engineering</h2>
+            <h2 className="ig-section-title">Prompt engineering</h2>
             <p className="ig-section-sub">A prompt is more than a description — it's a recipe. Build one below by selecting ingredients from each category.</p>
 
-            <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginBottom: 14 }}>
-              {[['Subject', '#e879f9'], ['Style', '#38bdf8'], ['Lighting', '#fbbf24'], ['Quality', '#34d399'], ['Negative', '#f87171']].map(([lbl, color]) => (
-                <div key={lbl} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#7a9bbf' }}>
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: color }} />
+            <div style={{ display: 'flex', gap: 'var(--spacing-3)', flexWrap: 'wrap', marginBottom: 'var(--spacing-3)' }}>
+              {[
+                { lbl: 'Subject',   tint: 'var(--text-primary)' },
+                { lbl: 'Style',     tint: 'var(--blue-500)' },
+                { lbl: 'Lighting',  tint: 'var(--orange-500)' },
+                { lbl: 'Quality',   tint: 'var(--text-primary)' },
+                { lbl: 'Negative',  tint: 'var(--color-error)' },
+              ].map(({ lbl, tint }) => (
+                <div key={lbl} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--text-size-caption)', color: 'var(--text-secondary)' }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: tint }} />
                   {lbl}
                 </div>
               ))}
             </div>
 
             <div className="ig-prompt-display">
-              {subject && <span style={{ color: '#e879f9' }}>{subject}</span>}
-              {style && <span style={{ color: '#38bdf8' }}>{`, ${style}`}</span>}
-              {lighting && <span style={{ color: '#fbbf24' }}>{`, ${lighting}`}</span>}
-              {quality && <span style={{ color: '#34d399' }}>{`, ${quality}`}</span>}
+              {subject && <span style={{ color: 'var(--text-primary)' }}>{subject}</span>}
+              {style && <span style={{ color: 'var(--blue-500)' }}>{`, ${style}`}</span>}
+              {lighting && <span style={{ color: 'var(--orange-500)' }}>{`, ${lighting}`}</span>}
+              {quality && <span style={{ color: 'var(--text-primary)' }}>{`, ${quality}`}</span>}
               {negSet.size > 0 && (
-                <span style={{ color: '#f87171' }}>{`\nNegative: ${[...negSet].join(', ')}`}</span>
+                <span style={{ color: 'var(--color-error)' }}>{`\nNegative: ${[...negSet].join(', ')}`}</span>
               )}
             </div>
 
@@ -592,7 +936,7 @@ export default function ImageGeneration() {
               ))}
             </div>
 
-            <div className="ig-prompt-cat-title">Art Style</div>
+            <div className="ig-prompt-cat-title">Art style</div>
             <div className="ig-prompt-chips">
               {STYLES.map(s => (
                 <button key={s} className={`ig-prompt-chip${style === s ? ' sel-st' : ''}`} onClick={() => setStyle(style === s ? null : s)}>{s}</button>
@@ -609,38 +953,39 @@ export default function ImageGeneration() {
             {(() => {
               const match = getExampleImage(subject, style, lighting)
               if (!match) return null
+              const tint = match.lightingMatched ? 'var(--orange-500)' : 'var(--blue-500)'
               return (
-                <div key={match.src} style={{ marginBottom: 20, borderRadius: 10, overflow: 'hidden', border: `1px solid ${match.lightingMatched ? 'rgba(251,191,36,0.2)' : 'rgba(56,189,248,0.2)'}` }}>
+                <div key={match.src} style={{ marginBottom: 'var(--spacing-5)', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: `1px solid ${tint}` }}>
                   <img key={match.src} src={match.src} alt="example output" style={{ width: '100%', display: 'block' }} />
-                  <div style={{ padding: '8px 14px', background: '#0d1628', fontSize: 12, fontFamily: 'IBM Plex Mono', color: match.lightingMatched ? '#fbbf24' : '#38bdf8' }}>
-                    Example · <span style={{ color: '#e879f9' }}>{subject}</span> · <span style={{ color: '#38bdf8' }}>{style}</span>
-                    {match.lightingMatched && <> · <span style={{ color: '#e0e8f0' }}>{lighting}</span></>}
+                  <div style={{ padding: 'var(--spacing-2) var(--spacing-4)', background: 'var(--surface-2)', fontSize: 'var(--text-size-caption)', fontFamily: 'IBM Plex Mono, ui-monospace, monospace', color: tint }}>
+                    Example · <span style={{ color: 'var(--text-primary)' }}>{subject}</span> · <span style={{ color: 'var(--blue-500)' }}>{style}</span>
+                    {match.lightingMatched && <> · <span style={{ color: 'var(--orange-500)' }}>{lighting}</span></>}
                   </div>
                 </div>
               )
             })()}
 
-            <div className="ig-prompt-cat-title">Quality Boosters</div>
+            <div className="ig-prompt-cat-title">Quality boosters</div>
             <div className="ig-prompt-chips">
               {QUALITIES.map(q => (
                 <button key={q} className={`ig-prompt-chip${quality === q ? ' sel-q' : ''}`} onClick={() => setQuality(quality === q ? null : q)}>{q}</button>
               ))}
             </div>
 
-            <div className="ig-prompt-cat-title">Negative Prompt</div>
+            <div className="ig-prompt-cat-title">Negative prompt</div>
             <div className="ig-prompt-chips">
               {NEGATIVES_LIST.map(n => (
                 <button key={n} className={`ig-prompt-chip${negSet.has(n) ? ' sel-n' : ''}`} onClick={() => toggleNeg(n)}>{n}</button>
               ))}
             </div>
 
-            <div style={{ background: '#0d1628', border: '1px solid #1e3048', borderRadius: 10, padding: 16 }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: '#e0e8f0', marginBottom: 8 }}>Pro Tips</div>
-              <ul style={{ fontSize: 13, color: '#7a9bbf', lineHeight: 1.75, margin: 0, paddingLeft: 18 }}>
-                <li>Be specific — "a tabby cat on a red velvet chair" beats "a cat"</li>
-                <li>Style + lighting have the largest impact on visual feel</li>
-                <li>Quality boosters like "masterpiece" shift the model toward fine art training data</li>
-                <li>Negative prompts are essential — always include "blurry, low quality, watermark"</li>
+            <div style={{ background: 'var(--surface-1)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-4)' }}>
+              <div style={{ font: 'var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary)', color: 'var(--text-primary)', marginBottom: 'var(--spacing-2)' }}>Pro tips</div>
+              <ul style={{ font: 'var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)', margin: 0, paddingLeft: 'var(--spacing-4)' }}>
+                <li>Be specific — "a tabby cat on a red velvet chair" beats "a cat".</li>
+                <li>Style and lighting have the largest impact on visual feel.</li>
+                <li>Quality boosters like "masterpiece" shift the model toward fine-art training data.</li>
+                <li>Negative prompts are essential — always include "blurry, low quality, watermark".</li>
               </ul>
             </div>
           </>
@@ -649,26 +994,26 @@ export default function ImageGeneration() {
         {/* ── Tab 3: CFG Scale ── */}
         {tab === 3 && (
           <>
-            <h2 className="ig-section-title">Guidance Scale (CFG)</h2>
-            <p className="ig-section-sub">CFG controls how strictly the model follows your prompt. Too low = ignores the prompt. Too high = distorted artifacts. Most use cases live between 7–12.</p>
+            <h2 className="ig-section-title">Guidance scale (CFG)</h2>
+            <p className="ig-section-sub">CFG controls how strictly the model follows your prompt. Too low ignores the prompt; too high produces distorted artefacts. Most use cases live between 7 and 12.</p>
 
-            <div style={{ maxWidth: 460, margin: '0 auto 28px' }}>
-              <div style={{ textAlign: 'center', marginBottom: 8 }}>
+            <div style={{ maxWidth: 460, margin: '0 auto var(--spacing-6)' }}>
+              <div style={{ textAlign: 'center', marginBottom: 'var(--spacing-1)' }}>
                 <div className="ig-cfg-value" style={{ color: cfgBand.color }}>{cfg}</div>
-                <div style={{ fontSize: 16, fontWeight: 600, color: cfgBand.color }}>{cfgBand.label}</div>
+                <div style={{ font: 'var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary)', color: cfgBand.color }}>{cfgBand.label}</div>
               </div>
               <input type="range" min={1} max={20} step={1} value={cfg}
                 onChange={e => setCfg(+e.target.value)} className="ig-cfg-slider" />
               <div className="ig-cfg-slider-labels">
                 <span>1 — Creative</span><span>10 — Balanced</span><span>20 — Literal</span>
               </div>
-              <div className="ig-cfg-band" style={{ borderColor: cfgBand.color + '44', background: cfgBand.color + '0d' }}>
-                <div style={{ fontSize: 14, color: '#b0c8e0', lineHeight: 1.65 }}>{cfgBand.desc}</div>
+              <div className="ig-cfg-band" style={{ borderColor: cfgBand.color }}>
+                <div style={{ font: 'var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)' }}>{cfgBand.desc}</div>
               </div>
             </div>
 
-            <div style={{ background: '#0d1628', border: '1px solid #1e3048', borderRadius: 12, padding: 20, marginBottom: 16 }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: '#e0e8f0', marginBottom: 12 }}>CFG Spectrum</div>
+            <div style={{ background: 'var(--surface-1)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-5)', marginBottom: 'var(--spacing-4)' }}>
+              <div style={{ font: 'var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary)', color: 'var(--text-primary)', marginBottom: 'var(--spacing-3)' }}>CFG spectrum</div>
               <div className="ig-cfg-spectrum">
                 {CFG_BANDS.map(b => (
                   <div key={b.label} style={{
@@ -679,20 +1024,20 @@ export default function ImageGeneration() {
                   }} />
                 ))}
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, fontFamily: 'IBM Plex Mono', color: '#4a6a8a', marginTop: 6 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--text-size-meta)', fontFamily: 'IBM Plex Mono, ui-monospace, monospace', color: 'var(--text-tertiary)', marginTop: 'var(--spacing-1)' }}>
                 <span>1</span><span>4</span><span>7</span><span>12</span><span>16</span><span>20</span>
               </div>
             </div>
 
-            <div style={{ background: '#0d1628', border: '1px solid #1e3048', borderRadius: 12, padding: 20 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: '#e0e8f0', marginBottom: 10 }}>Under the hood</div>
-              <div style={{ fontSize: 13, color: '#7a9bbf', lineHeight: 1.65, marginBottom: 12 }}>
+            <div style={{ background: 'var(--surface-1)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-5)' }}>
+              <div style={{ font: 'var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary)', color: 'var(--text-primary)', marginBottom: 'var(--spacing-2)' }}>Under the hood</div>
+              <div style={{ font: 'var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)', marginBottom: 'var(--spacing-3)' }}>
                 At each denoising step, the U-Net runs <em>twice</em> — once with your prompt (conditional) and once without (unconditional). CFG scale amplifies the difference:
               </div>
-              <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 13, background: '#050d1a', border: '1px solid #1e3048', borderRadius: 8, padding: '10px 16px', color: '#e879f9' }}>
+              <div style={{ fontFamily: 'IBM Plex Mono, ui-monospace, monospace', fontSize: 'var(--text-size-caption)', background: 'var(--surface-2)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-sm)', padding: 'var(--spacing-2) var(--spacing-4)', color: 'var(--orange-500)' }}>
                 output = uncond + {cfg} × (cond − uncond)
               </div>
-              <div style={{ fontSize: 13, color: '#7a9bbf', lineHeight: 1.65, marginTop: 12 }}>
+              <div style={{ font: 'var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)', marginTop: 'var(--spacing-3)' }}>
                 Higher values push further toward the conditional prediction — effective up to ~12, then instability sets in.
               </div>
             </div>
@@ -702,53 +1047,59 @@ export default function ImageGeneration() {
         {/* ── Tab 4: Samplers & Steps ── */}
         {tab === 4 && (
           <>
-            <h2 className="ig-section-title">Sampling Methods</h2>
+            <h2 className="ig-section-title">Sampling methods</h2>
             <p className="ig-section-sub">The sampler determines how the model steps from noise to image. Different algorithms offer different speed/quality trade-offs.</p>
 
             <div className="ig-samplers-grid">
               {SAMPLERS.map(s => (
-                <div key={s.name} className={`ig-sampler-card${sampler === s.name ? ' active' : ''}`} onClick={() => setSampler(s.name)}>
+                <button
+                  key={s.name}
+                  type="button"
+                  className={`ig-sampler-card${sampler === s.name ? ' active' : ''}`}
+                  onClick={() => setSampler(s.name)}
+                  aria-pressed={sampler === s.name}
+                >
                   <div className="ig-sampler-name">{s.name}</div>
                   <div className="ig-sampler-desc">{s.desc}</div>
                   <div className="ig-bar-row">
-                    <span style={{ width: 46 }}>Speed</span>
-                    <div className="ig-bar-bg"><div className="ig-bar-fill" style={{ width: `${s.speed * 20}%`, background: '#34d399' }} /></div>
+                    <span style={{ width: 50 }}>Speed</span>
+                    <div className="ig-bar-bg"><div className="ig-bar-fill" style={{ width: `${s.speed * 20}%`, background: 'var(--color-success)' }} /></div>
                   </div>
                   <div className="ig-bar-row">
-                    <span style={{ width: 46 }}>Quality</span>
-                    <div className="ig-bar-bg"><div className="ig-bar-fill" style={{ width: `${s.quality * 20}%`, background: '#e879f9' }} /></div>
+                    <span style={{ width: 50 }}>Quality</span>
+                    <div className="ig-bar-bg"><div className="ig-bar-fill" style={{ width: `${s.quality * 20}%`, background: 'var(--blue-500)' }} /></div>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
 
-            <div style={{ background: '#0d1628', border: '1px solid #1e3048', borderRadius: 12, padding: 22, marginBottom: 14 }}>
-              <div style={{ fontSize: 14, color: '#e0e8f0', marginBottom: 12 }}>
-                Steps: <strong style={{ color: '#e879f9' }}>{steps}</strong>
-                <span style={{ fontSize: 12, color: '#4a6a8a', marginLeft: 10 }}>
+            <div style={{ background: 'var(--surface-1)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-5)', marginBottom: 'var(--spacing-3)' }}>
+              <div style={{ font: 'var(--text-weight-body) var(--text-size-body)/1.2 var(--font-primary)', color: 'var(--text-primary)', marginBottom: 'var(--spacing-3)' }}>
+                Steps: <strong style={{ color: 'var(--text-primary)' }}>{steps}</strong>
+                <span style={{ fontSize: 'var(--text-size-caption)', color: 'var(--text-tertiary)', marginLeft: 'var(--spacing-2)' }}>
                   ({selSampler.name} typical: {selSampler.stepsTypical})
                 </span>
               </div>
               <input type="range" min={5} max={100} step={1} value={steps}
                 onChange={e => setSteps(+e.target.value)}
-                style={{ width: '100%', accentColor: '#e879f9', marginBottom: 10 }} />
-              <div style={{ fontSize: 13, color: '#7a9bbf', lineHeight: 1.5 }}>
+                style={{ width: '100%', accentColor: 'var(--blue-500)', marginBottom: 'var(--spacing-2)' }} />
+              <div style={{ font: 'var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)' }}>
                 {steps < selSampler.stepsMin
-                  ? `⚠️ Too few steps for ${sampler} — image will likely be noisy and incoherent.`
+                  ? `Too few steps for ${sampler} — image will likely be noisy and incoherent.`
                   : steps <= selSampler.stepsTypical
-                  ? `✓ Good range — ${sampler} converges well around ${selSampler.stepsTypical} steps.`
+                  ? `Good range — ${sampler} converges well around ${selSampler.stepsTypical} steps.`
                   : steps <= selSampler.stepsTypical * 2
-                  ? `↑ Diminishing returns — little quality gain beyond ${selSampler.stepsTypical} steps.`
-                  : `⚠️ Excessive — negligible benefit beyond ${selSampler.stepsTypical * 2} steps for ${sampler}.`}
+                  ? `Diminishing returns — little quality gain beyond ${selSampler.stepsTypical} steps.`
+                  : `Excessive — negligible benefit beyond ${selSampler.stepsTypical * 2} steps for ${sampler}.`}
               </div>
             </div>
 
-            <div style={{ background: '#0d1628', border: '1px solid #1e3048', borderRadius: 12, padding: 18 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: '#e0e8f0', marginBottom: 8 }}>Which sampler should I use?</div>
-              <div style={{ fontSize: 13, color: '#7a9bbf', lineHeight: 1.65 }}>
-                Start with <strong style={{ color: '#e879f9' }}>DPM++ 2M</strong> at 25 steps — the current community standard.
-                Try <strong style={{ color: '#b0c8e0' }}>Euler a</strong> when you want more variation between generations.
-                Use <strong style={{ color: '#b0c8e0' }}>DDIM</strong> when you need deterministic, reproducible outputs from the same seed.
+            <div style={{ background: 'var(--surface-1)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-4)' }}>
+              <div style={{ font: 'var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary)', color: 'var(--text-primary)', marginBottom: 'var(--spacing-2)' }}>Which sampler should I use?</div>
+              <div style={{ font: 'var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)' }}>
+                Start with <strong style={{ color: 'var(--text-primary)' }}>DPM++ 2M</strong> at 25 steps — the current community standard.
+                Try <strong style={{ color: 'var(--text-primary)' }}>Euler a</strong> when you want more variation between generations.
+                Use <strong style={{ color: 'var(--text-primary)' }}>DDIM</strong> when you need deterministic, reproducible outputs from the same seed.
               </div>
             </div>
           </>
@@ -757,31 +1108,44 @@ export default function ImageGeneration() {
         {/* ── Tab 5: Quiz ── */}
         {tab === 5 && (
           <div className="ig-quiz-wrap">
-            <h2 className="ig-section-title">Quiz</h2>
-            <p className="ig-section-sub">6 questions · adaptive difficulty · covers diffusion, prompting, CFG, and samplers.</p>
+            <h2 className="ig-section-title">Quick quiz</h2>
+            <p className="ig-section-sub">Six questions, adaptive difficulty — covers diffusion, prompting, CFG, and samplers.</p>
 
             {!done && currentQ && (
               <>
-                <div className="ig-quiz-counter">Question {qNum + 1} / {SESSION_SIZE}</div>
+                <div className="ig-quiz-counter">Question {qNum + 1} of {SESSION_SIZE}</div>
                 <div className="ig-quiz-progress">
                   <div className="ig-quiz-progress-fill" style={{ width: `${(qNum / SESSION_SIZE) * 100}%` }} />
                 </div>
-                <span className={`ig-diff-badge ${currentQ.difficulty}`}>⬤ {currentQ.difficulty}</span>
+                <span className={`ig-diff-badge ${currentQ.difficulty}`}>{currentQ.difficulty}</span>
                 <div className="ig-quiz-q">{currentQ.q}</div>
-                {currentQ.opts.map((opt, i) => {
-                  let cls = 'ig-quiz-opt'
-                  if (chosen !== null) {
-                    if (i === currentQ.correct) cls += ' correct'
-                    else if (i === chosen && chosen !== currentQ.correct) cls += ' wrong'
-                  }
-                  return (
-                    <button key={i} className={cls} disabled={chosen !== null} onClick={() => handleQuiz(i)}>{opt}</button>
-                  )
-                })}
+                <div role="radiogroup">
+                  {currentQ.opts.map((opt, i) => {
+                    let cls = 'ig-quiz-opt'
+                    if (chosen !== null) {
+                      if (i === currentQ.correct) cls += ' correct'
+                      else if (i === chosen && chosen !== currentQ.correct) cls += ' wrong'
+                    }
+                    return (
+                      <button
+                        key={i}
+                        className={cls}
+                        disabled={chosen !== null}
+                        role="radio"
+                        aria-checked={chosen === i}
+                        onClick={() => handleQuiz(i)}
+                      >
+                        {opt}
+                      </button>
+                    )
+                  })}
+                </div>
                 {chosen !== null && (
                   <>
                     <div className="ig-quiz-explanation">{currentQ.explanation}</div>
-                    <button className="ig-quiz-next" onClick={nextQ}>{qNum + 1 >= SESSION_SIZE ? 'See Score' : 'Next →'}</button>
+                    <button className="ig-quiz-next" onClick={nextQ}>
+                      {qNum + 1 >= SESSION_SIZE ? 'See results' : 'Next question'}
+                    </button>
                   </>
                 )}
               </>
@@ -791,11 +1155,11 @@ export default function ImageGeneration() {
               <div className="ig-quiz-done">
                 <div className="ig-quiz-score">{score}/{SESSION_SIZE}</div>
                 <div className="ig-quiz-score-sub">
-                  {score >= SESSION_SIZE - 1 ? 'Excellent! You understand image generation well.' :
-                   score >= SESSION_SIZE / 2 ? 'Good work — revisit any tabs where you felt uncertain.' :
-                   'Keep exploring — try the tabs again and retake the quiz.'}
+                  {score >= SESSION_SIZE - 1 ? 'You understand image generation well.' :
+                   score >= SESSION_SIZE / 2 ? 'Solid run. Worth a quick re-read of the tabs you skipped.' :
+                   'These take a couple of passes to click. Revisit a tab, then retake.'}
                 </div>
-                <button className="ig-quiz-retake" onClick={retake}>↺ Retake Quiz</button>
+                <button className="ig-quiz-retake" onClick={retake}>Retake quiz</button>
               </div>
             )}
           </div>
