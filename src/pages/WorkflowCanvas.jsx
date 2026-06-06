@@ -43,11 +43,11 @@ function getWhyLabel(whyHuman) {
 function getReadinessDot(whyHuman, automatable) {
   if (!whyHuman || !automatable) return { color: '#3a4a6a', label: 'Not assessed' }
   if (automatable === 'no' || whyHuman === 'compliance' || whyHuman === 'relationship')
-    return { color: '#ef4444', label: 'Keep Human' }
+    return { color: '#ef4444', label: 'Keep human' }
   if (automatable === 'maybe' || (automatable === 'yes' && whyHuman === 'creative'))
     return { color: '#eab308', label: 'Partial' }
   if (automatable === 'yes' && (whyHuman === 'not-yet' || whyHuman === 'habit'))
-    return { color: '#10b981', label: 'Strong Candidate' }
+    return { color: '#10b981', label: 'Strong candidate' }
   return { color: '#eab308', label: 'Partial' }
 }
 
@@ -566,89 +566,90 @@ const initialNodes = [
 // CSS
 // ─────────────────────────────────────────────────────────────────────────────
 
-const css = `
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
+// Workflow canvas uses the on-demand orange signal as its primary action accent.
+const ACCENT = 'var(--signal-onDemand-500)'
 
+const css = `
 *, *::before, *::after { box-sizing: border-box; }
 
-.wf-root { height: 100vh; display: flex; flex-direction: column; overflow: hidden; background: #0d0f18; color: #e0e8f0; position: relative; }
+.wf-root { height: 100vh; display: flex; flex-direction: column; overflow: hidden; background: var(--surface-base); color: var(--text-primary); position: relative; font-family: var(--font-body); }
 
 /* Toolbar */
-.wf-toolbar { height: 54px; background: #080a12; border-bottom: 1px solid #1a1f2e; display: flex; align-items: center; padding: 0 20px; gap: 16px; flex-shrink: 0; }
-.wf-toolbar-logo { display: flex; align-items: center; gap: 8px; font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 600; color: #e0e8f0; text-decoration: none; }
-.wf-toolbar-logo-icon { width: 28px; height: 28px; background: rgba(249,115,22,0.15); border: 1px solid rgba(249,115,22,0.3); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
-.wf-toolbar-center { flex: 1; display: flex; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #3a4a6a; }
-.wf-btn { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.06em; padding: 6px 14px; border-radius: 6px; border: 1px solid; cursor: pointer; transition: all 0.15s; background: none; text-transform: uppercase; }
-.wf-btn-primary { color: #f97316; border-color: rgba(249,115,22,0.4); }
-.wf-btn-primary:hover:not(:disabled) { background: rgba(249,115,22,0.1); }
+.wf-toolbar { height: 54px; background: var(--surface-1); border-bottom: 1px solid var(--border-default); display: flex; align-items: center; padding: 0 20px; gap: 16px; flex-shrink: 0; }
+.wf-toolbar-logo { display: flex; align-items: center; gap: 8px; font-family: var(--font-display); font-size: 16px; font-weight: 600; color: var(--text-primary); text-decoration: none; }
+.wf-toolbar-logo-icon { width: 28px; height: 28px; background: var(--signal-onDemand-50); border: 1px solid var(--signal-onDemand-100); border-radius: var(--radius-chip); display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.wf-toolbar-center { flex: 1; display: flex; justify-content: center; font-family: var(--font-mono); font-size: 12px; color: var(--text-tertiary); }
+.wf-btn { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.04em; padding: 6px 14px; border-radius: var(--radius-chip); border: 1px solid; cursor: pointer; transition: all 0.15s; background: none; font-weight: 600; }
+.wf-btn-primary { background: ${ACCENT}; color: #fff; border-color: ${ACCENT}; }
+.wf-btn-primary:hover:not(:disabled) { filter: brightness(1.08); }
 .wf-btn-primary:disabled { opacity: 0.35; cursor: default; }
-.wf-btn-ghost { color: #4a6a8a; border-color: #1a2a3a; }
-.wf-btn-ghost:hover { color: #b0c8e0; border-color: #2a3a5a; }
+.wf-btn-ghost { color: var(--text-secondary); border-color: var(--border-default); }
+.wf-btn-ghost:hover { color: var(--text-primary); border-color: var(--border-strong); }
 
 /* Canvas row */
 .wf-canvas-row { display: flex; flex: 1; overflow: hidden; }
 
 /* Sidebar */
-.wf-sidebar { width: 240px; flex-shrink: 0; background: #0a0c14; border-right: 1px solid #1a1f2e; display: flex; flex-direction: column; padding: 16px 12px; gap: 8px; overflow-y: auto; }
-.wf-sidebar-title { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #7a9bbf; padding: 0 4px 8px; border-bottom: 1px solid #1a1f2e; margin-bottom: 4px; }
-.wf-palette-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; border: 1px solid #1a1f2e; background: #0d0f18; cursor: grab; transition: all 0.15s; border-left: 3px solid var(--node-color); user-select: none; }
-.wf-palette-item:hover { background: #131620; border-color: var(--node-color); transform: translateX(2px); }
+.wf-sidebar { width: 240px; flex-shrink: 0; background: var(--surface-1); border-right: 1px solid var(--border-default); display: flex; flex-direction: column; padding: 16px 12px; gap: 8px; overflow-y: auto; }
+.wf-sidebar-title { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-tertiary); padding: 0 4px 8px; border-bottom: 1px solid var(--border-default); margin-bottom: 4px; font-weight: 600; }
+.wf-palette-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius-chip); border: 1px solid var(--border-default); background: var(--surface-base); cursor: grab; transition: all 0.15s; border-left: 3px solid var(--node-color); user-select: none; }
+.wf-palette-item:hover { background: var(--surface-2); border-color: var(--node-color); transform: translateX(2px); }
 .wf-palette-item:active { cursor: grabbing; }
 .wf-palette-icon { font-size: 18px; flex-shrink: 0; width: 24px; text-align: center; }
-.wf-palette-label { font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 600; color: #b0c8e0; }
-.wf-palette-desc { font-size: 11px; color: #3a4a6a; margin-top: 1px; }
-.wf-sidebar-hint { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #5a7a9a; line-height: 1.6; padding: 8px 4px; }
-.wf-sidebar-divider { height: 1px; background: #1a1f2e; margin: 4px 0; }
+.wf-palette-label { font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.wf-palette-desc { font-size: 11px; color: var(--text-tertiary); margin-top: 1px; }
+.wf-sidebar-hint { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); line-height: 1.6; padding: 8px 4px; }
+.wf-sidebar-divider { height: 1px; background: var(--border-default); margin: 4px 0; }
 
 /* React Flow Controls overrides */
-.react-flow__controls { background: #0a0c14 !important; border: 1px solid #2a3a5a !important; border-radius: 8px !important; box-shadow: 0 4px 16px rgba(0,0,0,0.5) !important; }
-.react-flow__controls-button { background: #0d0f18 !important; border-bottom: 1px solid #1a2a3a !important; fill: #7a9bbf !important; }
-.react-flow__controls-button:hover { background: #131620 !important; fill: #b0c8e0 !important; }
+.react-flow__controls { background: var(--surface-1) !important; border: 1px solid var(--border-default) !important; border-radius: var(--radius-chip) !important; box-shadow: var(--shadow-card) !important; }
+.react-flow__controls-button { background: var(--surface-base) !important; border-bottom: 1px solid var(--border-default) !important; fill: var(--text-secondary) !important; }
+.react-flow__controls-button:hover { background: var(--surface-2) !important; fill: var(--text-primary) !important; }
 .react-flow__controls-button svg { fill: inherit !important; }
 
 /* Node styles */
-.wf-node { border-radius: 10px; min-width: 180px; font-family: 'IBM Plex Sans', sans-serif; box-shadow: 0 4px 24px rgba(0,0,0,0.4); background: #0d0f18; }
-.wf-node-header { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 10px 10px 0 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.wf-node { border-radius: var(--radius-card); min-width: 180px; font-family: var(--font-display); box-shadow: var(--shadow-card); background: var(--surface-1); }
+.wf-node-header { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: var(--radius-card) var(--radius-card) 0 0; border-bottom: 1px solid var(--border-default); }
 .wf-node-icon { font-size: 16px; flex-shrink: 0; }
-.wf-node-label { flex: 1; font-size: 13px; font-weight: 600; color: #e0e8f0; background: transparent; border: none; outline: none; min-width: 0; font-family: 'IBM Plex Sans', sans-serif; }
-.wf-node-body { padding: 10px 14px; background: #0d1628; border-radius: 0 0 10px 10px; }
-.wf-node-badge { font-size: 10px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 7px; border-radius: 100px; font-weight: 600; flex-shrink: 0; }
+.wf-node-label { flex: 1; font-size: 13px; font-weight: 600; color: var(--text-primary); background: transparent; border: none; outline: none; min-width: 0; font-family: var(--font-display); }
+.wf-node-body { padding: 10px 14px; background: var(--surface-2); border-radius: 0 0 var(--radius-card) var(--radius-card); }
+.wf-node-badge { font-size: 10px; font-family: var(--font-mono); letter-spacing: 0.06em; padding: 2px 7px; border-radius: 100px; font-weight: 600; flex-shrink: 0; }
 
 /* Questionnaire */
 .wf-quest { display: flex; flex-direction: column; gap: 10px; padding-top: 8px; }
-.wf-quest-label { font-size: 11px; color: #4a6a8a; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; font-family: 'IBM Plex Mono', monospace; }
-.wf-quest select { width: 100%; background: #06080e; border: 1px solid #1e2a3a; border-radius: 6px; color: #b0c8e0; font-size: 13px; padding: 6px 10px; outline: none; font-family: 'IBM Plex Sans', sans-serif; }
+.wf-quest-label { font-size: 11px; color: var(--text-secondary); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; font-family: var(--font-mono); font-weight: 600; }
+.wf-quest select { width: 100%; background: var(--surface-base); border: 1px solid var(--border-default); border-radius: var(--radius-chip); color: var(--text-primary); font-size: 13px; padding: 6px 10px; outline: none; font-family: var(--font-body); }
 .wf-pill-group { display: flex; gap: 5px; flex-wrap: wrap; }
-.wf-pill { font-size: 11px; font-family: 'IBM Plex Mono', monospace; padding: 4px 10px; border-radius: 100px; border: 1px solid #1e2a3a; background: transparent; color: #4a6a8a; cursor: pointer; transition: all 0.15s; }
-.wf-pill.active-yes { background: rgba(16,185,129,0.15); border-color: #10b981; color: #10b981; }
-.wf-pill.active-maybe { background: rgba(234,179,8,0.15); border-color: #eab308; color: #eab308; }
-.wf-pill.active-no { background: rgba(239,68,68,0.12); border-color: #ef4444; color: #ef4444; }
-.wf-pill.active-freq { background: rgba(59,130,246,0.12); border-color: #3b82f6; color: #3b82f6; }
-.wf-quest input[type=number] { width: 70px; background: #06080e; border: 1px solid #1e2a3a; border-radius: 6px; color: #b0c8e0; font-size: 13px; padding: 5px 8px; outline: none; font-family: 'IBM Plex Mono', monospace; }
+.wf-pill { font-size: 11px; font-family: var(--font-mono); padding: 4px 10px; border-radius: 100px; border: 1px solid var(--border-default); background: transparent; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; }
+.wf-pill.active-yes { background: var(--color-success-bg); border-color: var(--color-success); color: var(--color-success); }
+.wf-pill.active-maybe { background: var(--color-warning-bg); border-color: var(--color-warning); color: var(--color-warning); }
+.wf-pill.active-no { background: var(--color-error-bg); border-color: var(--color-error); color: var(--color-error); }
+.wf-pill.active-freq { background: var(--color-info-bg); border-color: var(--color-info); color: var(--color-info); }
+.wf-quest input[type=number] { width: 70px; background: var(--surface-base); border: 1px solid var(--border-default); border-radius: var(--radius-chip); color: var(--text-primary); font-size: 13px; padding: 5px 8px; outline: none; font-family: var(--font-mono); }
 
 /* Report panel — bottom slide-up */
-.wf-report { position: absolute; bottom: 0; left: 0; right: 0; height: 56vh; background: #0a0c14; border-top: 1px solid #2a3a5a; display: flex; flex-direction: column; z-index: 100; box-shadow: 0 -8px 40px rgba(0,0,0,0.6); }
-.wf-report-header { padding: 12px 24px; border-bottom: 1px solid #1a1f2e; display: flex; align-items: center; gap: 12px; flex-shrink: 0; background: #080a12; }
-.wf-report-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; font-weight: 700; color: #e0e8f0; flex: 1; }
+.wf-report { position: absolute; bottom: 0; left: 0; right: 0; height: 56vh; background: var(--surface-1); border-top: 1px solid var(--border-strong); display: flex; flex-direction: column; z-index: 100; box-shadow: var(--shadow-elevated); }
+.wf-report-header { padding: 12px 24px; border-bottom: 1px solid var(--border-default); display: flex; align-items: center; gap: 12px; flex-shrink: 0; background: var(--surface-base); }
+.wf-report-title { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--text-primary); flex: 1; }
 .wf-report-body { padding: 0 24px 24px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; flex: 1; }
 /* Summary strip */
 .wf-report-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 16px 0; flex-shrink: 0; }
-.wf-stat-box { background: #0d0f18; border: 1px solid #1a1f2e; border-radius: 10px; padding: 14px 16px; text-align: center; }
-.wf-stat-num { font-family: 'IBM Plex Sans', sans-serif; font-size: 28px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
-.wf-stat-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #3a4a6a; }
+.wf-stat-box { background: var(--surface-base); border: 1px solid var(--border-default); border-radius: var(--radius-card); padding: 14px 16px; text-align: center; }
+.wf-stat-num { font-family: var(--font-display); font-size: 28px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+.wf-stat-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-tertiary); font-weight: 600; }
 /* Section title */
-.wf-report-section-title { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: #3a4a6a; margin-bottom: 10px; border-bottom: 1px solid #1a1f2e; padding-bottom: 6px; }
+.wf-report-section-title { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 10px; border-bottom: 1px solid var(--border-default); padding-bottom: 6px; font-weight: 600; }
 /* Task rows */
-.wf-task-row { display: grid; grid-template-columns: 1fr 140px 80px 70px 80px; gap: 8px; align-items: center; padding: 10px 12px; background: #0d0f18; border: 1px solid #1a1f2e; border-radius: 8px; margin-bottom: 6px; }
-.wf-task-name { font-size: 13px; font-weight: 600; color: #b0c8e0; }
-.wf-task-reason { font-size: 11px; color: #4a6a8a; font-family: 'IBM Plex Mono', monospace; line-height: 1.4; }
-.wf-task-implication { font-size: 11px; color: #4a6080; font-style: italic; line-height: 1.4; grid-column: 1 / -1; margin-top: 2px; }
-.wf-task-meta { font-size: 11px; color: #3a4a6a; font-family: 'IBM Plex Mono', monospace; text-align: center; }
-.wf-readiness-badge { font-size: 10px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.06em; padding: 3px 8px; border-radius: 100px; font-weight: 600; text-align: center; white-space: nowrap; }
+.wf-task-row { display: grid; grid-template-columns: 1fr 140px 80px 70px 80px; gap: 8px; align-items: center; padding: 10px 12px; background: var(--surface-base); border: 1px solid var(--border-default); border-radius: var(--radius-chip); margin-bottom: 6px; }
+.wf-task-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.wf-task-reason { font-size: 11px; color: var(--text-secondary); font-family: var(--font-mono); line-height: 1.4; }
+.wf-task-implication { font-size: 11px; color: var(--text-tertiary); font-style: italic; line-height: 1.4; grid-column: 1 / -1; margin-top: 2px; }
+.wf-task-meta { font-size: 11px; color: var(--text-tertiary); font-family: var(--font-mono); text-align: center; }
+.wf-readiness-badge { font-size: 10px; font-family: var(--font-mono); letter-spacing: 0.04em; padding: 3px 8px; border-radius: 100px; font-weight: 600; text-align: center; white-space: nowrap; }
 /* Rec items */
-.wf-rec-item { font-size: 13px; color: #7a9bbf; line-height: 1.7; padding: 8px 0; border-bottom: 1px solid #1a1f2e; display: flex; gap: 10px; }
+.wf-rec-item { font-size: 13px; color: var(--text-secondary); line-height: 1.7; padding: 8px 0; border-bottom: 1px solid var(--border-default); display: flex; gap: 10px; }
 .wf-rec-item:last-child { border-bottom: none; }
-.wf-rec-num { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #f97316; flex-shrink: 0; font-weight: 700; padding-top: 2px; }
+.wf-rec-num { font-family: var(--font-mono); font-size: 11px; color: ${ACCENT}; flex-shrink: 0; font-weight: 700; padding-top: 2px; }
 
 /* React Flow overrides */
 .react-flow__node { cursor: default; }
@@ -682,7 +683,7 @@ function ReportPanel({ nodes, onClose }) {
     <div className="wf-report">
       {/* Header */}
       <div className="wf-report-header">
-        <span className="wf-report-title">AI Readiness Report</span>
+        <span className="wf-report-title">AI readiness report</span>
         <button
           onClick={() => window.print()}
           style={{ background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.35)', color: '#f97316', fontFamily: "'IBM Plex Mono',monospace", fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '5px 12px', borderRadius: 6, cursor: 'pointer' }}
@@ -718,7 +719,7 @@ function ReportPanel({ nodes, onClose }) {
         {/* Task list */}
         {allTasks.length > 0 && (
           <div>
-            <div className="wf-report-section-title">Human Task Analysis</div>
+            <div className="wf-report-section-title">Human task analysis</div>
             {/* Column headers */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px 80px 70px 80px', gap: 8, padding: '0 12px 6px', fontSize: 10, fontFamily: "'IBM Plex Mono',monospace", letterSpacing: '0.1em', textTransform: 'uppercase', color: '#2a3a5a' }}>
               <span>Task</span><span>Why Human</span><span style={{ textAlign: 'center' }}>AI?</span><span style={{ textAlign: 'center' }}>Time</span><span style={{ textAlign: 'center' }}>Readiness</span>
@@ -752,7 +753,7 @@ function ReportPanel({ nodes, onClose }) {
         {/* Time savings */}
         {automationTasks.length > 0 && (
           <div>
-            <div className="wf-report-section-title">Estimated Time Savings</div>
+            <div className="wf-report-section-title">Estimated time savings</div>
             {automationTasks.map(t => (
               <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid #1a1f2e', fontSize: 13 }}>
                 <span style={{ color: '#7a9bbf' }}>{t.label}</span>
@@ -777,7 +778,7 @@ function ReportPanel({ nodes, onClose }) {
         {/* Recommended next steps */}
         {steps.length > 0 && (
           <div>
-            <div className="wf-report-section-title">Recommended Next Steps</div>
+            <div className="wf-report-section-title">Recommended next steps</div>
             {steps.map((s, i) => (
               <div key={i} className="wf-rec-item">
                 <span className="wf-rec-num">{i + 1}.</span>
@@ -886,10 +887,7 @@ function WorkflowCanvasInner() {
       {/* Toolbar */}
       <div className="wf-toolbar">
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: "'IBM Plex Mono',monospace", fontSize: 14, color: '#7a9bbf', textDecoration: 'none', border: '1px solid #2a3a5a', borderRadius: 6, padding: '6px 14px', transition: 'all 0.15s' }}
-            onMouseEnter={e => { e.currentTarget.style.color = '#e0e8f0'; e.currentTarget.style.borderColor = '#4a6a8a' }}
-            onMouseLeave={e => { e.currentTarget.style.color = '#7a9bbf'; e.currentTarget.style.borderColor = '#2a3a5a' }}
-          >
+          <Link to="/" className="wf-btn wf-btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, textDecoration: 'none' }}>
             ← Home
           </Link>
           <div className="wf-toolbar-logo">
@@ -904,9 +902,9 @@ function WorkflowCanvasInner() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {humanTaskNodes.length > 0 && (
-            <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 14, color: '#7a9bbf', background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 6, padding: '6px 14px' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, color: 'var(--color-info)', background: 'var(--color-info-bg)', border: '1px solid var(--color-info)', borderRadius: 'var(--radius-chip)', padding: '6px 14px' }}>
               👤 {humanTaskNodes.length} human task{humanTaskNodes.length !== 1 ? 's' : ''}
-              {aiCandidates > 0 && <span style={{ color: '#10b981', marginLeft: 8 }}>· {aiCandidates} candidate{aiCandidates !== 1 ? 's' : ''}</span>}
+              {aiCandidates > 0 && <span style={{ color: 'var(--color-success)', marginLeft: 8 }}>· {aiCandidates} candidate{aiCandidates !== 1 ? 's' : ''}</span>}
             </span>
           )}
           <button
@@ -915,7 +913,7 @@ function WorkflowCanvasInner() {
             onClick={() => setShowReport(true)}
             style={{ fontSize: 14, padding: '8px 20px' }}
           >
-            Generate Report
+            Generate report
           </button>
         </div>
       </div>
@@ -952,7 +950,7 @@ function WorkflowCanvasInner() {
             onClick={clearCanvas}
             style={{ width: '100%', marginTop: 4 }}
           >
-            Clear Canvas
+            Clear canvas
           </button>
 
           <div className="wf-sidebar-hint">
@@ -977,20 +975,20 @@ function WorkflowCanvasInner() {
           edgesReconnectable
           onReconnect={onReconnect}
           reconnectRadius={20}
-          style={{ flex: 1, background: '#0d0f18' }}
+          style={{ flex: 1, background: 'var(--surface-base)' }}
         >
-          <Background color="#1e2a3a" gap={24} size={1} />
+          <Background color="var(--border-default)" gap={24} size={1} />
           <Controls
             style={{
-              background: '#0a0c14',
-              border: '1px solid #1e2a3a',
+              background: 'var(--surface-1)',
+              border: '1px solid var(--border-default)',
               borderRadius: 8,
             }}
           />
           <MiniMap
             style={{
-              background: '#0a0c14',
-              border: '1px solid #1e2a3a',
+              background: 'var(--surface-1)',
+              border: '1px solid var(--border-default)',
               borderRadius: 8,
             }}
             nodeColor={n =>
