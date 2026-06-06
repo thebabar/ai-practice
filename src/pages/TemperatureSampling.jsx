@@ -65,59 +65,286 @@ const css = `
   background: var(--surface-base);
 }
 
-.ts-panel { max-width: 920px; margin: 0 auto; padding: 0 20px 80px; }
-.ts-section-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 8px; }
-.ts-section-sub { font-size: 16px; color: #7a5a6a; margin-bottom: 28px; line-height: 1.8; }
+.ts-panel { max-width: 920px; margin: 0 auto; padding: 0 var(--spacing-4) var(--spacing-7); }
 
-.ts-card { background: #0a080e; border: 1px solid #1e1020; border-radius: 14px; padding: 24px; margin-bottom: 20px; }
-.ts-card-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #ec4899; margin-bottom: 16px; }
+.ts-section-title {
+  font: var(--text-weight-h2) var(--text-size-h2)/var(--text-lh-h2) var(--font-primary);
+  letter-spacing: var(--text-ls-h2);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-2);
+}
+.ts-section-sub {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-6);
+  max-width: 720px;
+}
 
-/* ── Slider ── */
-.ts-slider-row { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
-.ts-slider-label { font-size: 12px; color: #7a5a6a; width: 100px; flex-shrink: 0; }
-.ts-slider { flex: 1; accent-color: #ec4899; cursor: pointer; }
-.ts-slider-val { font-family: 'IBM Plex Sans', sans-serif; font-size: 18px; font-weight: 800; color: #ec4899; width: 48px; text-align: right; flex-shrink: 0; }
+/* Card surface — Prism .card--default in spirit */
+.ts-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-e2);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-5);
+  margin-bottom: var(--spacing-5);
+}
+.ts-card-title {
+  font: var(--text-weight-h3) var(--text-size-h3)/var(--text-lh-h3) var(--font-primary);
+  letter-spacing: var(--text-ls-h3);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-4);
+}
 
-/* ── Distribution bars ── */
-.dist-container { margin: 16px 0; }
-.dist-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-.dist-token { font-size: 14px; color: #b0a0b8; width: 120px; flex-shrink: 0; text-align: right; font-family: 'IBM Plex Mono', monospace; }
-.dist-bar-bg { flex: 1; background: #0a080e; border-radius: 100px; height: 22px; overflow: hidden; border: 1px solid #1e1020; }
-.dist-bar-fill { height: 100%; border-radius: 100px; transition: width 0.5s cubic-bezier(.4,0,.2,1); display: flex; align-items: center; padding-right: 8px; justify-content: flex-end; }
-.dist-pct { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.8); }
-.dist-prob { width: 52px; font-size: 12px; color: #5a4a5a; flex-shrink: 0; text-align: left; }
-.dist-sampled { width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 9px; }
+/* ── Slider row (tokens-driven; mirrors .prism-slider). Defaults to
+ *  blue (structured / cutoffs). Add .ts-slider--orange on the input
+ *  for "exploratory" semantics (temperature). */
+.ts-slider-row { display: flex; align-items: center; gap: var(--spacing-3); margin-bottom: var(--spacing-2); }
+.ts-slider-label {
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  color: var(--text-secondary);
+  width: 110px;
+  flex-shrink: 0;
+}
+.ts-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 24px;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+}
+.ts-slider::-webkit-slider-runnable-track { height: 4px; background: var(--border-default); border-radius: 2px; }
+.ts-slider::-moz-range-track { height: 4px; background: var(--border-default); border-radius: 2px; }
+.ts-slider::-moz-range-progress { height: 4px; background: var(--blue-500); border-radius: 2px; }
+.ts-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--surface-1);
+  border: 2px solid var(--blue-500);
+  box-shadow: var(--shadow-e1);
+  margin-top: -6px;
+  cursor: pointer;
+}
+.ts-slider::-moz-range-thumb {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--surface-1);
+  border: 2px solid var(--blue-500);
+  box-shadow: var(--shadow-e1);
+  cursor: pointer;
+}
+.ts-slider:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; border-radius: var(--radius-sm); }
+.ts-slider--orange::-webkit-slider-thumb { border-color: var(--orange-500); }
+.ts-slider--orange::-moz-range-thumb { border-color: var(--orange-500); }
+.ts-slider--orange::-moz-range-progress { background: var(--orange-500); }
 
-/* ── Sampling viz ── */
-.sample-output { background: #06040a; border: 1px solid #1e1020; border-radius: 8px; padding: 16px; min-height: 60px; font-size: 16px; color: #b0a0b8; line-height: 1.8; margin-top: 14px; }
-.sample-token { display: inline-block; margin: 2px; padding: 2px 6px; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 14px; transition: all 0.2s; }
-.sample-btn { background: rgba(236,72,153,0.1); border: 1px solid #ec4899; color: #ec4899; font-family: 'IBM Plex Mono', monospace; font-size: 16px; padding: 9px 18px; border-radius: 6px; cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.18s; margin-top: 12px; }
-.sample-btn:hover { background: rgba(236,72,153,0.2); }
-.sample-btn:disabled { opacity: 0.5; cursor: default; }
+.ts-slider-val {
+  font: var(--text-weight-h3) var(--text-size-h3)/1 var(--font-primary);
+  color: var(--text-primary);
+  width: 64px;
+  text-align: right;
+  flex-shrink: 0;
+}
 
-/* ── Comparison grid ── */
-.compare-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+/* Helper / insight box — neutral with optional signal tint */
+.ts-helper {
+  margin-top: var(--spacing-4);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  font: var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+}
+.ts-helper--blue   { background: var(--blue-50);   border-color: var(--blue-100); }
+.ts-helper--orange { background: var(--orange-50); border-color: var(--orange-100); }
+
+/* Action button — solid orange (on-demand CTA). Ghost variant for "Clear". */
+.sample-btn {
+  background: var(--orange-500);
+  border: 1px solid var(--orange-500);
+  color: #fff;
+  font: 600 var(--text-size-body)/1 var(--font-primary);
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+  margin-top: var(--spacing-3);
+}
+.sample-btn:hover { background: #D45C10; border-color: #D45C10; }
+.sample-btn:disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+.sample-btn--ghost {
+  background: transparent;
+  border-color: var(--border-default);
+  color: var(--text-primary);
+}
+.sample-btn--ghost:hover { background: var(--surface-2); border-color: var(--border-strong); }
+/* Chip — preset row in tabs 0 and 4 */
+.sample-chip {
+  background: transparent;
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
+}
+.sample-chip:hover { background: var(--surface-2); border-color: var(--border-strong); color: var(--text-primary); }
+.sample-chip.is-active { background: var(--text-primary); border-color: var(--text-primary); color: var(--surface-base); }
+
+/* Sample output area */
+.sample-output {
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+  min-height: 60px;
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-secondary);
+  color: var(--text-primary);
+  margin-top: var(--spacing-3);
+}
+.sample-token {
+  display: inline-block;
+  margin: 2px;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--text-size-caption);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Comparison grid (tab 3) */
+.compare-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-3); }
 @media (max-width: 600px) { .compare-grid { grid-template-columns: 1fr; } }
-.compare-card { background: #06040a; border: 1px solid #1e1020; border-radius: 10px; padding: 16px; }
-.compare-temp { font-family: 'IBM Plex Sans', sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 4px; }
-.compare-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
-.compare-output { font-size: 14px; color: #9a8a9a; line-height: 1.7; font-style: italic; border-left: 2px solid; padding-left: 10px; margin-bottom: 10px; }
-.compare-tags { display: flex; flex-wrap: wrap; gap: 5px; }
-.compare-tag { font-size: 10px; padding: 2px 7px; border-radius: 4px; border: 1px solid; letter-spacing: 0.05em; }
+.compare-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+}
+.compare-temp {
+  font: var(--text-weight-h2) var(--text-size-h2)/1.2 var(--font-primary);
+  letter-spacing: var(--text-ls-h2);
+  margin-bottom: var(--spacing-1);
+}
+.compare-label {
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  letter-spacing: 0.04em;
+  margin-bottom: var(--spacing-3);
+}
+.compare-output {
+  font: italic var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-secondary);
+  color: var(--text-secondary);
+  border-left: 2px solid;
+  padding-left: var(--spacing-2);
+  margin-bottom: var(--spacing-2);
+}
+.compare-tags { display: flex; flex-wrap: wrap; gap: var(--spacing-1); }
+.compare-tag {
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid;
+}
 
-/* ── Top-K / Top-P ── */
-.topk-visual { display: flex; gap: 6px; flex-wrap: wrap; margin: 14px 0; align-items: flex-end; }
-.topk-bar-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.topk-bar { width: 36px; border-radius: 4px 4px 0 0; transition: all 0.4s cubic-bezier(.4,0,.2,1); border: 1px solid transparent; }
-.topk-token-label { font-size: 10px; color: #7a5a6a; font-family: 'IBM Plex Mono', monospace; }
-.topk-pct-label { font-size: 9px; color: #5a4a5a; }
+/* Nucleus (top-p) bar */
+.nucleus-track {
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: 100px;
+  height: 32px;
+  overflow: hidden;
+  display: flex;
+  margin: var(--spacing-3) 0;
+}
+.nucleus-segment {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
+  color: var(--surface-base);
+  transition: width var(--duration-deliberate) var(--ease-standard);
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 0 4px;
+}
 
-.cutoff-line { width: 2px; height: 120px; background: #ec4899; border-radius: 2px; align-self: flex-start; margin-top: 4px; position: relative; }
-.cutoff-label { position: absolute; top: -18px; left: 6px; font-size: 10px; color: #ec4899; white-space: nowrap; letter-spacing: 0.06em; }
+/* Code block — mono with surface-2 fill */
+.ts-codeblock {
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--text-size-caption);
+  line-height: 1.9;
+  color: var(--text-primary);
+}
+.ts-codeblock .c-comment { color: var(--text-tertiary); }
+.ts-codeblock .c-accent  { color: var(--blue-500); }
+.ts-codeblock .c-orange  { color: var(--orange-500); }
 
-/* ── Nucleus (top-p) bar ── */
-.nucleus-track { background: #06040a; border: 1px solid #1e1020; border-radius: 100px; height: 32px; overflow: hidden; display: flex; margin: 14px 0; }
-.nucleus-segment { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; transition: width 0.5s cubic-bezier(.4,0,.2,1); overflow: hidden; white-space: nowrap; padding: 0 4px; }
+/* Use-case row (tab 3) */
+.usecase-row {
+  display: flex;
+  gap: var(--spacing-4);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  align-items: center;
+  flex-wrap: wrap;
+}
+.usecase-row .uc-name {
+  font: var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary);
+  color: var(--text-primary);
+  min-width: 140px;
+}
+.usecase-row .uc-tag {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--text-size-meta);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+}
+.usecase-row .uc-reason {
+  font: var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+  flex: 1;
+  min-width: 200px;
+}
+
+/* Trade-off two-column grid (tabs 1 & 2) */
+.tradeoff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-3); }
+@media (max-width: 600px) { .tradeoff-grid { grid-template-columns: 1fr; } }
+.tradeoff-col {
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+}
+.tradeoff-col--blue   { background: var(--blue-50);   border-color: var(--blue-100); }
+.tradeoff-col--orange { background: var(--orange-50); border-color: var(--orange-100); }
+.tradeoff-title {
+  font: var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary);
+  margin-bottom: var(--spacing-3);
+}
+.tradeoff-bullet {
+  display: flex;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-1);
+  font: var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+}
+.tradeoff-bullet .b-mark { flex-shrink: 0; }
 
 /* ── Quiz ── */
 .ts-quiz-q { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 16px; line-height: 1.4; }
@@ -140,15 +367,24 @@ const css = `
 `
 
 // ── Token vocabulary with base logits ─────────────────────────────────────────
+// Semantic palette (§5.3): rank gradient from structured (blue) → exploratory
+// (orange). Top-rank tokens are the deterministic core; tail tokens are the
+// exploratory surprise. Five colours across eight tokens — no rainbow.
+const BLUE_500   = '#3B7DD8'
+const BLUE_300   = '#8BB8E8'
+const NEUTRAL    = '#8A7E72' // matches --text-tertiary
+const ORANGE_300 = '#F5B896'
+const ORANGE_500 = '#E8641A'
+
 const BASE_TOKENS = [
-  { token: 'the',      logit: 4.2, color: '#ec4899' },
-  { token: 'a',        logit: 3.8, color: '#f97316' },
-  { token: 'beautiful',logit: 3.1, color: '#fbbf24' },
-  { token: 'dark',     logit: 2.7, color: '#818cf8' },
-  { token: 'bright',   logit: 2.4, color: '#38bdf8' },
-  { token: 'mysterious',logit:1.9, color: '#34d399' },
-  { token: 'ancient',  logit: 1.5, color: '#a78bfa' },
-  { token: 'strange',  logit: 1.1, color: '#fb7185' },
+  { token: 'the',       logit: 4.2, color: BLUE_500 },
+  { token: 'a',         logit: 3.8, color: BLUE_500 },
+  { token: 'beautiful', logit: 3.1, color: BLUE_300 },
+  { token: 'dark',      logit: 2.7, color: NEUTRAL  },
+  { token: 'bright',    logit: 2.4, color: NEUTRAL  },
+  { token: 'mysterious',logit: 1.9, color: ORANGE_300 },
+  { token: 'ancient',   logit: 1.5, color: ORANGE_500 },
+  { token: 'strange',   logit: 1.1, color: ORANGE_500 },
 ]
 
 function softmax(logits, temperature) {
@@ -194,48 +430,51 @@ function applyTopP(probs, p) {
 }
 
 // ── Comparison outputs ────────────────────────────────────────────────────────
+// Per §5.3: low temp → blue (structured / deterministic); mid → neutral; high
+// temp → orange (exploratory / on-demand). Background tints use the Prism 50
+// soft-bg overlays so dark mode picks up the rgba overlays automatically.
 const TEMP_EXAMPLES = [
   {
     temp: 0.1,
     label: 'Deterministic',
-    color: '#38bdf8',
-    border: 'rgba(56,189,248,0.3)',
-    bg: 'rgba(56,189,248,0.05)',
+    color: 'var(--blue-500)',
+    border: 'var(--blue-100)',
+    bg: 'var(--blue-50)',
     outputs: [
       'The capital of France is Paris.',
       'The capital of France is Paris.',
       'The capital of France is Paris.',
     ],
     tags: ['Predictable', 'Repetitive', 'Factual tasks'],
-    tagColor: '#38bdf8',
+    tagColor: 'var(--blue-500)',
   },
   {
     temp: 1.0,
     label: 'Balanced',
-    color: '#ec4899',
-    border: 'rgba(236,72,153,0.3)',
-    bg: 'rgba(236,72,153,0.05)',
+    color: 'var(--text-primary)',
+    border: 'var(--border-default)',
+    bg: 'var(--surface-2)',
     outputs: [
       'Paris is the beautiful capital of France.',
-      'France\'s capital city is the historic Paris.',
-      'The vibrant city of Paris serves as France\'s capital.',
+      "France's capital city is the historic Paris.",
+      "The vibrant city of Paris serves as France's capital.",
     ],
     tags: ['Varied', 'Natural', 'General use'],
-    tagColor: '#ec4899',
+    tagColor: 'var(--text-primary)',
   },
   {
     temp: 2.0,
-    label: 'Creative Chaos',
-    color: '#f97316',
-    border: 'rgba(249,115,22,0.3)',
-    bg: 'rgba(249,115,22,0.05)',
+    label: 'Creative chaos',
+    color: 'var(--orange-500)',
+    border: 'var(--orange-100)',
+    bg: 'var(--orange-50)',
     outputs: [
-      'France! Capital? Perhaps Paris dances tonight...',
-      'Paris, magnificent ancient labyrinth of strange wonders!',
+      'France! Capital? Perhaps Paris dances tonight…',
+      'Paris, magnificent ancient labyrinth of strange wonders.',
       'Strange beautiful Paris — mysterious ancient French heartbeat.',
     ],
     tags: ['Unpredictable', 'Creative', 'May hallucinate'],
-    tagColor: '#f97316',
+    tagColor: 'var(--orange-500)',
   },
 ]
 
@@ -492,28 +731,30 @@ export default function TemperatureSampling() {
       {/* ── Tab 0: Temperature ── */}
       {tab === 0 && (
         <div className="ts-panel">
-          <div className="ts-section-title">What is Temperature?</div>
-          <p className="ts-section-sub">Before sampling a token, the model produces a score (logit) for every possible next word. Temperature scales these scores before converting to probabilities. Drag the slider and watch the distribution change.</p>
+          <div className="ts-section-title">What is temperature?</div>
+          <p className="ts-section-sub">Before sampling a token, the model produces a score (logit) for every possible next word. Temperature scales these scores before converting them to probabilities. Drag the slider and watch the distribution change.</p>
 
           <div className="ts-card">
-            <div className="ts-card-title">// Token Probability Distribution</div>
+            <div className="ts-card-title">Token probability distribution</div>
             <div className="ts-slider-row">
               <span className="ts-slider-label">Temperature</span>
-              <input type="range" className="ts-slider" min={0.1} max={2.5} step={0.05}
+              <input type="range" className="ts-slider ts-slider--orange" min={0.1} max={2.5} step={0.05}
                 value={temp} onChange={e => setTemp(+e.target.value)} />
               <span className="ts-slider-val">{temp.toFixed(2)}</span>
             </div>
 
-            <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-4)', flexWrap: 'wrap' }}>
               {[
                 { val: 0.1, label: 'Deterministic' },
                 { val: 0.7, label: 'Focused' },
                 { val: 1.0, label: 'Balanced' },
                 { val: 1.8, label: 'Creative' },
               ].map(p => (
-                <button key={p.val} className={`sample-btn`}
-                  style={{ padding: '5px 12px', fontSize: 11, marginTop: 0, background: Math.abs(temp - p.val) < 0.1 ? 'rgba(236,72,153,0.2)' : 'transparent', borderColor: Math.abs(temp - p.val) < 0.1 ? '#ec4899' : '#2a1222', color: Math.abs(temp - p.val) < 0.1 ? '#ec4899' : '#7a5a6a' }}
-                  onClick={() => setTemp(p.val)}>
+                <button
+                  key={p.val}
+                  className={`sample-chip${Math.abs(temp - p.val) < 0.1 ? ' is-active' : ''}`}
+                  onClick={() => setTemp(p.val)}
+                >
                   {p.val} — {p.label}
                 </button>
               ))}
@@ -530,18 +771,18 @@ export default function TemperatureSampling() {
               return (
                 <ResponsiveContainer width="100%" height={250}>
                   <BarChart data={data} margin={{ top: 10, right: 10, bottom: 5, left: -10 }} barCategoryGap="25%">
-                    <XAxis dataKey="token" tick={{ fill: '#b0a0b8', fontSize: 12, fontFamily: 'IBM Plex Mono' }} axisLine={{ stroke: '#1e1020' }} tickLine={false} />
-                    <YAxis domain={[0, 100]} tickFormatter={v => `${v}%`} tick={{ fill: '#5a4a5a', fontSize: 11, fontFamily: 'IBM Plex Mono' }} axisLine={false} tickLine={false} width={44} />
+                    <XAxis dataKey="token" tick={{ fill: '#8A7E72', fontSize: 12, fontFamily: 'IBM Plex Mono' }} axisLine={{ stroke: '#D1C7B8' }} tickLine={false} />
+                    <YAxis domain={[0, 100]} tickFormatter={v => `${v}%`} tick={{ fill: '#8A7E72', fontSize: 11, fontFamily: 'IBM Plex Mono' }} axisLine={false} tickLine={false} width={44} />
                     <Tooltip
-                      cursor={{ fill: 'rgba(236,72,153,0.06)' }}
-                      contentStyle={{ background: '#0a080e', border: '1px solid #2a1222', borderRadius: 8, fontFamily: 'IBM Plex Mono', fontSize: 12 }}
-                      labelStyle={{ color: '#ec4899', marginBottom: 4 }}
+                      cursor={{ fill: 'rgba(59,125,216,0.08)' }}
+                      contentStyle={{ background: '#FFFFFF', border: '1px solid #D1C7B8', borderRadius: 8, fontFamily: 'IBM Plex Mono', fontSize: 12, boxShadow: '0 4px 6px rgba(0,0,0,0.07)' }}
+                      labelStyle={{ color: '#1A1714', marginBottom: 4 }}
                       formatter={val => [`${val}%`, 'Probability']}
-                      itemStyle={{ color: '#e0e8f0' }}
+                      itemStyle={{ color: '#564C44' }}
                     />
                     <Bar dataKey="prob" radius={[4, 4, 0, 0]} isAnimationActive animationDuration={400}>
                       {data.map((entry, i) => (
-                        <Cell key={i} fill={entry.color} fillOpacity={entry.isTop ? 1 : 0.4} />
+                        <Cell key={i} fill={entry.color} fillOpacity={entry.isTop ? 1 : 0.45} />
                       ))}
                     </Bar>
                   </BarChart>
@@ -549,27 +790,27 @@ export default function TemperatureSampling() {
               )
             })()}
 
-            <div style={{ marginTop: 16, padding: '10px 14px', background: 'rgba(236,72,153,0.06)', border: '1px solid rgba(236,72,153,0.2)', borderRadius: 8, fontSize: 13, color: '#b08090', lineHeight: 1.7 }}>
-              {temp < 0.3 && '🧊 Very low temperature: one token dominates. Output is nearly deterministic.'}
-              {temp >= 0.3 && temp < 0.8 && '🎯 Low-medium temperature: focused distribution. Top tokens still dominate.'}
-              {temp >= 0.8 && temp < 1.3 && '⚖️ Balanced temperature: reasonable spread. Good general-purpose setting.'}
-              {temp >= 1.3 && temp < 1.8 && '🎨 High temperature: flattening distribution. More surprise, more variety.'}
-              {temp >= 1.8 && '🌪️ Very high temperature: nearly uniform. Tokens get equal chance — expect chaos!'}
+            <div className={`ts-helper ts-helper--${temp < 0.8 ? 'blue' : temp > 1.3 ? 'orange' : ''}`}>
+              {temp < 0.3 && 'Very low temperature: one token dominates. Output is nearly deterministic.'}
+              {temp >= 0.3 && temp < 0.8 && 'Low-to-medium temperature: focused distribution. Top tokens still dominate.'}
+              {temp >= 0.8 && temp < 1.3 && 'Balanced temperature: reasonable spread. A good general-purpose setting.'}
+              {temp >= 1.3 && temp < 1.8 && 'High temperature: the distribution is flattening. More surprise, more variety.'}
+              {temp >= 1.8 && 'Very high temperature: nearly uniform. Tokens get roughly equal chance — expect chaos.'}
             </div>
           </div>
 
           <div className="ts-card">
-            <div className="ts-card-title">// The Math Behind Temperature</div>
-            <p style={{ fontSize: 13, color: '#7a5a6a', lineHeight: 1.8, marginBottom: 14 }}>
-              The model outputs raw scores called <span style={{ color: '#ec4899' }}>logits</span>. Temperature divides these before the softmax function converts them to probabilities.
+            <div className="ts-card-title">The math behind temperature</div>
+            <p style={{ font: 'var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)', marginBottom: 'var(--spacing-4)' }}>
+              The model outputs raw scores called <span className="prism-mono" style={{ color: 'var(--blue-500)' }}>logits</span>. Temperature divides these before the softmax function converts them to probabilities.
             </p>
-            <div style={{ background: '#06040a', border: '1px solid rgba(236,72,153,0.2)', borderRadius: 8, padding: 16, fontFamily: "'IBM Plex Mono',monospace", fontSize: 13, lineHeight: 2.2 }}>
-              <div style={{ color: '#5a4a5a' }}>// Step 1: Scale logits by temperature</div>
-              <div style={{ color: '#b0a0b8' }}>scaled_logit = logit / <span style={{ color: '#ec4899' }}>temperature</span></div>
-              <div style={{ color: '#5a4a5a', marginTop: 8 }}>// Step 2: Convert to probabilities via softmax</div>
-              <div style={{ color: '#b0a0b8' }}>prob(token) = <span style={{ color: '#34d399' }}>exp(scaled_logit)</span> / <span style={{ color: '#38bdf8' }}>Σ exp(all scaled_logits)</span></div>
-              <div style={{ color: '#5a4a5a', marginTop: 8 }}>// Low temp → large differences amplified → one token wins</div>
-              <div style={{ color: '#5a4a5a' }}>// High temp → differences shrink → flatter distribution</div>
+            <div className="ts-codeblock">
+              <div className="c-comment">// Step 1 — scale logits by temperature</div>
+              <div>scaled_logit = logit / <span className="c-accent">temperature</span></div>
+              <div className="c-comment" style={{ marginTop: 'var(--spacing-2)' }}>// Step 2 — convert to probabilities via softmax</div>
+              <div>prob(token) = <span className="c-accent">exp(scaled_logit)</span> / <span className="c-orange">Σ exp(all scaled_logits)</span></div>
+              <div className="c-comment" style={{ marginTop: 'var(--spacing-2)' }}>// Low temp → large differences amplified → one token wins</div>
+              <div className="c-comment">// High temp → differences shrink → flatter distribution</div>
             </div>
           </div>
         </div>
@@ -578,22 +819,22 @@ export default function TemperatureSampling() {
       {/* ── Tab 1: Top-K ── */}
       {tab === 1 && (
         <div className="ts-panel">
-          <div className="ts-section-title">Top-K Sampling</div>
-          <p className="ts-section-sub">Top-K keeps only the K most probable tokens at each step, zeroing out the rest. This prevents the model from ever picking very unlikely tokens — reducing incoherence while keeping variety.</p>
+          <div className="ts-section-title">Top-K sampling</div>
+          <p className="ts-section-sub">Top-K keeps only the K most probable tokens at each step, zeroing out the rest. This prevents the model from picking very unlikely tokens — reducing incoherence while keeping variety.</p>
 
           <div className="ts-card">
-            <div className="ts-card-title">// Top-K Cutoff Visualizer</div>
+            <div className="ts-card-title">Top-K cutoff visualiser</div>
             <div className="ts-slider-row">
-              <span className="ts-slider-label" style={{ color: '#34d399' }}>K value</span>
-              <input type="range" className="ts-slider" style={{ accentColor: '#34d399' }} min={1} max={8} step={1}
+              <span className="ts-slider-label">K value</span>
+              <input type="range" className="ts-slider" min={1} max={8} step={1}
                 value={topK} onChange={e => setTopK(+e.target.value)} />
-              <span className="ts-slider-val" style={{ color: '#34d399' }}>K={topK}</span>
+              <span className="ts-slider-val">K={topK}</span>
             </div>
             <div className="ts-slider-row">
-              <span className="ts-slider-label" style={{ color: '#ec4899' }}>Temperature</span>
-              <input type="range" className="ts-slider" style={{ accentColor: '#ec4899' }} min={0.1} max={2.0} step={0.05}
+              <span className="ts-slider-label">Temperature</span>
+              <input type="range" className="ts-slider ts-slider--orange" min={0.1} max={2.0} step={0.05}
                 value={topKTemp} onChange={e => setTopKTemp(+e.target.value)} />
-              <span className="ts-slider-val" style={{ color: '#ec4899' }}>{topKTemp.toFixed(1)}</span>
+              <span className="ts-slider-val">{topKTemp.toFixed(1)}</span>
             </div>
 
             {(() => {
@@ -608,18 +849,18 @@ export default function TemperatureSampling() {
               return (
                 <ResponsiveContainer width="100%" height={220}>
                   <BarChart data={data} margin={{ top: 10, right: 10, bottom: 5, left: -10 }} barCategoryGap="25%">
-                    <XAxis dataKey="token" tick={{ fill: '#b0a0b8', fontSize: 12, fontFamily: 'IBM Plex Mono' }} axisLine={{ stroke: '#1e1020' }} tickLine={false} />
-                    <YAxis domain={[0, 100]} tickFormatter={v => `${v}%`} tick={{ fill: '#5a4a5a', fontSize: 11, fontFamily: 'IBM Plex Mono' }} axisLine={false} tickLine={false} width={44} />
+                    <XAxis dataKey="token" tick={{ fill: '#8A7E72', fontSize: 12, fontFamily: 'IBM Plex Mono' }} axisLine={{ stroke: '#D1C7B8' }} tickLine={false} />
+                    <YAxis domain={[0, 100]} tickFormatter={v => `${v}%`} tick={{ fill: '#8A7E72', fontSize: 11, fontFamily: 'IBM Plex Mono' }} axisLine={false} tickLine={false} width={44} />
                     <Tooltip
-                      cursor={{ fill: 'rgba(236,72,153,0.06)' }}
-                      contentStyle={{ background: '#0a080e', border: '1px solid #2a1222', borderRadius: 8, fontFamily: 'IBM Plex Mono', fontSize: 12 }}
-                      labelStyle={{ color: '#ec4899', marginBottom: 4 }}
-                      formatter={(val, _n, props) => [`${val}%`, props.payload.inTopK ? '✓ In top-K' : '✗ Excluded']}
-                      itemStyle={{ color: '#e0e8f0' }}
+                      cursor={{ fill: 'rgba(59,125,216,0.08)' }}
+                      contentStyle={{ background: '#FFFFFF', border: '1px solid #D1C7B8', borderRadius: 8, fontFamily: 'IBM Plex Mono', fontSize: 12, boxShadow: '0 4px 6px rgba(0,0,0,0.07)' }}
+                      labelStyle={{ color: '#1A1714', marginBottom: 4 }}
+                      formatter={(val, _n, props) => [`${val}%`, props.payload.inTopK ? 'In top-K' : 'Excluded']}
+                      itemStyle={{ color: '#564C44' }}
                     />
                     <Bar dataKey="prob" radius={[4, 4, 0, 0]} isAnimationActive animationDuration={350}>
                       {data.map((entry, i) => (
-                        <Cell key={i} fill={entry.color} fillOpacity={entry.inTopK ? 1 : 0.15} />
+                        <Cell key={i} fill={entry.color} fillOpacity={entry.inTopK ? 1 : 0.18} />
                       ))}
                     </Bar>
                   </BarChart>
@@ -627,34 +868,33 @@ export default function TemperatureSampling() {
               )
             })()}
 
-            <div style={{ display: 'flex', gap: 16, marginTop: 8, flexWrap: 'wrap', fontSize: 13 }}>
-              <div style={{ color: '#ec4899' }}>
-                ✓ <strong>In top-{topK}:</strong> {BASE_TOKENS.filter((_, i) => {
-                  const sorted = [...topKBaseProbs].map((p, idx) => ({ p, idx })).sort((a, b) => b.p - a.p)
-                  return sorted.findIndex(s => s.idx === i) < topK
-                }).map(t => `"${t.token}"`).join(', ')}
-              </div>
+            <div style={{ marginTop: 'var(--spacing-2)', font: 'var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)' }}>
+              <strong style={{ color: 'var(--blue-500)' }}>In top-{topK}:</strong>{' '}
+              {BASE_TOKENS.filter((_, i) => {
+                const sorted = [...topKBaseProbs].map((p, idx) => ({ p, idx })).sort((a, b) => b.p - a.p)
+                return sorted.findIndex(s => s.idx === i) < topK
+              }).map(t => `"${t.token}"`).join(', ')}
             </div>
-            <div style={{ marginTop: 12, padding: '10px 14px', background: 'rgba(236,72,153,0.06)', border: '1px solid rgba(236,72,153,0.2)', borderRadius: 8, fontSize: 13, color: '#b08090', lineHeight: 1.7 }}>
-              {topK === 1 && '🎯 K=1 = greedy decoding. Always picks the single most likely token. Deterministic.'}
-              {topK === 2 && '⚡ K=2: Very focused. Only the top 2 tokens compete.'}
-              {topK >= 3 && topK <= 5 && `🎯 K=${topK}: Good balance — likely tokens only, no random noise from tail.`}
-              {topK > 5 && `🌊 K=${topK}: Wide selection. The long tail of improbable tokens is still excluded.`}
+            <div className="ts-helper ts-helper--blue">
+              {topK === 1 && 'K=1 is greedy decoding — always picks the single most likely token. Deterministic.'}
+              {topK === 2 && 'K=2 is very focused — only the top two tokens compete.'}
+              {topK >= 3 && topK <= 5 && `K=${topK} is a good balance — likely tokens only, no random noise from the tail.`}
+              {topK > 5 && `K=${topK} is a wide selection — the long tail of improbable tokens is still excluded.`}
             </div>
           </div>
 
           <div className="ts-card">
-            <div className="ts-card-title">// Top-K Trade-offs</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="ts-card-title">Top-K trade-offs</div>
+            <div className="tradeoff-grid">
               {[
-                { label: 'Low K (1–5)', color: '#38bdf8', bg: 'rgba(56,189,248,0.05)', border: 'rgba(56,189,248,0.2)', points: ['High consistency', 'Factual tasks, code generation', 'Risk: repetitive, less creative', 'Good for: Q&A, summarization'] },
-                { label: 'High K (20–50)', color: '#f97316', bg: 'rgba(249,115,22,0.05)', border: 'rgba(249,115,22,0.2)', points: ['More variety and surprise', 'Creative writing, brainstorming', 'Risk: occasional incoherence', 'Good for: story generation'] },
+                { label: 'Low K (1–5)', mod: 'blue',   tint: 'var(--blue-500)',   points: ['High consistency', 'Factual tasks, code generation', 'Risk: repetitive, less creative', 'Good for Q&A and summarisation'] },
+                { label: 'High K (20–50)', mod: 'orange', tint: 'var(--orange-500)', points: ['More variety and surprise', 'Creative writing, brainstorming', 'Risk: occasional incoherence', 'Good for story generation'] },
               ].map(col => (
-                <div key={col.label} style={{ background: col.bg, border: `1px solid ${col.border}`, borderRadius: 10, padding: 16 }}>
-                  <div style={{ fontFamily: "'IBM Plex Sans',sans-serif", fontWeight: 700, fontSize: 13, color: col.color, marginBottom: 10 }}>{col.label}</div>
+                <div key={col.label} className={`tradeoff-col tradeoff-col--${col.mod}`}>
+                  <div className="tradeoff-title" style={{ color: col.tint }}>{col.label}</div>
                   {col.points.map(p => (
-                    <div key={p} style={{ display: 'flex', gap: 8, marginBottom: 6, fontSize: 12, color: '#7a5a6a', lineHeight: 1.5 }}>
-                      <span style={{ color: col.color, flexShrink: 0 }}>▸</span>{p}
+                    <div key={p} className="tradeoff-bullet">
+                      <span className="b-mark" style={{ color: col.tint }}>▸</span>{p}
                     </div>
                   ))}
                 </div>
@@ -667,11 +907,11 @@ export default function TemperatureSampling() {
       {/* ── Tab 2: Top-P ── */}
       {tab === 2 && (
         <div className="ts-panel">
-          <div className="ts-section-title">Top-P (Nucleus) Sampling</div>
+          <div className="ts-section-title">Top-P (nucleus) sampling</div>
           <p className="ts-section-sub">Instead of a fixed token count, Top-P dynamically selects the smallest group of tokens whose cumulative probability exceeds P. The nucleus adapts — smaller when one token dominates, larger when the distribution is flat.</p>
 
           <div className="ts-card">
-            <div className="ts-card-title">// Nucleus Size Visualizer</div>
+            <div className="ts-card-title">Nucleus size visualiser</div>
             <div className="ts-slider-row">
               <span className="ts-slider-label">Top-P</span>
               <input type="range" className="ts-slider" min={0.05} max={1.0} step={0.01}
@@ -680,20 +920,22 @@ export default function TemperatureSampling() {
             </div>
             <div className="ts-slider-row">
               <span className="ts-slider-label">Temperature</span>
-              <input type="range" className="ts-slider" min={0.1} max={2.0} step={0.05}
+              <input type="range" className="ts-slider ts-slider--orange" min={0.1} max={2.0} step={0.05}
                 value={topPTemp} onChange={e => setTopPTemp(+e.target.value)} />
               <span className="ts-slider-val">{topPTemp.toFixed(1)}</span>
             </div>
 
-            <div style={{ fontSize: 12, color: '#5a4a5a', marginBottom: 10 }}>Tokens sorted by probability — shaded tokens form the nucleus:</div>
+            <div style={{ font: 'var(--text-weight-body) var(--text-size-caption)/1.4 var(--font-primary)', color: 'var(--text-tertiary)', marginBottom: 'var(--spacing-2)' }}>
+              Tokens sorted by probability — shaded tokens form the nucleus.
+            </div>
             <div className="nucleus-track">
               {nucleusItems.map((item, i) => (
                 <div key={i} className="nucleus-segment"
                   style={{
                     width: `${item.p * 100}%`,
-                    background: item.inNucleus ? `${item.color}cc` : '#1e1020',
-                    color: item.inNucleus ? '#fff' : '#3a2a3a',
-                    borderRight: i < nucleusItems.length - 1 ? '1px solid rgba(0,0,0,0.3)' : 'none',
+                    background: item.inNucleus ? item.color : 'var(--surface-3)',
+                    color: item.inNucleus ? '#fff' : 'var(--text-tertiary)',
+                    borderRight: i < nucleusItems.length - 1 ? '1px solid rgba(0,0,0,0.15)' : 'none',
                     minWidth: item.p > 0.03 ? undefined : 0,
                   }}>
                   {item.p > 0.06 ? `"${item.token}"` : ''}
@@ -701,41 +943,35 @@ export default function TemperatureSampling() {
               ))}
             </div>
 
-            <div style={{ display: 'flex', gap: 12, marginTop: 10, flexWrap: 'wrap' }}>
-              <div style={{ fontSize: 13, color: '#ec4899' }}>
-                Nucleus size: <strong>{nucleusItems.filter(i => i.inNucleus).length}</strong> tokens
-              </div>
-              <div style={{ fontSize: 13, color: '#7a5a6a' }}>
-                Covers: <strong style={{ color: '#34d399' }}>
-                  {(nucleusItems.filter(i => i.inNucleus).reduce((s, i) => s + i.p, 0) * 100).toFixed(1)}%
-                </strong> of probability mass
-              </div>
+            <div style={{ display: 'flex', gap: 'var(--spacing-3)', marginTop: 'var(--spacing-2)', flexWrap: 'wrap', font: 'var(--text-weight-body) var(--text-size-caption)/1.4 var(--font-primary)', color: 'var(--text-secondary)' }}>
+              <div>Nucleus size: <strong style={{ color: 'var(--orange-500)' }}>{nucleusItems.filter(i => i.inNucleus).length}</strong> tokens</div>
+              <div>Covers: <strong style={{ color: 'var(--blue-500)' }}>{(nucleusItems.filter(i => i.inNucleus).reduce((s, i) => s + i.p, 0) * 100).toFixed(1)}%</strong> of probability mass</div>
             </div>
 
-            <div style={{ marginTop: 12, padding: '10px 14px', background: 'rgba(236,72,153,0.06)', border: '1px solid rgba(236,72,153,0.2)', borderRadius: 8, fontSize: 13, color: '#b08090', lineHeight: 1.7 }}>
-              💡 Notice: when temperature is high, the nucleus expands (flat distribution needs more tokens to reach P%). When temperature is low, it shrinks (one token covers most probability). This adaptability is Top-P's key advantage over Top-K.
+            <div className="ts-helper ts-helper--blue">
+              When temperature is high, the nucleus expands — a flat distribution needs more tokens to reach P%. When temperature is low, it shrinks — one token already covers most of the probability. This adaptability is Top-P's key advantage over Top-K.
             </div>
           </div>
 
           <div className="ts-card">
-            <div className="ts-card-title">// Top-K vs Top-P</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="ts-card-title">Top-K vs Top-P</div>
+            <div className="tradeoff-grid">
               {[
-                { label: 'Top-K', color: '#38bdf8', bg: 'rgba(56,189,248,0.05)', border: 'rgba(56,189,248,0.2)', points: ['Fixed number of tokens every step', 'Simple to understand and tune', 'K=50 always means 50 candidates', 'Can be too broad or too narrow'] },
-                { label: 'Top-P (Nucleus)', color: '#ec4899', bg: 'rgba(236,72,153,0.05)', border: 'rgba(236,72,153,0.2)', points: ['Adapts to the distribution shape', 'P=0.9 = 90% of probability mass', 'Fewer tokens when one dominates', 'More robust across different prompts'] },
+                { label: 'Top-K',           mod: 'blue',   tint: 'var(--blue-500)',   points: ['Fixed token count every step', 'Simple to understand and tune', 'K=50 always means 50 candidates', 'Can be too broad or too narrow'] },
+                { label: 'Top-P (nucleus)', mod: 'orange', tint: 'var(--orange-500)', points: ['Adapts to the distribution shape', 'P=0.9 means 90% of probability mass', 'Fewer tokens when one dominates', 'More robust across different prompts'] },
               ].map(col => (
-                <div key={col.label} style={{ background: col.bg, border: `1px solid ${col.border}`, borderRadius: 10, padding: 16 }}>
-                  <div style={{ fontFamily: "'IBM Plex Sans',sans-serif", fontWeight: 700, fontSize: 13, color: col.color, marginBottom: 10 }}>{col.label}</div>
+                <div key={col.label} className={`tradeoff-col tradeoff-col--${col.mod}`}>
+                  <div className="tradeoff-title" style={{ color: col.tint }}>{col.label}</div>
                   {col.points.map(p => (
-                    <div key={p} style={{ display: 'flex', gap: 8, marginBottom: 6, fontSize: 12, color: '#7a5a6a', lineHeight: 1.5 }}>
-                      <span style={{ color: col.color, flexShrink: 0 }}>▸</span>{p}
+                    <div key={p} className="tradeoff-bullet">
+                      <span className="b-mark" style={{ color: col.tint }}>▸</span>{p}
                     </div>
                   ))}
                 </div>
               ))}
             </div>
-            <div style={{ marginTop: 12, padding: '10px 14px', background: 'rgba(52,211,153,0.06)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: 8, fontSize: 13, color: '#60a880', lineHeight: 1.7 }}>
-              💡 In practice, most APIs combine both: <strong style={{ color: '#34d399' }}>Temperature + Top-P + Top-K</strong> are applied together. A common production setting: temp=0.7, top_p=0.9, top_k=40.
+            <div className="ts-helper">
+              In practice, most APIs combine all three: <strong style={{ color: 'var(--text-primary)' }}>temperature, Top-P, and Top-K</strong> apply together. A common production setting is temp=0.7, top_p=0.9, top_k=40.
             </div>
           </div>
         </div>
@@ -744,11 +980,11 @@ export default function TemperatureSampling() {
       {/* ── Tab 3: Comparison ── */}
       {tab === 3 && (
         <div className="ts-panel">
-          <div className="ts-section-title">Temperature in Practice</div>
-          <p className="ts-section-sub">The same prompt produces very different outputs at different temperatures. Here's the same question — "What is the capital of France?" — sampled three times at each setting.</p>
+          <div className="ts-section-title">Temperature in practice</div>
+          <p className="ts-section-sub">The same prompt produces very different outputs at different temperatures. Here is the same question — "What is the capital of France?" — sampled three times at each setting.</p>
 
           <div className="ts-card">
-            <div className="ts-card-title">// Same Prompt, Different Temperatures</div>
+            <div className="ts-card-title">Same prompt, different temperatures</div>
             <div className="compare-grid">
               {TEMP_EXAMPLES.map(ex => (
                 <div key={ex.temp} className="compare-card" style={{ borderColor: ex.border, background: ex.bg }}>
@@ -759,7 +995,7 @@ export default function TemperatureSampling() {
                   ))}
                   <div className="compare-tags">
                     {ex.tags.map(tag => (
-                      <span key={tag} className="compare-tag" style={{ color: ex.tagColor, background: `${ex.tagColor}12`, borderColor: `${ex.tagColor}30` }}>{tag}</span>
+                      <span key={tag} className="compare-tag" style={{ color: ex.tagColor, background: ex.bg, borderColor: ex.border }}>{tag}</span>
                     ))}
                   </div>
                 </div>
@@ -768,23 +1004,23 @@ export default function TemperatureSampling() {
           </div>
 
           <div className="ts-card">
-            <div className="ts-card-title">// Recommended Settings by Use Case</div>
-            <div style={{ display: 'grid', gap: 10 }}>
+            <div className="ts-card-title">Recommended settings by use case</div>
+            <div style={{ display: 'grid', gap: 'var(--spacing-2)' }}>
               {[
-                { useCase: 'Code generation', temp: '0.1–0.3', topP: '0.9', topK: '10', color: '#38bdf8', reason: 'Correctness matters — low variance, no hallucinated syntax' },
-                { useCase: 'Q&A / Factual', temp: '0.1–0.5', topP: '0.9', topK: '20', color: '#34d399', reason: 'Accurate answers, slightly varied phrasing' },
-                { useCase: 'Chat / Conversation', temp: '0.7–1.0', topP: '0.9', topK: '40', color: '#ec4899', reason: 'Natural, human-like responses with variety' },
-                { useCase: 'Creative writing', temp: '1.0–1.5', topP: '0.95', topK: '50', color: '#f97316', reason: 'Imagination and surprise — some incoherence is acceptable' },
-                { useCase: 'Brainstorming', temp: '1.2–1.8', topP: '0.98', topK: '60', color: '#fbbf24', reason: 'Diverse ideas — diversity over coherence' },
+                { useCase: 'Code generation',     temp: '0.1–0.3', topP: '0.9',  topK: '10', tint: 'var(--blue-500)',   reason: 'Correctness matters — low variance, no hallucinated syntax.' },
+                { useCase: 'Q&A and factual',     temp: '0.1–0.5', topP: '0.9',  topK: '20', tint: 'var(--blue-500)',   reason: 'Accurate answers with slightly varied phrasing.' },
+                { useCase: 'Chat / conversation', temp: '0.7–1.0', topP: '0.9',  topK: '40', tint: 'var(--text-primary)', reason: 'Natural, human-like responses with variety.' },
+                { useCase: 'Creative writing',    temp: '1.0–1.5', topP: '0.95', topK: '50', tint: 'var(--orange-500)', reason: 'Imagination and surprise — some incoherence is acceptable.' },
+                { useCase: 'Brainstorming',       temp: '1.2–1.8', topP: '0.98', topK: '60', tint: 'var(--orange-500)', reason: 'Diverse ideas — diversity over coherence.' },
               ].map(row => (
-                <div key={row.useCase} style={{ display: 'flex', gap: 14, padding: '10px 14px', background: '#06040a', borderRadius: 8, border: `1px solid ${row.color}20`, alignItems: 'center', flexWrap: 'wrap' }}>
-                  <div style={{ fontFamily: "'IBM Plex Sans',sans-serif", fontWeight: 700, fontSize: 13, color: row.color, minWidth: 140 }}>{row.useCase}</div>
-                  <div style={{ display: 'flex', gap: 8 }}>
+                <div key={row.useCase} className="usecase-row">
+                  <div className="uc-name" style={{ color: row.tint }}>{row.useCase}</div>
+                  <div style={{ display: 'flex', gap: 'var(--spacing-1)' }}>
                     {[['T', row.temp], ['P', row.topP], ['K', row.topK]].map(([label, val]) => (
-                      <span key={label} style={{ background: `${row.color}12`, border: `1px solid ${row.color}25`, color: row.color, borderRadius: 4, padding: '2px 8px', fontSize: 11, fontFamily: "'IBM Plex Mono',monospace" }}>{label}={val}</span>
+                      <span key={label} className="uc-tag">{label}={val}</span>
                     ))}
                   </div>
-                  <div style={{ fontSize: 12, color: '#7a5a6a', flex: 1, minWidth: 200 }}>{row.reason}</div>
+                  <div className="uc-reason">{row.reason}</div>
                 </div>
               ))}
             </div>
@@ -795,19 +1031,21 @@ export default function TemperatureSampling() {
       {/* ── Tab 4: Live Sampler ── */}
       {tab === 4 && (
         <div className="ts-panel">
-          <div className="ts-section-title">Live Token Sampler</div>
-          <p className="ts-section-sub">Adjust temperature, Top-K, and Top-P, then watch the model sample tokens one by one. Each token color reflects how likely it was — brighter means more probable.</p>
+          <div className="ts-section-title">Live token sampler</div>
+          <p className="ts-section-sub">Adjust temperature, Top-K, and Top-P, then watch the model sample tokens one by one. Each token's tint reflects how likely it was — saturation rises with probability.</p>
 
           <div className="ts-card">
-            <div className="ts-card-title">// Configure & Sample</div>
+            <div className="ts-card-title">Configure and sample</div>
 
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 12, color: '#7a5a6a', marginBottom: 8 }}>Starting prompt:</div>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <div style={{ marginBottom: 'var(--spacing-4)' }}>
+              <div style={{ font: 'var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary)', color: 'var(--text-secondary)', marginBottom: 'var(--spacing-2)' }}>Starting prompt</div>
+              <div style={{ display: 'flex', gap: 'var(--spacing-2)', flexWrap: 'wrap' }}>
                 {PROMPTS.map((p, i) => (
-                  <button key={i} className="sample-btn"
-                    style={{ padding: '5px 12px', fontSize: 11, marginTop: 0, background: promptIdx === i ? 'rgba(236,72,153,0.2)' : 'transparent', borderColor: promptIdx === i ? '#ec4899' : '#2a1222', color: promptIdx === i ? '#ec4899' : '#7a5a6a' }}
-                    onClick={() => { setPromptIdx(i); setSampledTokens([]) }}>
+                  <button
+                    key={i}
+                    className={`sample-chip${promptIdx === i ? ' is-active' : ''}`}
+                    onClick={() => { setPromptIdx(i); setSampledTokens([]) }}
+                  >
                     "{p}"
                   </button>
                 ))}
@@ -816,7 +1054,7 @@ export default function TemperatureSampling() {
 
             <div className="ts-slider-row">
               <span className="ts-slider-label">Temperature</span>
-              <input type="range" className="ts-slider" min={0.1} max={2.5} step={0.05}
+              <input type="range" className="ts-slider ts-slider--orange" min={0.1} max={2.5} step={0.05}
                 value={samplerTemp} onChange={e => setSamplerTemp(+e.target.value)} />
               <span className="ts-slider-val">{samplerTemp.toFixed(1)}</span>
             </div>
@@ -834,7 +1072,7 @@ export default function TemperatureSampling() {
             </div>
 
             <div className="sample-output">
-              <span style={{ color: '#5a4a5a' }}>{PROMPTS[promptIdx]} </span>
+              <span style={{ color: 'var(--text-tertiary)' }}>{PROMPTS[promptIdx]} </span>
               {sampledTokens.map((t, i) => (
                 <span key={i} className="sample-token"
                   style={{
@@ -845,22 +1083,21 @@ export default function TemperatureSampling() {
                   {t.token}
                 </span>
               ))}
-              {sampling && <span style={{ color: '#ec4899', animation: 'none' }}>▌</span>}
+              {sampling && <span style={{ color: 'var(--orange-500)' }}>▌</span>}
             </div>
 
-            <div style={{ display: 'flex', gap: 10, marginTop: 12, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 'var(--spacing-2)', marginTop: 'var(--spacing-3)', flexWrap: 'wrap' }}>
               <button className="sample-btn" onClick={() => { setSampledTokens([]); runSampler() }} disabled={sampling}>
-                {sampling ? '⏳ Sampling...' : '▶ Sample Tokens'}
+                {sampling ? 'Sampling…' : 'Sample tokens'}
               </button>
-              <button className="sample-btn" style={{ background: 'transparent', borderColor: '#2a1222', color: '#7a5a6a' }}
-                onClick={() => setSampledTokens([])}>
-                ↺ Clear
+              <button className="sample-btn sample-btn--ghost" onClick={() => setSampledTokens([])}>
+                Clear
               </button>
             </div>
 
             {sampledTokens.length > 0 && (
-              <div style={{ marginTop: 12, fontSize: 12, color: '#5a4a5a' }}>
-                Token colors indicate probability: <span style={{ color: '#ec4899' }}>bright = likely</span>, <span style={{ color: '#5a4a5a' }}>dim = less likely</span>
+              <div style={{ marginTop: 'var(--spacing-3)', font: 'var(--text-weight-body) var(--text-size-caption)/1.4 var(--font-primary)', color: 'var(--text-tertiary)' }}>
+                Token tint reflects probability — brighter is more likely, dimmer is less likely.
               </div>
             )}
           </div>
