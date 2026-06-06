@@ -1,218 +1,756 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import NavBar from '../components/NavBar.jsx'
+import {
+  ChatCircleIcon, HashIcon, MagnifyingGlassIcon, FileTextIcon,
+  PuzzlePieceIcon, SparkleIcon, RobotIcon, DatabaseIcon,
+  BuildingsIcon, BooksIcon, WrenchIcon,
+  EnvelopeSimpleIcon, NoteIcon, GlobeIcon, ChartBarIcon, BookOpenIcon, HeadphonesIcon,
+  CalendarBlankIcon, TargetIcon, LockKeyIcon, LightningIcon,
+  CheckIcon, ArrowRightIcon, ArrowCounterClockwiseIcon,
+} from '@phosphor-icons/react'
+
+const ICON_BY_KEY = {
+  chat: ChatCircleIcon, hash: HashIcon, search: MagnifyingGlassIcon, file: FileTextIcon,
+  puzzle: PuzzlePieceIcon, sparkle: SparkleIcon, robot: RobotIcon, database: DatabaseIcon,
+  buildings: BuildingsIcon, books: BooksIcon, wrench: WrenchIcon,
+  envelope: EnvelopeSimpleIcon, note: NoteIcon, globe: GlobeIcon, chartbar: ChartBarIcon,
+  bookopen: BookOpenIcon, headphones: HeadphonesIcon,
+  calendar: CalendarBlankIcon, target: TargetIcon, lock: LockKeyIcon, lightning: LightningIcon,
+}
+const IconFor = ({ name, ...rest }) => {
+  const C = ICON_BY_KEY[name]
+  return C ? <C {...rest} /> : null
+}
 
 const css = `
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
+/* ── RAG migrated to Prism tokens.
+ *  Per §5.3 — user input + retrieved context = orange; embed / search /
+ *  LLM steps = blue; grounded answer = success; comparison ratings
+ *  flow through the feedback palette. ───────────────────────── */
 
-.rg-root { min-height: 100vh; background: #050810; color: #e0e8f0; font-family: 'IBM Plex Mono', monospace; overflow-x: hidden; }
+.rg-root { min-height: 100vh; background: var(--surface-base); color: var(--text-primary); overflow-x: hidden; }
 
-.rg-hero { text-align: center; padding: 48px 24px 28px; position: relative; }
-.rg-hero::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 700px; height: 320px; background: radial-gradient(ellipse at 50% 0%, rgba(6,182,212,0.09) 0%, transparent 70%); pointer-events: none; }
-.rg-eyebrow { font-size: 16px; letter-spacing: 0.22em; color: #06b6d4; text-transform: uppercase; margin-bottom: 14px; }
-.rg-title { font-family: 'IBM Plex Sans', sans-serif; font-size: clamp(28px, 5vw, 52px); font-weight: 800; letter-spacing: -0.02em; color: #fff; line-height: 1.05; margin-bottom: 12px; }
-.rg-title span { color: #06b6d4; }
-.rg-subtitle { font-size: 16px; color: #3a6a7a; max-width: 540px; margin: 0 auto 32px; line-height: 1.8; }
+/* Hero — obsidian + refracted light (§5.2) */
+.rg-hero {
+  position: relative;
+  text-align: center;
+  padding: var(--spacing-7) var(--spacing-4) var(--spacing-6);
+  background: var(--text-primary);
+  color: var(--surface-base);
+  overflow: hidden;
+}
+:root[data-theme="dark"] .rg-hero {
+  background: var(--surface-base);
+  color: var(--text-primary);
+}
+.rg-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-refracted-b);
+  opacity: var(--refracted-opacity-standard);
+  pointer-events: none;
+}
+.rg-hero > * { position: relative; }
+.rg-eyebrow {
+  font: var(--text-weight-label) var(--text-size-caption)/var(--text-lh-caption) var(--font-primary);
+  letter-spacing: 0.08em;
+  color: var(--blue-300);
+  margin-bottom: var(--spacing-3);
+}
+.rg-title {
+  font: var(--text-weight-h1) var(--text-size-h1)/var(--text-lh-h1) var(--font-primary);
+  letter-spacing: var(--text-ls-h1);
+  margin-bottom: var(--spacing-3);
+}
+.rg-subtitle {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  max-width: 540px;
+  margin: 0 auto;
+  opacity: 0.85;
+}
 
-.rg-tabs { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; padding: 0 16px 32px; }
-.rg-tab { background: transparent; border: 1px solid #0a2030; color: #3a6a7a; font-family: 'IBM Plex Mono', monospace; font-size: 16px; letter-spacing: 0.1em; padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: all 0.18s; text-transform: uppercase; }
-.rg-tab:hover { border-color: #06b6d4; color: #06b6d4; }
-.rg-tab.active { background: rgba(6,182,212,0.1); border-color: #06b6d4; color: #06b6d4; }
+.rg-tabs-row {
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-5) var(--spacing-4) var(--spacing-6);
+  background: var(--surface-base);
+}
 
-.rg-panel { max-width: 920px; margin: 0 auto; padding: 0 20px 80px; }
+.rg-panel { max-width: 920px; margin: 0 auto; padding: 0 var(--spacing-4) var(--spacing-7); }
 
-.rg-section-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 8px; }
-.rg-section-sub { font-size: 16px; color: #3a6a7a; line-height: 1.7; margin-bottom: 24px; }
+.rg-section-title {
+  font: var(--text-weight-h2) var(--text-size-h2)/var(--text-lh-h2) var(--font-primary);
+  letter-spacing: var(--text-ls-h2);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-2);
+}
+.rg-section-sub {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-6);
+  max-width: 720px;
+}
 
-.rg-card { background: rgba(6,182,212,0.04); border: 1px solid rgba(6,182,212,0.15); border-radius: 14px; padding: 20px 24px; margin-bottom: 16px; }
-.rg-card-plain { background: rgba(255,255,255,0.02); border: 1px solid #0d1e28; border-radius: 14px; padding: 20px 24px; margin-bottom: 16px; }
+.rg-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-e2);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-5);
+  margin-bottom: var(--spacing-4);
+}
+.rg-card-plain {
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-5);
+  margin-bottom: var(--spacing-4);
+}
 
-/* Pipeline tab */
-.rg-pipeline-step { display: flex; align-items: flex-start; gap: 16px; padding: 16px 20px; border-radius: 12px; border: 1px solid #0d1e28; background: rgba(255,255,255,0.02); margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
-.rg-pipeline-step.active { border-color: #06b6d4; background: rgba(6,182,212,0.06); }
-.rg-pipeline-step.done { border-color: rgba(6,182,212,0.3); background: rgba(6,182,212,0.03); }
-.rg-step-icon { font-size: 24px; min-width: 36px; text-align: center; margin-top: 2px; }
-.rg-step-label { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 4px; }
-.rg-step-label.active { color: #06b6d4; }
-.rg-step-content { font-size: 14px; color: #4a8a9a; line-height: 1.6; }
-.rg-step-content.active { color: #a0d4dc; }
-.rg-step-num { font-size: 12px; color: #1a4a5a; font-family: 'IBM Plex Mono', monospace; margin-bottom: 4px; }
-.rg-step-num.active { color: #06b6d4; }
+/* Pipeline steps */
+.rg-pipeline-step {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--surface-1);
+  margin-bottom: var(--spacing-2);
+  transition: background-color var(--duration-deliberate) var(--ease-standard), border-color var(--duration-deliberate) var(--ease-standard);
+}
+.rg-pipeline-step.active { background: var(--step-soft, var(--blue-50)); border-color: var(--step-tint, var(--blue-500)); }
+.rg-pipeline-step.done   { opacity: 0.7; }
+.rg-step-icon {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--step-tint, var(--text-secondary));
+}
+.rg-step-label {
+  font: var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-1);
+}
+.rg-pipeline-step.active .rg-step-label { color: var(--step-tint); }
+.rg-step-content {
+  font: var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+}
+.rg-step-num {
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  margin-bottom: var(--spacing-1);
+}
 
-.rg-streaming { font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: #34d399; line-height: 1.7; white-space: pre-wrap; }
-.rg-cursor { display: inline-block; width: 2px; height: 14px; background: #34d399; margin-left: 1px; vertical-align: middle; animation: rg-blink 0.8s steps(1) infinite; }
+.rg-streaming {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--text-size-caption);
+  color: var(--color-success);
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+.rg-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 14px;
+  background: var(--color-success);
+  margin-left: 1px;
+  vertical-align: middle;
+  animation: rg-blink 0.8s steps(1) infinite;
+}
 @keyframes rg-blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
 
-.rg-btn { background: rgba(6,182,212,0.1); border: 1px solid #06b6d4; color: #06b6d4; font-family: 'IBM Plex Mono', monospace; font-size: 14px; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: all 0.18s; letter-spacing: 0.08em; }
-.rg-btn:hover { background: rgba(6,182,212,0.18); }
-.rg-btn-ghost { background: transparent; border: 1px solid #1a3a4a; color: #3a6a7a; font-family: 'IBM Plex Mono', monospace; font-size: 14px; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: all 0.18s; letter-spacing: 0.08em; margin-left: 10px; }
-.rg-btn-ghost:hover { border-color: #3a6a7a; color: #6a9aaa; }
+/* Buttons */
+.rg-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  background: var(--orange-500);
+  border: 1px solid var(--orange-500);
+  color: #fff;
+  font: 600 var(--text-size-body)/1 var(--font-primary);
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+}
+.rg-btn:hover { background: #D45C10; border-color: #D45C10; }
+.rg-btn:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.rg-btn:disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+.rg-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  background: transparent;
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+  font: 600 var(--text-size-body)/1 var(--font-primary);
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  margin-left: var(--spacing-2);
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+}
+.rg-btn-ghost:hover { background: var(--surface-2); border-color: var(--border-strong); }
+.rg-btn-ghost:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
 
-.rg-benefits-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 20px; }
-.rg-benefit-card { background: rgba(6,182,212,0.04); border: 1px solid rgba(6,182,212,0.12); border-radius: 10px; padding: 16px; text-align: center; }
-.rg-benefit-icon { font-size: 22px; margin-bottom: 8px; }
-.rg-benefit-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; font-weight: 700; color: #c0e8f0; margin-bottom: 4px; }
-.rg-benefit-desc { font-size: 12px; color: #3a6a7a; line-height: 1.5; }
+/* Benefits */
+.rg-benefits-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--spacing-3); margin-top: var(--spacing-5); }
+.rg-benefit-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+  text-align: center;
+}
+.rg-benefit-icon {
+  display: inline-flex;
+  margin-bottom: var(--spacing-2);
+  color: var(--blue-500);
+}
+.rg-benefit-title {
+  font: var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-1);
+}
+.rg-benefit-desc {
+  font: var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+}
 
-/* Chunking tab */
-.rg-controls { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
-.rg-slider-wrap { display: flex; align-items: center; gap: 12px; }
-.rg-slider-label { font-size: 14px; color: #3a6a7a; white-space: nowrap; }
-.rg-slider { -webkit-appearance: none; width: 180px; height: 4px; border-radius: 2px; background: #0d1e28; outline: none; }
-.rg-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #06b6d4; cursor: pointer; }
-.rg-slider-val { font-size: 13px; color: #06b6d4; font-family: 'IBM Plex Mono', monospace; min-width: 90px; }
+/* Chunking */
+.rg-controls { display: flex; align-items: center; gap: var(--spacing-4); flex-wrap: wrap; margin-bottom: var(--spacing-6); }
+.rg-slider-wrap { display: flex; align-items: center; gap: var(--spacing-3); }
+.rg-slider-label {
+  font: var(--text-weight-body) var(--text-size-caption)/1 var(--font-primary);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.rg-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 180px;
+  height: 24px;
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+}
+.rg-slider::-webkit-slider-runnable-track { height: 4px; background: var(--border-default); border-radius: 2px; }
+.rg-slider::-moz-range-track { height: 4px; background: var(--border-default); border-radius: 2px; }
+.rg-slider::-moz-range-progress { height: 4px; background: var(--blue-500); border-radius: 2px; }
+.rg-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--surface-1);
+  border: 2px solid var(--blue-500);
+  box-shadow: var(--shadow-e1);
+  margin-top: -6px;
+  cursor: pointer;
+}
+.rg-slider::-moz-range-thumb {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--surface-1);
+  border: 2px solid var(--blue-500);
+  box-shadow: var(--shadow-e1);
+  cursor: pointer;
+}
+.rg-slider:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; border-radius: var(--radius-sm); }
+.rg-slider:disabled { opacity: 0.55; cursor: not-allowed; }
+.rg-slider-val {
+  font: var(--text-weight-body) var(--text-size-caption)/1 var(--font-primary);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  color: var(--text-primary);
+  min-width: 110px;
+}
 
-.rg-strategy-btns { display: flex; gap: 8px; flex-wrap: wrap; }
-.rg-strategy-btn { background: transparent; border: 1px solid #0d1e28; color: #3a6a7a; font-family: 'IBM Plex Mono', monospace; font-size: 13px; padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: all 0.18s; }
-.rg-strategy-btn.active { background: rgba(6,182,212,0.1); border-color: #06b6d4; color: #06b6d4; }
+.rg-strategy-btns { display: flex; gap: var(--spacing-2); flex-wrap: wrap; }
+.rg-strategy-btn,
+.rg-template-btn,
+.rg-eq-chip {
+  background: transparent;
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
+}
+.rg-strategy-btn:hover:not(.active),
+.rg-template-btn:hover:not(.active),
+.rg-eq-chip:hover {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+.rg-strategy-btn.active,
+.rg-template-btn.active {
+  background: var(--text-primary);
+  border-color: var(--text-primary);
+  color: var(--surface-base);
+}
+.rg-strategy-btn:focus-visible,
+.rg-template-btn:focus-visible,
+.rg-eq-chip:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+.rg-eq-chip { border-radius: 100px; }
 
-.rg-chunk-count { font-size: 13px; color: #06b6d4; font-family: 'IBM Plex Mono', monospace; margin-bottom: 14px; }
+.rg-chunk-count {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--text-size-caption);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-3);
+}
 
-.rg-doc-display { background: rgba(255,255,255,0.02); border: 1px solid #0d1e28; border-radius: 12px; padding: 20px; font-size: 14px; line-height: 1.8; color: #a0b8c8; }
-.rg-chunk-seg { display: inline; border-radius: 4px; padding: 1px 0; }
+.rg-doc-display {
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-5);
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-primary);
+}
+.rg-chunk-seg { display: inline; border-radius: var(--radius-sm); padding: 1px 0; }
 
-.rg-overlap-info { background: rgba(6,182,212,0.04); border: 1px solid rgba(6,182,212,0.12); border-radius: 10px; padding: 16px 20px; margin-top: 20px; }
-.rg-overlap-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; font-weight: 700; color: #06b6d4; margin-bottom: 6px; }
-.rg-overlap-text { font-size: 14px; color: #3a6a7a; line-height: 1.7; }
+.rg-overlap-info {
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+  margin-top: var(--spacing-5);
+}
+.rg-overlap-title {
+  font: var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-1);
+}
+.rg-overlap-text {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+}
 
-/* Retrieval tab */
-.rg-query-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
-.rg-chip { background: transparent; border: 1px solid #0d1e28; color: #3a6a7a; font-family: 'IBM Plex Mono', monospace; font-size: 13px; padding: 7px 14px; border-radius: 100px; cursor: pointer; transition: all 0.18s; }
-.rg-chip:hover { border-color: #06b6d4; color: #06b6d4; }
-.rg-chip.active { background: rgba(6,182,212,0.1); border-color: #06b6d4; color: #06b6d4; }
+/* Retrieval */
+.rg-query-chips { display: flex; gap: var(--spacing-2); flex-wrap: wrap; margin-bottom: var(--spacing-5); }
+.rg-chip {
+  background: transparent;
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: 100px;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
+}
+.rg-chip:hover { background: var(--surface-2); border-color: var(--border-strong); color: var(--text-primary); }
+.rg-chip.active { background: var(--text-primary); border-color: var(--text-primary); color: var(--surface-base); }
+.rg-chip:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
 
-.rg-chunk-card { background: rgba(255,255,255,0.02); border: 1px solid #0d1e28; border-radius: 10px; padding: 14px 18px; margin-bottom: 10px; transition: border-color 0.2s; }
-.rg-chunk-card.top-result { border-color: rgba(6,182,212,0.4); background: rgba(6,182,212,0.04); }
-.rg-chunk-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px; }
-.rg-chunk-text { font-size: 13px; color: #4a7a8a; line-height: 1.6; margin-bottom: 10px; }
-.rg-score-row { display: flex; align-items: center; gap: 10px; }
-.rg-score-bar-bg { flex: 1; height: 6px; background: #0d1e28; border-radius: 3px; overflow: hidden; }
-.rg-score-bar { height: 100%; border-radius: 3px; background: #06b6d4; transition: width 0.4s ease; }
-.rg-score-val { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #06b6d4; min-width: 36px; text-align: right; }
-.rg-top-badge { font-size: 11px; color: #06b6d4; font-family: 'IBM Plex Mono', monospace; background: rgba(6,182,212,0.1); border: 1px solid rgba(6,182,212,0.25); border-radius: 4px; padding: 1px 6px; }
+.rg-chunk-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3) var(--spacing-4);
+  margin-bottom: var(--spacing-2);
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+}
+.rg-chunk-card.top-result { background: var(--orange-50); border-color: var(--orange-500); }
+.rg-chunk-title {
+  font: var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-1);
+}
+.rg-chunk-text {
+  font: var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-2);
+}
+.rg-score-row { display: flex; align-items: center; gap: var(--spacing-2); }
+.rg-score-bar-bg { flex: 1; height: 6px; background: var(--surface-3); border-radius: 3px; overflow: hidden; }
+.rg-score-bar { height: 100%; border-radius: 3px; background: var(--text-tertiary); transition: width var(--duration-deliberate) var(--ease-standard); }
+.rg-chunk-card.top-result .rg-score-bar { background: var(--orange-500); }
+.rg-score-val {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--text-size-caption);
+  color: var(--text-secondary);
+  min-width: 36px;
+  text-align: right;
+}
+.rg-chunk-card.top-result .rg-score-val { color: var(--orange-500); }
+.rg-top-badge {
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
+  color: var(--orange-500);
+  background: var(--surface-1);
+  border: 1px solid var(--orange-500);
+  border-radius: var(--radius-sm);
+  padding: 2px 8px;
+}
 
-.rg-quality-section { margin-top: 32px; }
-.rg-quality-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px; }
-.rg-quality-col { border-radius: 10px; padding: 16px; }
-.rg-quality-col.vague { background: rgba(248,113,113,0.04); border: 1px solid rgba(248,113,113,0.15); }
-.rg-quality-col.specific { background: rgba(52,211,153,0.04); border: 1px solid rgba(52,211,153,0.15); }
-.rg-quality-label { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; font-weight: 600; }
-.rg-quality-label.vague { color: #f87171; }
-.rg-quality-label.specific { color: #34d399; }
-.rg-quality-query { font-size: 14px; color: #c0d0d8; margin-bottom: 12px; font-style: italic; }
-.rg-quality-scores { display: flex; flex-direction: column; gap: 4px; }
-.rg-quality-score-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
-.rg-quality-score-row .bar-bg { flex: 1; height: 5px; background: #0d1e28; border-radius: 2px; overflow: hidden; }
+.rg-quality-section { margin-top: var(--spacing-7); }
+.rg-quality-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-3); margin-top: var(--spacing-3); }
+@media (max-width: 600px) { .rg-quality-grid { grid-template-columns: 1fr; } }
+.rg-quality-col {
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+  background: var(--surface-1);
+  border: 1px solid;
+}
+.rg-quality-col.vague    { border-color: var(--color-error); }
+.rg-quality-col.specific { border-color: var(--color-success); }
+.rg-quality-label {
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  letter-spacing: 0.06em;
+  margin-bottom: var(--spacing-2);
+}
+.rg-quality-label.vague    { color: var(--color-error); }
+.rg-quality-label.specific { color: var(--color-success); }
+.rg-quality-query {
+  font: italic var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-3);
+}
+.rg-quality-scores { display: flex; flex-direction: column; gap: var(--spacing-1); }
+.rg-quality-score-row { display: flex; align-items: center; gap: var(--spacing-2); }
+.rg-quality-score-row .bar-bg { flex: 1; height: 5px; background: var(--surface-3); border-radius: 2px; overflow: hidden; }
 .rg-quality-score-row .bar { height: 100%; border-radius: 2px; }
-.rg-quality-score-row .lbl { color: #3a6a7a; min-width: 80px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.rg-quality-score-row .val { color: #6a9aaa; min-width: 30px; text-align: right; font-family: 'IBM Plex Mono', monospace; }
+.rg-quality-score-row .lbl {
+  color: var(--text-secondary);
+  min-width: 100px;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--text-size-meta);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rg-quality-score-row .val {
+  color: var(--text-secondary);
+  min-width: 30px;
+  text-align: right;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--text-size-meta);
+}
 
-/* Prompt Assembly tab */
-.rg-assembly-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+/* Prompt assembly */
+.rg-assembly-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--spacing-4); margin-bottom: var(--spacing-6); }
 @media (max-width: 700px) { .rg-assembly-grid { grid-template-columns: 1fr; } }
-.rg-assembly-col-label { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #3a6a7a; margin-bottom: 10px; font-weight: 600; }
-.rg-query-box { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); border-radius: 10px; padding: 14px; font-size: 14px; color: #c0e8f0; line-height: 1.6; }
-.rg-chunk-toggle { border-radius: 10px; border: 1px solid #0d1e28; padding: 12px 14px; margin-bottom: 8px; cursor: pointer; transition: all 0.18s; }
-.rg-chunk-toggle.included { border-color: rgba(6,182,212,0.4); background: rgba(6,182,212,0.06); }
-.rg-chunk-toggle.excluded { background: rgba(255,255,255,0.01); opacity: 0.6; }
-.rg-chunk-toggle-title { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 4px; font-family: 'IBM Plex Sans', sans-serif; }
-.rg-chunk-toggle-text { font-size: 12px; color: #3a6a7a; line-height: 1.5; }
-.rg-chunk-toggle-status { font-size: 11px; font-family: 'IBM Plex Mono', monospace; margin-top: 6px; }
-.rg-chunk-toggle-status.on { color: #06b6d4; }
-.rg-chunk-toggle-status.off { color: #2a4a5a; }
+.rg-assembly-col-label {
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  margin-bottom: var(--spacing-3);
+}
+.rg-query-box {
+  background: var(--orange-50);
+  border: 1px solid var(--orange-500);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3) var(--spacing-4);
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-primary);
+}
+.rg-chunk-toggle {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--surface-1);
+  padding: var(--spacing-3);
+  margin-bottom: var(--spacing-2);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+}
+.rg-chunk-toggle:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.rg-chunk-toggle.included { background: var(--blue-50); border-color: var(--blue-500); }
+.rg-chunk-toggle.excluded { opacity: 0.55; }
+.rg-chunk-toggle-title {
+  font: var(--text-weight-label) var(--text-size-caption)/1.2 var(--font-primary);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-1);
+}
+.rg-chunk-toggle-text {
+  font: var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+}
+.rg-chunk-toggle-status {
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  margin-top: var(--spacing-1);
+}
+.rg-chunk-toggle-status.on  { color: var(--blue-500); }
+.rg-chunk-toggle-status.off { color: var(--text-tertiary); }
 
-.rg-prompt-preview { background: #020508; border: 1px solid #0d1e28; border-radius: 10px; padding: 16px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; line-height: 1.7; color: #6a9aaa; white-space: pre-wrap; min-height: 220px; }
-.rg-prompt-system { color: #3a6a7a; }
-.rg-prompt-context { color: #06b6d4; }
-.rg-prompt-query { color: #c0e8f0; }
+.rg-prompt-preview {
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--text-size-meta);
+  line-height: 1.7;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  min-height: 220px;
+}
+.rg-prompt-system  { color: var(--text-tertiary); }
+.rg-prompt-context { color: var(--blue-500); }
+.rg-prompt-query   { color: var(--orange-500); }
 
-.rg-token-count { font-size: 13px; color: #3a6a7a; margin-top: 8px; }
-.rg-token-count span { color: #06b6d4; font-family: 'IBM Plex Mono', monospace; }
+.rg-token-count {
+  font: var(--text-weight-body) var(--text-size-caption)/1 var(--font-primary);
+  color: var(--text-secondary);
+  margin-top: var(--spacing-2);
+}
+.rg-token-count strong { color: var(--text-primary); font-weight: 600; }
 
-.rg-template-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-.rg-template-btn { background: transparent; border: 1px solid #0d1e28; color: #3a6a7a; font-family: 'IBM Plex Mono', monospace; font-size: 13px; padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: all 0.18s; }
-.rg-template-btn.active { background: rgba(6,182,212,0.1); border-color: #06b6d4; color: #06b6d4; }
+.rg-template-btns { display: flex; gap: var(--spacing-2); flex-wrap: wrap; margin-bottom: var(--spacing-5); }
 
-.rg-answer-box { background: rgba(52,211,153,0.04); border: 1px solid rgba(52,211,153,0.2); border-radius: 10px; padding: 16px 20px; margin-top: 16px; font-size: 14px; color: #a0d4c0; line-height: 1.7; }
-.rg-answer-label { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #34d399; margin-bottom: 8px; font-weight: 600; }
+.rg-answer-box {
+  background: var(--surface-1);
+  border: 1px solid var(--color-success);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+  margin-top: var(--spacing-4);
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-primary);
+}
+.rg-answer-label {
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  letter-spacing: 0.06em;
+  color: var(--color-success);
+  margin-bottom: var(--spacing-2);
+}
 
-/* Comparison tab */
-.rg-compare-table { width: 100%; border-collapse: collapse; margin-bottom: 32px; }
-.rg-compare-table th { text-align: left; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: #3a6a7a; padding: 10px 16px; border-bottom: 1px solid #0d1e28; }
-.rg-compare-table th.rag-col { color: #06b6d4; }
-.rg-compare-table th.ft-col { color: #818cf8; }
-.rg-compare-row td { padding: 14px 16px; border-bottom: 1px solid #080f18; font-size: 14px; vertical-align: top; }
-.rg-compare-row:hover td { background: rgba(255,255,255,0.015); }
-.rg-compare-row.expanded td { background: rgba(6,182,212,0.03); }
-.rg-row-label { color: #c0d0d8; font-family: 'IBM Plex Sans', sans-serif; font-weight: 600; font-size: 14px; cursor: pointer; white-space: nowrap; }
-.rg-row-expand { display: flex; align-items: center; gap: 8px; }
-.rg-row-expand-arrow { font-size: 10px; color: #3a6a7a; transition: transform 0.18s; }
+/* Comparison table */
+.rg-compare-table { width: 100%; border-collapse: collapse; margin-bottom: var(--spacing-7); }
+.rg-compare-table th {
+  text-align: left;
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  padding: var(--spacing-3) var(--spacing-4);
+  border-bottom: 1px solid var(--border-default);
+}
+.rg-compare-table th.rag-col { color: var(--blue-500); }
+.rg-compare-table th.ft-col  { color: var(--orange-500); }
+.rg-compare-row td {
+  padding: var(--spacing-3) var(--spacing-4);
+  border-bottom: 1px solid var(--border-default);
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-primary);
+  vertical-align: top;
+}
+.rg-compare-row.expanded td { background: var(--surface-2); }
+.rg-row-label {
+  font: var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary);
+  color: var(--text-primary);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.rg-row-expand { display: flex; align-items: center; gap: var(--spacing-2); }
+.rg-row-expand-arrow {
+  color: var(--text-tertiary);
+  display: inline-flex;
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
 .rg-row-expand-arrow.open { transform: rotate(90deg); }
-.rg-rating-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; }
-.rg-rating-dot.good { background: #34d399; }
-.rg-rating-dot.warn { background: #fbbf24; }
-.rg-rating-dot.bad { background: #f87171; }
-.rg-cell-short { color: #4a7a8a; font-size: 13px; }
-.rg-cell-detail { font-size: 13px; color: #3a6a7a; line-height: 1.6; margin-top: 6px; padding-top: 6px; border-top: 1px solid #0d1e28; }
+.rg-rating-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: var(--spacing-2); }
+.rg-rating-dot.good { background: var(--color-success); }
+.rg-rating-dot.warn { background: var(--color-warning); }
+.rg-rating-dot.bad  { background: var(--color-error); }
+.rg-cell-short { color: var(--text-secondary); font-size: var(--text-size-caption); }
+.rg-cell-detail {
+  font: var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+  margin-top: var(--spacing-2);
+  padding-top: var(--spacing-2);
+  border-top: 1px solid var(--border-default);
+}
 
-.rg-scenario-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-top: 14px; }
-.rg-scenario-card { background: rgba(255,255,255,0.02); border: 1px solid #0d1e28; border-radius: 10px; padding: 16px; cursor: pointer; transition: border-color 0.18s; }
-.rg-scenario-card:hover { border-color: #1a3a4a; }
-.rg-scenario-card.selected { border-color: rgba(6,182,212,0.35); }
-.rg-scenario-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; font-weight: 700; color: #c0d0d8; margin-bottom: 8px; }
-.rg-scenario-rec { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-family: 'IBM Plex Mono', monospace; padding: 3px 10px; border-radius: 100px; margin-bottom: 8px; }
-.rg-scenario-rec.rag { background: rgba(6,182,212,0.1); border: 1px solid rgba(6,182,212,0.3); color: #06b6d4; }
-.rg-scenario-rec.finetune { background: rgba(129,140,248,0.1); border: 1px solid rgba(129,140,248,0.3); color: #818cf8; }
-.rg-scenario-rec.hybrid { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); color: #fbbf24; }
-.rg-scenario-rationale { font-size: 13px; color: #3a6a7a; line-height: 1.6; }
+.rg-scenario-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--spacing-3); margin-top: var(--spacing-3); }
+.rg-scenario-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+}
+.rg-scenario-card:hover { background: var(--surface-2); border-color: var(--border-strong); }
+.rg-scenario-card:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.rg-scenario-card.selected { border-color: var(--text-primary); }
+.rg-scenario-title {
+  font: var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-2);
+}
+.rg-scenario-rec {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
+  padding: 3px 10px;
+  border-radius: 100px;
+  margin-bottom: var(--spacing-2);
+  border: 1px solid;
+}
+.rg-scenario-rec.rag      { background: var(--blue-50);   border-color: var(--blue-500);   color: var(--blue-500); }
+.rg-scenario-rec.finetune { background: var(--orange-50); border-color: var(--orange-500); color: var(--orange-500); }
+.rg-scenario-rec.hybrid   { background: var(--surface-1); border-color: var(--text-primary); color: var(--text-primary); }
+.rg-scenario-rationale {
+  font: var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+}
 
-.rg-hybrid-box { background: rgba(251,191,36,0.04); border: 1px solid rgba(251,191,36,0.15); border-radius: 12px; padding: 20px 24px; margin-top: 32px; }
-.rg-hybrid-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #fbbf24; margin-bottom: 8px; }
-.rg-hybrid-text { font-size: 14px; color: #5a5030; line-height: 1.7; }
+.rg-hybrid-box {
+  background: var(--surface-2);
+  border: 1px solid var(--text-primary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-5);
+  margin-top: var(--spacing-7);
+}
+.rg-hybrid-title {
+  font: var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-2);
+}
+.rg-hybrid-text {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+}
 
 /* Intro simulator */
-.rg-sim-input { flex:1; background:rgba(255,255,255,0.03); border:1px solid #0d1e28; border-radius:8px; padding:10px 14px; color:#c0e8f0; font-family:'IBM Plex Mono',monospace; font-size:13px; outline:none; transition: border-color 0.18s; }
-.rg-sim-input:focus { border-color: rgba(6,182,212,0.5); }
-.rg-sim-input::placeholder { color: #1a3a4a; }
-.rg-eq-chip { background:transparent; border:1px solid #0d1e28; color:#3a6a7a; font-family:'IBM Plex Mono',monospace; font-size:12px; padding:5px 12px; border-radius:100px; cursor:pointer; transition:all 0.18s; }
-.rg-eq-chip:hover { border-color:#06b6d4; color:#06b6d4; }
+.rg-sim-input {
+  flex: 1;
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-3) var(--spacing-4);
+  color: var(--text-primary);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--text-size-caption);
+  outline: none;
+  transition: border-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
+}
+.rg-sim-input:focus-visible {
+  border-color: var(--purple-500);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+.rg-sim-input::placeholder { color: var(--text-tertiary); }
 
-/* Quiz tab */
-.rg-quiz-wrap { max-width: 680px; margin: 0 auto; }
-.rg-quiz-progress { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
-.rg-quiz-progress-bar-bg { flex: 1; height: 4px; background: #0d1e28; border-radius: 2px; overflow: hidden; }
-.rg-quiz-progress-bar { height: 100%; background: #06b6d4; border-radius: 2px; transition: width 0.4s; }
-.rg-quiz-progress-label { font-size: 13px; color: #3a6a7a; font-family: 'IBM Plex Mono', monospace; white-space: nowrap; }
+/* Quiz */
+.rg-quiz-wrap { max-width: 720px; margin: 0 auto; }
+.rg-quiz-progress { display: flex; align-items: center; gap: var(--spacing-3); margin-bottom: var(--spacing-6); }
+.rg-quiz-progress-bar-bg { flex: 1; height: 4px; background: var(--surface-3); border-radius: 2px; overflow: hidden; }
+.rg-quiz-progress-bar {
+  height: 100%;
+  background: var(--text-primary);
+  border-radius: 2px;
+  transition: width var(--duration-standard) var(--ease-standard);
+}
+.rg-quiz-progress-label {
+  font: var(--text-weight-body) var(--text-size-caption)/1 var(--font-primary);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
 
-.rg-diff-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 100px; border: 1px solid; margin-bottom: 14px; font-weight: 500; }
-.rg-diff-badge.easy   { color: #34d399; border-color: rgba(52,211,153,0.35);  background: rgba(52,211,153,0.08); }
-.rg-diff-badge.medium { color: #fbbf24; border-color: rgba(251,191,36,0.35);  background: rgba(251,191,36,0.08); }
-.rg-diff-badge.hard   { color: #f87171; border-color: rgba(248,113,113,0.35); background: rgba(239,68,68,0.08); }
+.rg-diff-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  padding: 3px 10px;
+  border-radius: 100px;
+  border: 1px solid;
+  background: var(--surface-1);
+  margin-bottom: var(--spacing-3);
+}
+.rg-diff-badge::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.rg-diff-badge.easy   { color: var(--color-success); border-color: var(--color-success); }
+.rg-diff-badge.medium { color: var(--color-warning); border-color: var(--color-warning); }
+.rg-diff-badge.hard   { color: var(--color-info);    border-color: var(--color-info); }
 
-.rg-quiz-q { font-family: 'IBM Plex Sans', sans-serif; font-size: 18px; font-weight: 700; color: #fff; line-height: 1.5; margin-bottom: 24px; }
-.rg-quiz-opts { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-.rg-quiz-opt { background: rgba(255,255,255,0.02); border: 1px solid #0d1e28; border-radius: 10px; padding: 14px 18px; cursor: pointer; transition: all 0.18s; text-align: left; font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; color: #a0b8c8; }
-.rg-quiz-opt:hover:not(:disabled) { border-color: #06b6d4; color: #c0e8f0; }
-.rg-quiz-opt.correct { border-color: #34d399; background: rgba(52,211,153,0.08); color: #34d399; }
-.rg-quiz-opt.wrong { border-color: #f87171; background: rgba(248,113,113,0.08); color: #f87171; }
-.rg-quiz-opt.neutral { opacity: 0.5; }
+.rg-quiz-q {
+  font: var(--text-weight-h3) var(--text-size-h3)/var(--text-lh-h3) var(--font-primary);
+  letter-spacing: var(--text-ls-h3);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-5);
+}
+.rg-quiz-opts { display: flex; flex-direction: column; gap: var(--spacing-2); margin-bottom: var(--spacing-5); }
+.rg-quiz-opt {
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3) var(--spacing-4);
+  cursor: pointer;
+  text-align: left;
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-primary);
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+}
+.rg-quiz-opt:hover:not(:disabled) { background: var(--surface-2); border-color: var(--border-strong); }
+.rg-quiz-opt:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
 .rg-quiz-opt:disabled { cursor: default; }
+.rg-quiz-opt.correct { border-color: var(--color-success); }
+.rg-quiz-opt.wrong   { border-color: var(--color-error); }
+.rg-quiz-opt.neutral { opacity: 0.55; }
+.rg-quiz-opt-letter {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  color: var(--text-tertiary);
+  margin-right: var(--spacing-2);
+}
 
-.rg-quiz-explanation { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.15); border-radius: 10px; padding: 16px 20px; font-size: 14px; color: #4a8a9a; line-height: 1.7; margin-bottom: 20px; }
-.rg-quiz-explanation strong { color: #06b6d4; }
+.rg-quiz-explanation {
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3) var(--spacing-4);
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-5);
+}
+.rg-quiz-explanation strong { color: var(--text-primary); }
 
-.rg-quiz-done { text-align: center; padding: 40px 0; }
-.rg-quiz-done-score { font-family: 'IBM Plex Sans', sans-serif; font-size: 56px; font-weight: 900; color: #06b6d4; line-height: 1; margin-bottom: 8px; }
-.rg-quiz-done-label { font-size: 16px; color: #3a6a7a; margin-bottom: 32px; }
+.rg-quiz-done { text-align: center; padding: var(--spacing-7) 0; }
+.rg-quiz-done-score {
+  font: var(--text-weight-h1) var(--text-size-h1)/1 var(--font-primary);
+  letter-spacing: var(--text-ls-h1);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-2);
+}
+.rg-quiz-done-label {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-6);
+}
 `
 
 // ─── Pipeline data ───────────────────────────────────────────────────────────
+// Per §5.3 — user query + retrieved chunks = orange (external input);
+// embed / vector search / prompt assembly / generation = blue (structured
+// transformation); the final streamed answer reads in success-green via
+// .rg-streaming.
 const PIPELINE_STEPS = [
-  { id: 0, icon: '💬', label: 'User Query', type: 'query', content: 'What are the main causes of inflation?' },
-  { id: 1, icon: '🔢', label: 'Embed Query', type: 'embed', content: 'Query converted to vector: [0.82, 0.14, 0.67, 0.31, 0.55, 0.22, 0.78, 0.09, ...]' },
-  { id: 2, icon: '🔍', label: 'Vector Search', type: 'search', content: 'Scanning 10,000 document chunks for semantic similarity...' },
-  { id: 3, icon: '📄', label: 'Retrieved Chunks', type: 'retrieve', content: 'Top 3 chunks retrieved from knowledge base' },
-  { id: 4, icon: '🧩', label: 'Prompt Assembly', type: 'assemble', content: 'Query + retrieved context combined into structured prompt' },
-  { id: 5, icon: '✨', label: 'LLM Generation', type: 'generate', content: 'Inflation is primarily caused by demand-pull factors (excess consumer spending), cost-push factors (rising production costs), and built-in inflation (wage-price spiral). Central banks typically respond by raising interest rates to reduce money supply.' }
+  { id: 0, iconKey: 'chat',    label: 'User query',        tint: 'var(--orange-500)', soft: 'var(--orange-50)', content: 'What are the main causes of inflation?' },
+  { id: 1, iconKey: 'hash',    label: 'Embed query',       tint: 'var(--blue-500)',   soft: 'var(--blue-50)',   content: 'Query converted to vector: [0.82, 0.14, 0.67, 0.31, 0.55, 0.22, 0.78, 0.09, …]' },
+  { id: 2, iconKey: 'search',  label: 'Vector search',     tint: 'var(--blue-500)',   soft: 'var(--blue-50)',   content: 'Scanning 10,000 document chunks for semantic similarity…' },
+  { id: 3, iconKey: 'file',    label: 'Retrieved chunks',  tint: 'var(--orange-500)', soft: 'var(--orange-50)', content: 'Top 3 chunks retrieved from the knowledge base.' },
+  { id: 4, iconKey: 'puzzle',  label: 'Prompt assembly',   tint: 'var(--blue-500)',   soft: 'var(--blue-50)',   content: 'Query and retrieved context combined into a structured prompt.' },
+  { id: 5, iconKey: 'sparkle', label: 'LLM generation',    tint: 'var(--color-success)', soft: 'var(--surface-1)', content: 'Inflation is primarily caused by demand-pull factors (excess consumer spending), cost-push factors (rising production costs), and built-in inflation (wage-price spiral). Central banks typically respond by raising interest rates to reduce money supply.' },
 ]
 
 // ─── Chunking data ────────────────────────────────────────────────────────────
@@ -333,9 +871,10 @@ const QUIZ = [
 ]
 
 // ─── Intro simulator data ─────────────────────────────────────────────────────
+// iconKey resolves via IconFor; each doc icon stays neutral.
 const INTRO_DOCS = [
   {
-    id: 0, label: 'Company FAQ', icon: '🏢',
+    id: 0, label: 'Company FAQ', iconKey: 'buildings',
     sentences: [
       "NovaTech was founded in 2018 and is headquartered in Austin, Texas.",
       "Our flagship product is CloudSync, a real-time data synchronization platform.",
@@ -351,7 +890,7 @@ const INTRO_DOCS = [
     exampleQs: ['What is CloudSync?', 'How much does the Pro plan cost?', 'Is my data secure?']
   },
   {
-    id: 1, label: 'Study Notes', icon: '📚',
+    id: 1, label: 'Study notes', iconKey: 'books',
     sentences: [
       "Photosynthesis is the process by which plants convert sunlight into glucose using carbon dioxide and water.",
       "Chlorophyll, the green pigment in plants, absorbs light energy primarily in the red and blue wavelengths.",
@@ -367,7 +906,7 @@ const INTRO_DOCS = [
     exampleQs: ['What is photosynthesis?', 'Where does the Calvin cycle happen?', 'What do plants release?']
   },
   {
-    id: 2, label: 'Product Manual', icon: '🔧',
+    id: 2, label: 'Product manual', iconKey: 'wrench',
     sentences: [
       "The ProCam X1 camera shoots 4K video at up to 120 frames per second.",
       "Battery life is approximately 90 minutes when recording in 4K mode.",
@@ -400,12 +939,12 @@ function simpleRetrieve(question, sentences) {
     .filter(x => x.score > 0)
 }
 
-// ─── Chunk color palette ──────────────────────────────────────────────────────
+// ─── Chunk colour ramp — 4-step semantic palette (§5.3) ──────────────────────
 const CHUNK_COLORS = [
-  { bg: 'rgba(6,182,212,0.12)', border: 'rgba(6,182,212,0.3)' },
-  { bg: 'rgba(129,140,248,0.12)', border: 'rgba(129,140,248,0.3)' },
-  { bg: 'rgba(52,211,153,0.12)', border: 'rgba(52,211,153,0.3)' },
-  { bg: 'rgba(251,191,36,0.12)', border: 'rgba(251,191,36,0.3)' },
+  { bg: 'var(--blue-50)',   border: 'var(--blue-500)' },
+  { bg: 'var(--blue-50)',   border: 'var(--blue-300)' },
+  { bg: 'var(--orange-50)', border: 'var(--orange-300)' },
+  { bg: 'var(--orange-50)', border: 'var(--orange-500)' },
 ]
 
 const TEMPLATE_CONFIGS = {
@@ -416,7 +955,7 @@ const TEMPLATE_CONFIGS = {
 
 export default function RAG() {
   const [tab, setTab] = useState(0)
-  const TABS = ['What is RAG?', 'Pipeline', 'Chunking', 'Retrieval', 'Prompt Assembly', 'RAG vs Fine-Tuning', 'Quiz']
+  const TABS = ['What is RAG?', 'Pipeline', 'Chunking', 'Retrieval', 'Prompt assembly', 'RAG vs fine-tuning', 'Quiz']
 
   // ── Tab 0: What is RAG? ──────────────────────────────────────────────────
   const [introDocId, setIntroDocId] = useState(0)
@@ -583,16 +1122,26 @@ export default function RAG() {
       <style>{css}</style>
       <NavBar />
 
-      <div className="rg-hero">
-        <div className="rg-eyebrow">LLM Architecture</div>
-        <h1 className="rg-title">Retrieval-<span>Augmented</span> Generation</h1>
+      <header className="rg-hero">
+        <div className="rg-eyebrow">LLM architecture</div>
+        <h1 className="rg-title">Retrieval-augmented generation</h1>
         <p className="rg-subtitle">See how RAG pipelines retrieve, chunk, and inject knowledge into LLM prompts — making AI systems accurate, updatable, and grounded in truth.</p>
-      </div>
+      </header>
 
-      <div className="rg-tabs">
-        {TABS.map((t, i) => (
-          <button key={t} className={`rg-tab${tab === i ? ' active' : ''}`} onClick={() => setTab(i)}>{t}</button>
-        ))}
+      <div className="rg-tabs-row">
+        <div className="prism-tabs" role="tablist" aria-label="Sections">
+          {TABS.map((t, i) => (
+            <button
+              key={t}
+              role="tab"
+              className="prism-tab"
+              aria-selected={tab === i}
+              onClick={() => setTab(i)}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="rg-panel">
@@ -602,65 +1151,103 @@ export default function RAG() {
           <div>
             <div className="rg-section-title">What is RAG?</div>
             <p className="rg-section-sub">
-              RAG stands for <strong style={{color:'#c0e8f0'}}>Retrieval-Augmented Generation</strong>. It gives an AI model access to your own documents — so it can answer questions accurately based on information it was never trained on.
+              RAG stands for <strong style={{ color: 'var(--text-primary)' }}>retrieval-augmented generation</strong>. It gives an AI model access to your own documents — so it can answer questions accurately based on information it was never trained on.
             </p>
 
-            {/* Flow diagram */}
-            <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap',margin:'24px 0',padding:'20px',background:'rgba(6,182,212,0.04)',borderRadius:12,border:'1px solid rgba(6,182,212,0.12)'}}>
-              {[{label:'Your Documents',icon:'📄'}, null, {label:'Knowledge Base',icon:'🗄️'}, null, {label:'Retrieve',icon:'🔍'}, null, {label:'LLM',icon:'✨'}, null, {label:'Grounded Answer',icon:'💬',highlight:true}].map((item, i) =>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-1)', flexWrap: 'wrap', margin: 'var(--spacing-6) 0', padding: 'var(--spacing-4)', background: 'var(--surface-2)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)' }}>
+              {[
+                { label: 'Your documents',   iconKey: 'file',     tint: 'var(--orange-500)' },
+                null,
+                { label: 'Knowledge base',   iconKey: 'database', tint: 'var(--text-primary)' },
+                null,
+                { label: 'Retrieve',         iconKey: 'search',   tint: 'var(--blue-500)' },
+                null,
+                { label: 'LLM',              iconKey: 'sparkle',  tint: 'var(--blue-500)' },
+                null,
+                { label: 'Grounded answer',  iconKey: 'chat',     tint: 'var(--color-success)', highlight: true },
+              ].map((item, i) =>
                 item === null
-                  ? <div key={i} style={{color:'#06b6d4',fontSize:18,padding:'0 2px'}}>→</div>
-                  : <div key={item.label} style={{background:item.highlight?'rgba(6,182,212,0.15)':'rgba(255,255,255,0.03)',border:`1px solid ${item.highlight?'rgba(6,182,212,0.4)':'#0d1e28'}`,borderRadius:8,padding:'10px 14px',textAlign:'center',minWidth:88}}>
-                      <div style={{fontSize:20,marginBottom:4}}>{item.icon}</div>
-                      <div style={{fontSize:12,color:item.highlight?'#06b6d4':'#6a9aaa',fontFamily:'IBM Plex Mono',lineHeight:1.3}}>{item.label}</div>
+                  ? <ArrowRightIcon key={`arrow-${i}`} size={16} weight="bold" style={{ color: 'var(--text-tertiary)' }} />
+                  : <div key={item.label} style={{ background: item.highlight ? 'var(--surface-1)' : 'var(--surface-1)', border: `1px solid ${item.highlight ? 'var(--color-success)' : 'var(--border-default)'}`, borderRadius: 'var(--radius-sm)', padding: 'var(--spacing-2) var(--spacing-3)', textAlign: 'center', minWidth: 96 }}>
+                      <div style={{ marginBottom: 4, color: item.tint, display: 'flex', justifyContent: 'center' }}><IconFor name={item.iconKey} size={20} weight="duotone" /></div>
+                      <div style={{ font: 'var(--text-weight-label) var(--text-size-meta)/1.2 var(--font-primary)', color: item.highlight ? 'var(--color-success)' : 'var(--text-secondary)' }}>{item.label}</div>
                     </div>
               )}
             </div>
 
-            {/* What is a knowledge base */}
-            <div className="rg-card" style={{marginBottom:28}}>
-              <div style={{fontFamily:'IBM Plex Sans',fontSize:17,fontWeight:700,color:'#fff',marginBottom:8}}>What is a Knowledge Base?</div>
-              <p style={{fontSize:14,color:'#4a8a9a',lineHeight:1.7,marginBottom:14}}>
+            <div className="rg-card" style={{ marginBottom: 'var(--spacing-7)' }}>
+              <div style={{ font: 'var(--text-weight-h3) var(--text-size-h3)/var(--text-lh-h3) var(--font-primary)', letterSpacing: 'var(--text-ls-h3)', color: 'var(--text-primary)', marginBottom: 'var(--spacing-2)' }}>What is a knowledge base?</div>
+              <p style={{ font: 'var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)', marginBottom: 'var(--spacing-4)' }}>
                 A knowledge base is a collection of your own text that the RAG system indexes and searches. Think of it as giving the AI a reference library to consult before answering. It can hold any text-based content:
               </p>
-              <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
-                {[['📄','PDFs & docs'],['📧','Emails'],['📝','Notes'],['🌐','Web pages'],['💬','Chat logs'],['📊','Spreadsheets'],['📖','Books'],['🎧','Transcripts']].map(([icon,lbl]) => (
-                  <div key={lbl} style={{background:'rgba(6,182,212,0.06)',border:'1px solid rgba(6,182,212,0.15)',borderRadius:8,padding:'8px 12px',fontSize:13,color:'#6ab8cc',display:'flex',alignItems:'center',gap:6}}>
-                    <span>{icon}</span><span>{lbl}</span>
+              <div style={{ display: 'flex', gap: 'var(--spacing-2)', flexWrap: 'wrap' }}>
+                {[
+                  { iconKey: 'file',       lbl: 'PDFs and docs' },
+                  { iconKey: 'envelope',   lbl: 'Emails' },
+                  { iconKey: 'note',       lbl: 'Notes' },
+                  { iconKey: 'globe',      lbl: 'Web pages' },
+                  { iconKey: 'chat',       lbl: 'Chat logs' },
+                  { iconKey: 'chartbar',   lbl: 'Spreadsheets' },
+                  { iconKey: 'bookopen',   lbl: 'Books' },
+                  { iconKey: 'headphones', lbl: 'Transcripts' },
+                ].map(({ iconKey, lbl }) => (
+                  <div key={lbl} style={{ background: 'var(--surface-2)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-sm)', padding: 'var(--spacing-2) var(--spacing-3)', font: 'var(--text-weight-body) var(--text-size-caption)/1 var(--font-primary)', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 'var(--spacing-1)' }}>
+                    <IconFor name={iconKey} size={16} weight="duotone" /><span>{lbl}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Try it yourself */}
-            <div style={{fontFamily:'IBM Plex Sans',fontSize:18,fontWeight:700,color:'#fff',marginBottom:6}}>Try It Yourself</div>
-            <p style={{fontSize:14,color:'#3a6a7a',marginBottom:16,lineHeight:1.7}}>
+            <div style={{ font: 'var(--text-weight-h3) var(--text-size-h3)/var(--text-lh-h3) var(--font-primary)', letterSpacing: 'var(--text-ls-h3)', color: 'var(--text-primary)', marginBottom: 'var(--spacing-1)' }}>Try it yourself</div>
+            <p style={{ font: 'var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)', marginBottom: 'var(--spacing-4)' }}>
               Pick a sample knowledge base and ask any question about it. The system retrieves the most relevant sentences and assembles a prompt — just like a real RAG pipeline.
             </p>
 
-            {/* Doc picker */}
-            <div style={{display:'flex',gap:10,marginBottom:20,flexWrap:'wrap'}}>
+            <div style={{ display: 'flex', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-5)', flexWrap: 'wrap' }}>
               {INTRO_DOCS.map(doc => (
-                <button key={doc.id} onClick={() => changeIntroDoc(doc.id)} style={{background:introDocId===doc.id?'rgba(6,182,212,0.12)':'transparent',border:`1px solid ${introDocId===doc.id?'#06b6d4':'#0d1e28'}`,color:introDocId===doc.id?'#06b6d4':'#3a6a7a',fontFamily:'IBM Plex Mono',fontSize:13,padding:'8px 16px',borderRadius:8,cursor:'pointer',display:'flex',alignItems:'center',gap:8,transition:'all 0.18s'}}>
-                  <span>{doc.icon}</span><span>{doc.label}</span>
+                <button
+                  key={doc.id}
+                  onClick={() => changeIntroDoc(doc.id)}
+                  className={`rg-strategy-btn${introDocId === doc.id ? ' active' : ''}`}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--spacing-2)' }}
+                >
+                  <IconFor name={doc.iconKey} size={16} weight="duotone" />
+                  <span>{doc.label}</span>
                 </button>
               ))}
             </div>
 
-            {/* Document with highlighted retrieved sentences */}
             {(() => {
               const doc = INTRO_DOCS.find(d => d.id === introDocId)
               const retrievedIndices = new Set((introRetrieved?.docId === introDocId ? introRetrieved.results : []).map(r => r.i))
               return (
-                <div style={{background:'rgba(255,255,255,0.02)',border:'1px solid #0d1e28',borderRadius:12,padding:20,marginBottom:16}}>
-                  <div style={{fontSize:12,color:'#3a6a7a',letterSpacing:'0.1em',textTransform:'uppercase',marginBottom:12}}>{doc.icon} {doc.label} · {doc.sentences.length} sentences</div>
-                  <div style={{display:'flex',flexDirection:'column',gap:6}}>
+                <div style={{ background: 'var(--surface-1)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-5)', marginBottom: 'var(--spacing-4)' }}>
+                  <div style={{ font: 'var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary)', color: 'var(--text-tertiary)', marginBottom: 'var(--spacing-3)', display: 'inline-flex', alignItems: 'center', gap: 'var(--spacing-2)' }}>
+                    <IconFor name={doc.iconKey} size={16} weight="duotone" />
+                    {doc.label} · {doc.sentences.length} sentences
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-1)' }}>
                     {doc.sentences.map((s, i) => {
                       const isRetrieved = retrievedIndices.has(i)
                       const rank = (introRetrieved?.results || []).findIndex(r => r.i === i)
                       return (
-                        <div key={i} style={{padding:'8px 12px',borderRadius:6,background:isRetrieved?'rgba(6,182,212,0.1)':'transparent',border:isRetrieved?'1px solid rgba(6,182,212,0.3)':'1px solid transparent',fontSize:13,color:isRetrieved?'#c0e8f0':'#4a7a8a',lineHeight:1.6,transition:'all 0.2s',display:'flex',alignItems:'flex-start',gap:8}}>
-                          {isRetrieved && <span style={{fontSize:11,color:'#06b6d4',fontFamily:'IBM Plex Mono',background:'rgba(6,182,212,0.15)',padding:'1px 6px',borderRadius:4,whiteSpace:'nowrap',marginTop:1}}>#{rank+1}</span>}
+                        <div key={i} style={{
+                          padding: 'var(--spacing-2) var(--spacing-3)',
+                          borderRadius: 'var(--radius-sm)',
+                          background: isRetrieved ? 'var(--orange-50)' : 'transparent',
+                          border: isRetrieved ? '1px solid var(--orange-500)' : '1px solid transparent',
+                          font: 'var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary)',
+                          color: isRetrieved ? 'var(--text-primary)' : 'var(--text-secondary)',
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          gap: 'var(--spacing-2)',
+                          transition: 'background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard)',
+                        }}>
+                          {isRetrieved && (
+                            <span style={{ font: 'var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary)', color: 'var(--orange-500)', background: 'var(--surface-1)', border: '1px solid var(--orange-500)', padding: '1px 6px', borderRadius: 'var(--radius-sm)', whiteSpace: 'nowrap', marginTop: 1 }}>
+                              #{rank + 1}
+                            </span>
+                          )}
                           <span>{s}</span>
                         </div>
                       )
@@ -670,37 +1257,43 @@ export default function RAG() {
               )
             })()}
 
-            {/* Question input */}
-            <div style={{marginBottom:10}}>
-              <div style={{fontSize:12,color:'#3a6a7a',letterSpacing:'0.1em',textTransform:'uppercase',marginBottom:8}}>Ask a question</div>
-              <div style={{display:'flex',gap:8}}>
-                <input type="text" className="rg-sim-input" value={introQuestion} onChange={e => setIntroQuestion(e.target.value)} onKeyDown={e => e.key === 'Enter' && runIntroAsk()} placeholder="Type a question about the document..." />
-                <button className="rg-btn" onClick={() => runIntroAsk()}>Ask →</button>
+            <div style={{ marginBottom: 'var(--spacing-3)' }}>
+              <div style={{ font: 'var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary)', letterSpacing: 0.06, color: 'var(--text-tertiary)', marginBottom: 'var(--spacing-2)' }}>Ask a question</div>
+              <div style={{ display: 'flex', gap: 'var(--spacing-2)' }}>
+                <input
+                  type="text"
+                  className="rg-sim-input"
+                  value={introQuestion}
+                  onChange={e => setIntroQuestion(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && runIntroAsk()}
+                  placeholder="Type a question about the document…"
+                />
+                <button className="rg-btn" onClick={() => runIntroAsk()}>
+                  Ask <ArrowRightIcon size={14} weight="bold" />
+                </button>
               </div>
             </div>
 
-            {/* Example question chips */}
-            <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:24,alignItems:'center'}}>
-              <span style={{fontSize:12,color:'#2a4a5a'}}>Try:</span>
+            <div style={{ display: 'flex', gap: 'var(--spacing-2)', flexWrap: 'wrap', marginBottom: 'var(--spacing-6)', alignItems: 'center' }}>
+              <span style={{ font: 'var(--text-weight-body) var(--text-size-caption)/1 var(--font-primary)', color: 'var(--text-tertiary)' }}>Try:</span>
               {INTRO_DOCS.find(d => d.id === introDocId).exampleQs.map(q => (
                 <button key={q} className="rg-eq-chip" onClick={() => runIntroAsk(q)}>{q}</button>
               ))}
             </div>
 
-            {/* Results */}
             {introRetrieved && introRetrieved.docId === introDocId && (
               <div>
                 {introRetrieved.results.length === 0 ? (
-                  <div className="rg-card-plain" style={{color:'#f87171',textAlign:'center',padding:'20px'}}>No relevant chunks found. Try a more specific question.</div>
+                  <div className="rg-card-plain" style={{ color: 'var(--color-error)', textAlign: 'center' }}>No relevant chunks found. Try a more specific question.</div>
                 ) : (
                   <>
-                    <div style={{fontFamily:'IBM Plex Sans',fontSize:15,fontWeight:700,color:'#fff',marginBottom:10}}>Retrieved chunks → Assembled prompt</div>
-                    <div style={{background:'#020508',border:'1px solid #0d1e28',borderRadius:10,padding:16,fontFamily:'IBM Plex Mono',fontSize:12,lineHeight:1.7,marginBottom:12,whiteSpace:'pre-wrap'}}>
-                      <span style={{color:'#3a6a7a'}}>{'[SYSTEM]\nYou are a helpful assistant. Answer using ONLY the provided context.\n\n'}</span>
-                      <span style={{color:'#06b6d4'}}>{'[CONTEXT]\n'}{introRetrieved.results.map((r,i) => `Chunk ${i+1}: ${r.s}`).join('\n')}{'\n\n'}</span>
-                      <span style={{color:'#c0e8f0'}}>{'[QUESTION]\n'}{introRetrieved.question}</span>
+                    <div style={{ font: 'var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary)', color: 'var(--text-primary)', marginBottom: 'var(--spacing-2)' }}>Retrieved chunks → assembled prompt</div>
+                    <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-4)', fontFamily: 'IBM Plex Mono, ui-monospace, monospace', fontSize: 'var(--text-size-meta)', lineHeight: 1.7, marginBottom: 'var(--spacing-3)', whiteSpace: 'pre-wrap' }}>
+                      <span style={{ color: 'var(--text-tertiary)' }}>{'[SYSTEM]\nYou are a helpful assistant. Answer using ONLY the provided context.\n\n'}</span>
+                      <span style={{ color: 'var(--blue-500)' }}>{'[CONTEXT]\n'}{introRetrieved.results.map((r, i) => `Chunk ${i+1}: ${r.s}`).join('\n')}{'\n\n'}</span>
+                      <span style={{ color: 'var(--orange-500)' }}>{'[QUESTION]\n'}{introRetrieved.question}</span>
                     </div>
-                    <div className="rg-answer-label">LLM Answer</div>
+                    <div className="rg-answer-label">LLM answer</div>
                     <div className="rg-answer-box">Based on the retrieved context: {introRetrieved.results.map(r => r.s).join(' ')}</div>
                   </>
                 )}
@@ -712,8 +1305,8 @@ export default function RAG() {
         {/* ── Tab 1: Pipeline ───────────────────────────────────────────── */}
         {tab === 1 && (
           <div>
-            <div className="rg-section-title">The RAG Pipeline</div>
-            <p className="rg-section-sub">Step through each stage of a Retrieval-Augmented Generation pipeline. Click "Next Step" to advance.</p>
+            <div className="rg-section-title">The RAG pipeline</div>
+            <p className="rg-section-sub">Step through each stage of a retrieval-augmented generation pipeline. Click "Next step" to advance.</p>
 
             {PIPELINE_STEPS.map((step, i) => {
               const isActive = i === pipelineStep
@@ -722,13 +1315,14 @@ export default function RAG() {
                 <div
                   key={step.id}
                   className={`rg-pipeline-step${isActive ? ' active' : isDone ? ' done' : ''}`}
+                  style={{ '--step-tint': step.tint, '--step-soft': step.soft }}
                 >
-                  <div className="rg-step-icon">{step.icon}</div>
+                  <div className="rg-step-icon"><IconFor name={step.iconKey} size={22} weight="duotone" /></div>
                   <div style={{ flex: 1 }}>
-                    <div className={`rg-step-num${isActive ? ' active' : ''}`}>STEP {i + 1} OF 6</div>
-                    <div className={`rg-step-label${isActive ? ' active' : ''}`}>{step.label}</div>
+                    <div className="rg-step-num">Step {i + 1} of 6</div>
+                    <div className="rg-step-label">{step.label}</div>
                     {(isActive || isDone) && (
-                      <div className={`rg-step-content${isActive ? ' active' : ''}`}>
+                      <div className="rg-step-content">
                         {isActive && i === 5 ? (
                           <span className="rg-streaming">
                             {streaming}
@@ -738,29 +1332,33 @@ export default function RAG() {
                       </div>
                     )}
                   </div>
-                  {isDone && <div style={{ color: '#06b6d4', fontSize: 18, marginTop: 2 }}>✓</div>}
+                  {isDone && <CheckIcon size={18} weight="bold" style={{ color: 'var(--color-success)', marginTop: 2 }} />}
                 </div>
               )
             })}
 
-            <div style={{ marginTop: 24, display: 'flex', gap: 0 }}>
+            <div style={{ marginTop: 'var(--spacing-6)', display: 'flex', gap: 0 }}>
               {pipelineStep < 5 && (
-                <button className="rg-btn" onClick={advancePipeline}>Next Step →</button>
+                <button className="rg-btn" onClick={advancePipeline}>
+                  Next step <ArrowRightIcon size={14} weight="bold" />
+                </button>
               )}
-              <button className="rg-btn-ghost" onClick={resetPipeline}>Reset</button>
+              <button className="rg-btn-ghost" onClick={resetPipeline}>
+                <ArrowCounterClockwiseIcon size={14} weight="bold" /> Reset
+              </button>
             </div>
 
-            <div style={{ marginTop: 40 }}>
-              <div className="rg-section-title" style={{ fontSize: 18, marginBottom: 16 }}>Why RAG?</div>
+            <div style={{ marginTop: 'var(--spacing-7)' }}>
+              <div className="rg-section-title" style={{ fontSize: 'var(--text-size-h3)', marginBottom: 'var(--spacing-4)' }}>Why RAG?</div>
               <div className="rg-benefits-grid">
                 {[
-                  { icon: '📅', title: 'Overcomes Knowledge Cutoff', desc: 'Inject current information without retraining the model.' },
-                  { icon: '🎯', title: 'Reduces Hallucinations', desc: 'Grounding answers in real retrieved text cuts fabrication dramatically.' },
-                  { icon: '🔒', title: 'Enables Private Data Q&A', desc: "Query your company's internal documents with full privacy control." },
-                  { icon: '⚡', title: 'No Retraining Required', desc: 'Update the knowledge base in minutes, not weeks.' },
+                  { iconKey: 'calendar',  title: 'Overcomes knowledge cutoff', desc: 'Inject current information without retraining the model.' },
+                  { iconKey: 'target',    title: 'Reduces hallucinations',     desc: 'Grounding answers in real retrieved text cuts fabrication dramatically.' },
+                  { iconKey: 'lock',      title: 'Enables private Q&A',        desc: "Query your company's internal documents with full privacy control." },
+                  { iconKey: 'lightning', title: 'No retraining required',     desc: 'Update the knowledge base in minutes, not weeks.' },
                 ].map(b => (
                   <div key={b.title} className="rg-benefit-card">
-                    <div className="rg-benefit-icon">{b.icon}</div>
+                    <div className="rg-benefit-icon"><IconFor name={b.iconKey} size={24} weight="duotone" /></div>
                     <div className="rg-benefit-title">{b.title}</div>
                     <div className="rg-benefit-desc">{b.desc}</div>
                   </div>
@@ -773,12 +1371,12 @@ export default function RAG() {
         {/* ── Tab 2: Chunking ───────────────────────────────────────────── */}
         {tab === 2 && (
           <div>
-            <div className="rg-section-title">Document Chunking</div>
+            <div className="rg-section-title">Document chunking</div>
             <p className="rg-section-sub">Documents must be split into chunks before they can be embedded and indexed. The chunking strategy directly affects retrieval quality.</p>
 
             <div className="rg-controls">
               <div className="rg-slider-wrap">
-                <span className="rg-slider-label">Chunk size:</span>
+                <span className="rg-slider-label">Chunk size</span>
                 <input
                   type="range" min={2} max={6} step={1}
                   value={chunkSize}
@@ -786,7 +1384,7 @@ export default function RAG() {
                   className="rg-slider"
                   disabled={chunkStrategy === 'paragraph'}
                 />
-                <span className="rg-slider-val">~{chunkSize * 25} tokens/chunk</span>
+                <span className="rg-slider-val">~{chunkSize * 25} tokens / chunk</span>
               </div>
               <div className="rg-strategy-btns">
                 {['fixed', 'sentence', 'paragraph'].map(s => (
@@ -810,21 +1408,21 @@ export default function RAG() {
                   <span
                     key={ci}
                     className="rg-chunk-seg"
-                    style={{ background: col.bg, borderLeft: `3px solid ${col.border.replace('0.3', '0.5')}`, paddingLeft: 6, marginRight: 2, display: 'inline' }}
+                    style={{ background: col.bg, borderLeft: `3px solid ${col.border}`, paddingLeft: 6, marginRight: 2, display: 'inline' }}
                     title={`Chunk ${ci + 1}`}
                   >
                     {chunk.join(' ')}
-                    {ci < chunks.length - 1 && <span style={{ color: col.border, fontFamily: 'IBM Plex Mono', fontSize: 11, margin: '0 4px' }}> ‖ </span>}
+                    {ci < chunks.length - 1 && <span style={{ color: col.border, fontFamily: 'IBM Plex Mono, ui-monospace, monospace', fontSize: 'var(--text-size-meta)', margin: '0 4px' }}> ‖ </span>}
                   </span>
                 )
               })}
             </div>
 
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
+            <div style={{ display: 'flex', gap: 'var(--spacing-2)', flexWrap: 'wrap', marginTop: 'var(--spacing-3)' }}>
               {chunks.map((_, ci) => {
                 const col = CHUNK_COLORS[ci % CHUNK_COLORS.length]
                 return (
-                  <span key={ci} style={{ fontSize: 12, fontFamily: 'IBM Plex Mono', padding: '2px 8px', borderRadius: 4, background: col.bg, color: col.border, border: `1px solid ${col.border}` }}>
+                  <span key={ci} style={{ font: 'var(--text-weight-body) var(--text-size-meta)/1 var(--font-primary)', fontFamily: 'IBM Plex Mono, ui-monospace, monospace', padding: '2px 8px', borderRadius: 'var(--radius-sm)', background: col.bg, color: col.border, border: `1px solid ${col.border}` }}>
                     {`Chunk ${ci + 1} · ${chunks[ci].join(' ').split(/\s+/).length} words`}
                   </span>
                 )
@@ -834,7 +1432,7 @@ export default function RAG() {
             <div className="rg-overlap-info">
               <div className="rg-overlap-title">What is chunk overlap?</div>
               <div className="rg-overlap-text">
-                When documents are split at fixed boundaries, sentences that span two chunks get severed — losing context. Chunk overlap (typically 10–20%) copies the tail of each chunk into the head of the next, ensuring boundary-spanning content is fully captured in at least one retrievable unit. For a 100-token chunk with 20% overlap, each chunk shares 20 tokens with its neighbor.
+                When documents are split at fixed boundaries, sentences that span two chunks get severed — losing context. Chunk overlap (typically 10–20%) copies the tail of each chunk into the head of the next, ensuring boundary-spanning content is fully captured in at least one retrievable unit. For a 100-token chunk with 20% overlap, each chunk shares 20 tokens with its neighbour.
               </div>
             </div>
           </div>
@@ -843,7 +1441,7 @@ export default function RAG() {
         {/* ── Tab 3: Retrieval ──────────────────────────────────────────── */}
         {tab === 3 && (
           <div>
-            <div className="rg-section-title">Semantic Retrieval</div>
+            <div className="rg-section-title">Semantic retrieval</div>
             <p className="rg-section-sub">Select a query to see how similarity scores determine which chunks are retrieved. The top 3 results are passed to the LLM.</p>
 
             <div className="rg-query-chips">
@@ -859,39 +1457,39 @@ export default function RAG() {
             </div>
 
             {selectedQuery === null && (
-              <div className="rg-card-plain" style={{ textAlign: 'center', color: '#3a6a7a', padding: '40px 24px' }}>
-                Select a query above to see retrieval results
+              <div className="rg-card-plain" style={{ textAlign: 'center', color: 'var(--text-tertiary)' }}>
+                Select a query above to see retrieval results.
               </div>
             )}
 
             {selectedQuery !== null && sortedChunks.map((chunk, i) => (
               <div key={chunk.id} className={`rg-chunk-card${i < 3 ? ' top-result' : ''}`}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--spacing-1)' }}>
                   <div className="rg-chunk-title">{chunk.title}</div>
                   {i < 3 && <span className="rg-top-badge">Top {i+1}</span>}
                 </div>
                 <div className="rg-chunk-text">{chunk.text}</div>
                 <div className="rg-score-row">
                   <div className="rg-score-bar-bg">
-                    <div className="rg-score-bar" style={{ width: `${chunk.score * 100}%`, background: i < 3 ? '#06b6d4' : '#1a3a4a' }} />
+                    <div className="rg-score-bar" style={{ width: `${chunk.score * 100}%` }} />
                   </div>
-                  <div className="rg-score-val" style={{ color: i < 3 ? '#06b6d4' : '#2a4a5a' }}>{chunk.score.toFixed(2)}</div>
+                  <div className="rg-score-val">{chunk.score.toFixed(2)}</div>
                 </div>
               </div>
             ))}
 
             <div className="rg-quality-section">
-              <div className="rg-section-title" style={{ fontSize: 17, marginBottom: 6 }}>Query Quality Matters</div>
-              <p style={{ fontSize: 14, color: '#3a6a7a', marginBottom: 14 }}>Vague queries return scattered scores. Specific queries surface a clear winner.</p>
+              <div className="rg-section-title" style={{ fontSize: 'var(--text-size-h3)', marginBottom: 'var(--spacing-1)' }}>Query quality matters</div>
+              <p style={{ font: 'var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)', marginBottom: 'var(--spacing-3)' }}>Vague queries return scattered scores. Specific queries surface a clear winner.</p>
               <div className="rg-quality-grid">
                 <div className="rg-quality-col vague">
                   <div className="rg-quality-label vague">Vague query</div>
                   <div className="rg-quality-query">"Tell me about security"</div>
                   <div className="rg-quality-scores">
-                    {[['Data Security', 0.42], ['Cybersecurity', 0.39], ['Networks', 0.35], ['Economics', 0.33]].map(([lbl, val]) => (
+                    {[['Data security', 0.42], ['Cybersecurity', 0.39], ['Networks', 0.35], ['Economics', 0.33]].map(([lbl, val]) => (
                       <div key={lbl} className="rg-quality-score-row">
                         <span className="lbl">{lbl}</span>
-                        <div className="bar-bg"><div className="bar" style={{ width: `${val * 100}%`, background: '#f87171' }} /></div>
+                        <div className="bar-bg"><div className="bar" style={{ width: `${val * 100}%`, background: 'var(--color-error)' }} /></div>
                         <span className="val">{val.toFixed(2)}</span>
                       </div>
                     ))}
@@ -901,10 +1499,10 @@ export default function RAG() {
                   <div className="rg-quality-label specific">Specific query</div>
                   <div className="rg-quality-query">"How to prevent SQL injection attacks"</div>
                   <div className="rg-quality-scores">
-                    {[['Data Security', 0.94], ['Cybersecurity', 0.61], ['Networks', 0.22], ['Economics', 0.08]].map(([lbl, val]) => (
+                    {[['Data security', 0.94], ['Cybersecurity', 0.61], ['Networks', 0.22], ['Economics', 0.08]].map(([lbl, val]) => (
                       <div key={lbl} className="rg-quality-score-row">
                         <span className="lbl">{lbl}</span>
-                        <div className="bar-bg"><div className="bar" style={{ width: `${val * 100}%`, background: '#34d399' }} /></div>
+                        <div className="bar-bg"><div className="bar" style={{ width: `${val * 100}%`, background: 'var(--color-success)' }} /></div>
                         <span className="val">{val.toFixed(2)}</span>
                       </div>
                     ))}
@@ -918,11 +1516,11 @@ export default function RAG() {
         {/* ── Tab 4: Prompt Assembly ────────────────────────────────────── */}
         {tab === 4 && (
           <div>
-            <div className="rg-section-title">Prompt Assembly</div>
+            <div className="rg-section-title">Prompt assembly</div>
             <p className="rg-section-sub">Toggle context chunks on and off to see how the assembled prompt — and the LLM's answer — change in real time.</p>
 
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 13, color: '#3a6a7a', marginBottom: 8, letterSpacing: '0.1em', textTransform: 'uppercase' }}>System prompt template</div>
+            <div style={{ marginBottom: 'var(--spacing-4)' }}>
+              <div className="rg-assembly-col-label">System prompt template</div>
               <div className="rg-template-btns">
                 {Object.keys(TEMPLATE_CONFIGS).map(t => (
                   <button key={t} className={`rg-template-btn${promptTemplate === t ? ' active' : ''}`} onClick={() => setPromptTemplate(t)}>
@@ -942,11 +1540,17 @@ export default function RAG() {
                 {PROMPT_CHUNKS.map(c => {
                   const on = includedChunks.has(c.id)
                   return (
-                    <div key={c.id} className={`rg-chunk-toggle${on ? ' included' : ' excluded'}`} onClick={() => toggleChunk(c.id)}>
+                    <button
+                      key={c.id}
+                      type="button"
+                      className={`rg-chunk-toggle${on ? ' included' : ' excluded'}`}
+                      onClick={() => toggleChunk(c.id)}
+                      aria-pressed={on}
+                    >
                       <div className="rg-chunk-toggle-title">{c.title}</div>
                       <div className="rg-chunk-toggle-text">{c.text}</div>
-                      <div className={`rg-chunk-toggle-status${on ? ' on' : ' off'}`}>{on ? '✓ included' : '✗ excluded'}</div>
-                    </div>
+                      <div className={`rg-chunk-toggle-status${on ? ' on' : ' off'}`}>{on ? 'Included' : 'Excluded'}</div>
+                    </button>
                   )
                 })}
               </div>
@@ -957,11 +1561,11 @@ export default function RAG() {
                   <span className="rg-prompt-context">Context:{'\n'}{assembledPrompt.contextBlock}{'\n\n'}</span>
                   <span className="rg-prompt-query">Question: What are the main causes of inflation?</span>
                 </div>
-                <div className="rg-token-count">Estimated tokens: <span>{tokenCount}</span></div>
+                <div className="rg-token-count">Estimated tokens: <strong>{tokenCount}</strong></div>
               </div>
             </div>
 
-            <div className="rg-answer-label">LLM Answer</div>
+            <div className="rg-answer-label">LLM answer</div>
             <div className="rg-answer-box">{answer}</div>
           </div>
         )}
@@ -969,7 +1573,7 @@ export default function RAG() {
         {/* ── Tab 5: RAG vs Fine-Tuning ─────────────────────────────────── */}
         {tab === 5 && (
           <div>
-            <div className="rg-section-title">RAG vs Fine-Tuning</div>
+            <div className="rg-section-title">RAG vs fine-tuning</div>
             <p className="rg-section-sub">Both techniques adapt LLMs to specific domains — but in fundamentally different ways. Click any row to expand.</p>
 
             <table className="rg-compare-table">
@@ -977,64 +1581,66 @@ export default function RAG() {
                 <tr>
                   <th style={{ width: '22%' }}>Dimension</th>
                   <th className="rag-col">RAG</th>
-                  <th className="ft-col">Fine-Tuning</th>
+                  <th className="ft-col">Fine-tuning</th>
                 </tr>
               </thead>
               <tbody>
                 {COMPARISON_ROWS.map((row, i) => (
-                  <>
-                    <tr
-                      key={`row-${i}`}
-                      className={`rg-compare-row${expandedRow === i ? ' expanded' : ''}`}
-                      onClick={() => toggleRow(i)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <td>
-                        <div className="rg-row-expand">
-                          <span className={`rg-row-expand-arrow${expandedRow === i ? ' open' : ''}`}>▶</span>
-                          <span className="rg-row-label">{row.label}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <span className={`rg-rating-dot ${row.rag.rating}`} />
-                        <span className="rg-cell-short">{expandedRow === i ? '' : row.rag.text.slice(0, 38) + '…'}</span>
-                        {expandedRow === i && <div className="rg-cell-detail">{row.rag.text}</div>}
-                      </td>
-                      <td>
-                        <span className={`rg-rating-dot ${row.ft.rating}`} />
-                        <span className="rg-cell-short">{expandedRow === i ? '' : row.ft.text.slice(0, 38) + '…'}</span>
-                        {expandedRow === i && <div className="rg-cell-detail">{row.ft.text}</div>}
-                      </td>
-                    </tr>
-                  </>
+                  <tr
+                    key={`row-${i}`}
+                    className={`rg-compare-row${expandedRow === i ? ' expanded' : ''}`}
+                    onClick={() => toggleRow(i)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <td>
+                      <div className="rg-row-expand">
+                        <span className={`rg-row-expand-arrow${expandedRow === i ? ' open' : ''}`}>
+                          <ArrowRightIcon size={12} weight="bold" />
+                        </span>
+                        <span className="rg-row-label">{row.label}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span className={`rg-rating-dot ${row.rag.rating}`} />
+                      <span className="rg-cell-short">{expandedRow === i ? '' : row.rag.text.slice(0, 38) + '…'}</span>
+                      {expandedRow === i && <div className="rg-cell-detail">{row.rag.text}</div>}
+                    </td>
+                    <td>
+                      <span className={`rg-rating-dot ${row.ft.rating}`} />
+                      <span className="rg-cell-short">{expandedRow === i ? '' : row.ft.text.slice(0, 38) + '…'}</span>
+                      {expandedRow === i && <div className="rg-cell-detail">{row.ft.text}</div>}
+                    </td>
+                  </tr>
                 ))}
               </tbody>
             </table>
 
-            <div className="rg-section-title" style={{ fontSize: 17, marginBottom: 6 }}>When to use which?</div>
-            <p style={{ fontSize: 14, color: '#3a6a7a', marginBottom: 14 }}>Click a scenario to see the recommended approach.</p>
+            <div className="rg-section-title" style={{ fontSize: 'var(--text-size-h3)', marginBottom: 'var(--spacing-1)' }}>When to use which?</div>
+            <p style={{ font: 'var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)', marginBottom: 'var(--spacing-4)' }}>Click a scenario to see the recommended approach.</p>
             <div className="rg-scenario-grid">
               {SCENARIOS.map(sc => (
-                <div
+                <button
                   key={sc.id}
+                  type="button"
                   className={`rg-scenario-card${selectedScenario === sc.id ? ' selected' : ''}`}
                   onClick={() => setSelectedScenario(prev => prev === sc.id ? null : sc.id)}
+                  aria-pressed={selectedScenario === sc.id}
                 >
                   <div className="rg-scenario-title">{sc.title}</div>
                   {selectedScenario === sc.id && (
                     <>
                       <div className={`rg-scenario-rec ${sc.recommendation}`}>
-                        {sc.recommendation === 'rag' ? 'Use RAG' : sc.recommendation === 'finetune' ? 'Fine-Tune' : 'Hybrid'}
+                        {sc.recommendation === 'rag' ? 'Use RAG' : sc.recommendation === 'finetune' ? 'Fine-tune' : 'Hybrid'}
                       </div>
                       <div className="rg-scenario-rationale">{sc.rationale}</div>
                     </>
                   )}
-                </div>
+                </button>
               ))}
             </div>
 
             <div className="rg-hybrid-box">
-              <div className="rg-hybrid-title">Hybrid RAG + Fine-Tuning</div>
+              <div className="rg-hybrid-title">Hybrid RAG + fine-tuning</div>
               <div className="rg-hybrid-text">
                 Production AI systems often combine both. Fine-tuning teaches the model domain language, reasoning patterns, and output format — while RAG supplies the specific facts and current information the model needs to answer accurately. The two techniques are complementary, not mutually exclusive.
               </div>
@@ -1049,7 +1655,7 @@ export default function RAG() {
               <div className="rg-quiz-done">
                 <div className="rg-quiz-done-score">{score}/{SESSION_SIZE}</div>
                 <div className="rg-quiz-done-label">Questions answered correctly</div>
-                <button className="rg-btn" onClick={retake}>Retake Quiz</button>
+                <button className="rg-btn" onClick={retake}>Retake quiz</button>
               </div>
             ) : currentQ ? (
               <>
@@ -1057,16 +1663,14 @@ export default function RAG() {
                   <div className="rg-quiz-progress-bar-bg">
                     <div className="rg-quiz-progress-bar" style={{ width: `${(qNum / SESSION_SIZE) * 100}%` }} />
                   </div>
-                  <span className="rg-quiz-progress-label">{qNum + 1} / {SESSION_SIZE}</span>
+                  <span className="rg-quiz-progress-label">Question {qNum + 1} of {SESSION_SIZE}</span>
                 </div>
 
-                <div className={`rg-diff-badge ${currentQ.difficulty}`}>
-                  {currentQ.difficulty === 'easy' ? '◎ Easy' : currentQ.difficulty === 'medium' ? '◈ Medium' : '◆ Hard'}
-                </div>
+                <div className={`rg-diff-badge ${currentQ.difficulty}`}>{currentQ.difficulty}</div>
 
                 <div className="rg-quiz-q">{currentQ.q}</div>
 
-                <div className="rg-quiz-opts">
+                <div className="rg-quiz-opts" role="radiogroup">
                   {currentQ.opts.map((opt, i) => {
                     let cls = 'rg-quiz-opt'
                     if (chosen !== null) {
@@ -1075,8 +1679,15 @@ export default function RAG() {
                       else cls += ' neutral'
                     }
                     return (
-                      <button key={i} className={cls} onClick={() => handleQuiz(i)} disabled={chosen !== null}>
-                        <span style={{ color: '#3a6a7a', marginRight: 10, fontFamily: 'IBM Plex Mono', fontSize: 13 }}>{String.fromCharCode(65 + i)}.</span>
+                      <button
+                        key={i}
+                        className={cls}
+                        onClick={() => handleQuiz(i)}
+                        disabled={chosen !== null}
+                        role="radio"
+                        aria-checked={chosen === i}
+                      >
+                        <span className="rg-quiz-opt-letter">{String.fromCharCode(65 + i)}.</span>
                         {opt}
                       </button>
                     )
@@ -1086,11 +1697,11 @@ export default function RAG() {
                 {chosen !== null && (
                   <>
                     <div className="rg-quiz-explanation">
-                      <strong>{chosen === currentQ.correct ? 'Correct!' : 'Not quite.'}</strong>{' '}
+                      <strong>{chosen === currentQ.correct ? 'Correct.' : 'Not quite.'}</strong>{' '}
                       {currentQ.explanation}
                     </div>
                     <button className="rg-btn" onClick={nextQ}>
-                      {qNum + 1 >= SESSION_SIZE ? 'See Results' : 'Next Question →'}
+                      {qNum + 1 >= SESSION_SIZE ? 'See results' : 'Next question'}
                     </button>
                   </>
                 )}
