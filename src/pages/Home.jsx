@@ -1,423 +1,293 @@
 import { Link } from 'react-router-dom'
-import { GraduationCapIcon, ChartScatterIcon, ThermometerSimpleIcon, LinkedinLogoIcon } from '@phosphor-icons/react'
+import {
+  GraduationCapIcon, ChartScatterIcon, ThermometerSimpleIcon, LinkedinLogoIcon,
+  HashIcon, RobotIcon, BrainIcon, PuzzlePieceIcon, PaletteIcon,
+  BooksIcon, FlowArrowIcon, LightningIcon, PresentationChartIcon,
+  GraphIcon, BookOpenIcon, ArrowRightIcon,
+} from '@phosphor-icons/react'
 import NavBar from '../components/NavBar.jsx'
 
 const css = `
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
+/* ── Phase 6: Home rebuilt on Prism tokens.
+ *  Differentiation between cards = icon + tag (§5.1).
+ *  Per-card accent colours dropped per §8. ─────────────────── */
 
-.home { min-height: 100vh; background: #050810; color: #e0e8f0; font-family: 'IBM Plex Mono', monospace; }
+.home { min-height: 100vh; background: var(--surface-base); color: var(--text-primary); }
 
-.hero { position: relative; padding: 80px 24px 64px; text-align: center; overflow: hidden; }
-.hero-glow { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 40% at 50% -10%, rgba(56,189,248,0.12) 0%, transparent 60%), radial-gradient(ellipse 40% 30% at 20% 80%, rgba(129,140,248,0.07) 0%, transparent 50%), radial-gradient(ellipse 30% 25% at 80% 70%, rgba(52,211,153,0.06) 0%, transparent 50%); pointer-events: none; }
-.hero-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(56,189,248,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,0.04) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 0%, transparent 80%); }
+/* Hero — obsidian + refracted light (§5.2) */
+.hero {
+  position: relative;
+  text-align: center;
+  padding: var(--spacing-7) var(--spacing-4) var(--spacing-6);
+  background: var(--text-primary);
+  color: var(--surface-base);
+  overflow: hidden;
+}
+:root[data-theme="dark"] .hero {
+  background: var(--surface-base);
+  color: var(--text-primary);
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-refracted-b);
+  opacity: var(--refracted-opacity-standard);
+  pointer-events: none;
+}
+.hero > * { position: relative; }
 
-.hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #38bdf8; margin-bottom: 20px; padding: 6px 14px; background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.2); border-radius: 100px; }
-.hero-title { font-family: 'IBM Plex Sans', sans-serif; font-size: clamp(42px, 7vw, 88px); font-weight: 900; letter-spacing: -0.04em; line-height: 0.95; color: #fff; margin-bottom: 24px; }
-.hero-title .line2 { display: block; background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #34d399 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-.hero-desc { font-size: 16px; color: #7a9bbf; max-width: 520px; margin: 0 auto 48px; line-height: 1.8; }
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  letter-spacing: 0.08em;
+  color: var(--orange-300);
+  margin-bottom: var(--spacing-4);
+  padding: var(--spacing-1) var(--spacing-3);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 100px;
+}
+.hero-title {
+  font: var(--text-weight-h1) clamp(var(--text-size-h2), 6vw, 64px)/1.05 var(--font-primary);
+  letter-spacing: var(--text-ls-h1);
+  margin-bottom: var(--spacing-4);
+}
+.hero-desc {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  max-width: 560px;
+  margin: 0 auto var(--spacing-6);
+  opacity: 0.85;
+}
 
-.hero-stats { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; }
-.hero-stat-num { font-family: 'IBM Plex Sans', sans-serif; font-size: 28px; font-weight: 900; color: #38bdf8; line-height: 1; }
-.hero-stat-lbl { font-size: 16px; color: #4a6a8a; letter-spacing: 0.12em; text-transform: uppercase; margin-top: 4px; }
+.hero-stats { display: flex; justify-content: center; gap: var(--spacing-7); flex-wrap: wrap; }
+.hero-stat-num {
+  font: var(--text-weight-h1) var(--text-size-h2)/1 var(--font-primary);
+  letter-spacing: var(--text-ls-h2);
+  color: var(--orange-300);
+}
+.hero-stat-lbl {
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+  margin-top: var(--spacing-1);
+}
 
-.hero-byline { position: relative; display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 40px; font-size: 13px; color: #5a7a9a; letter-spacing: 0.03em; }
-.hero-byline strong { color: #94b8d8; font-weight: 600; }
-.hero-byline-sep { color: #2a4060; }
-.hero-byline-link { display: inline-flex; align-items: center; gap: 6px; color: #7a9bbf; text-decoration: none; transition: color 0.18s; }
-.hero-byline-link:hover { color: #38bdf8; }
+.hero-byline {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: var(--spacing-6);
+  font: var(--text-weight-body) var(--text-size-caption)/1.4 var(--font-primary);
+  opacity: 0.7;
+}
+.hero-byline strong { font-weight: 600; opacity: 1; }
+.hero-byline-sep { opacity: 0.4; }
+.hero-byline-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+.hero-byline-link:hover { opacity: 1; }
 
-.lab-section { max-width: 1100px; margin: 0 auto; padding: 0 24px 100px; }
-.section-header { display: flex; align-items: baseline; gap: 14px; margin-bottom: 28px; }
-.section-label { font-size: 13px; letter-spacing: 0.18em; text-transform: uppercase; color: #38bdf8; }
-.section-line { flex: 1; height: 1px; background: linear-gradient(90deg, rgba(56,189,248,0.3), transparent); }
+/* Section grid */
+.lab-section { max-width: 1100px; margin: 0 auto; padding: 0 var(--spacing-4) var(--spacing-7); }
+.section-header { display: flex; align-items: baseline; gap: var(--spacing-3); margin-bottom: var(--spacing-5); }
+.section-label {
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+}
+.section-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border-default);
+}
 
-.viz-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+.viz-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--spacing-4); }
 
-.viz-card { position: relative; background: #0a1020; border: 1px solid #141e35; border-radius: 16px; padding: 28px; text-decoration: none; display: block; overflow: hidden; transition: all 0.25s cubic-bezier(.4,0,.2,1); }
-.viz-card::before { content: ''; position: absolute; inset: 0; border-radius: 16px; opacity: 0; transition: opacity 0.25s; background: var(--card-glow); }
-.viz-card:hover { border-color: var(--card-accent); transform: translateY(-3px); box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 40px var(--card-glow-color); }
-.viz-card:hover::before { opacity: 1; }
-.viz-card.coming-soon { opacity: 0.5; cursor: default; pointer-events: none; }
+.viz-card {
+  position: relative;
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-5);
+  text-decoration: none;
+  display: block;
+  color: inherit;
+  box-shadow: var(--shadow-e2);
+  transition: border-color var(--duration-fast) var(--ease-standard),
+              box-shadow var(--duration-fast) var(--ease-standard),
+              transform var(--duration-fast) var(--ease-standard);
+}
+.viz-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-e2), var(--shadow-e1);
+  transform: translateY(-2px);
+}
+.viz-card:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+.viz-card.coming-soon { opacity: 0.55; cursor: default; pointer-events: none; }
 
-.card-icon-wrap { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 18px; background: var(--card-icon-bg); border: 1px solid var(--card-accent-dim); position: relative; z-index: 1; }
-.card-tag { display: inline-block; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; margin-bottom: 10px; background: var(--card-tag-bg); color: var(--card-accent); border: 1px solid var(--card-accent-dim); position: relative; z-index: 1; }
-.card-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 8px; letter-spacing: -0.02em; position: relative; z-index: 1; }
-.card-desc { font-size: 16px; color: #5a7a9a; line-height: 1.7; margin-bottom: 20px; position: relative; z-index: 1; }
-.card-pills { display: flex; flex-wrap: wrap; gap: 6px; position: relative; z-index: 1; }
-.card-pill { font-size: 16px; color: #3a5a7a; background: rgba(255,255,255,0.03); border: 1px solid #141e35; padding: 3px 8px; border-radius: 4px; }
-.card-arrow { position: absolute; bottom: 24px; right: 24px; font-size: 18px; color: var(--card-accent); opacity: 0; transform: translateX(-6px); transition: all 0.2s; z-index: 1; }
+.card-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-4);
+}
+.card-tag {
+  display: inline-block;
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--spacing-2);
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
+}
+.card-title {
+  font: var(--text-weight-h3) var(--text-size-h3)/var(--text-lh-h3) var(--font-primary);
+  letter-spacing: var(--text-ls-h3);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-2);
+}
+.card-desc {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-4);
+}
+.card-pills { display: flex; flex-wrap: wrap; gap: var(--spacing-1); }
+.card-pill {
+  font: var(--text-weight-body) var(--text-size-meta)/1 var(--font-primary);
+  color: var(--text-tertiary);
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+}
+.card-arrow {
+  position: absolute;
+  bottom: var(--spacing-5);
+  right: var(--spacing-5);
+  color: var(--text-tertiary);
+  display: inline-flex;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity var(--duration-fast) var(--ease-standard), transform var(--duration-fast) var(--ease-standard);
+}
 .viz-card:hover .card-arrow { opacity: 1; transform: translateX(0); }
-.coming-label { position: absolute; top: 16px; right: 16px; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #3a5a7a; background: rgba(255,255,255,0.04); border: 1px solid #1a2744; padding: 4px 8px; border-radius: 4px; }
 
-.lab-footer { border-top: 1px solid #0d1828; padding: 28px 24px; text-align: center; font-size: 13px; color: #2a4060; letter-spacing: 0.06em; }
+/* Beta-style "Coming soon" badge, mirroring .badge--beta */
+.coming-label {
+  position: absolute;
+  top: var(--spacing-3);
+  right: var(--spacing-3);
+  display: inline-flex;
+  align-items: center;
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  border: 1px solid var(--color-info);
+  color: var(--color-info);
+}
 
-.gl-utility-bar { max-width: 1100px; margin: 0 auto; padding: 0 24px 32px; }
-.gl-utility-link { display: flex; align-items: center; gap: 14px; background: rgba(148,163,184,0.03); border: 1px solid rgba(148,163,184,0.1); border-radius: 10px; padding: 13px 20px; text-decoration: none; transition: all 0.18s; }
-.gl-utility-link:hover { border-color: rgba(148,163,184,0.28); background: rgba(148,163,184,0.06); }
-.gl-utility-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; font-weight: 700; color: #94a3b8; margin-right: 10px; }
-.gl-utility-desc { font-size: 12px; color: #3a5a7a; font-family: 'IBM Plex Mono', monospace; }
-.gl-utility-arrow { margin-left: auto; color: #94a3b8; font-size: 16px; flex-shrink: 0; transition: transform 0.18s; }
+.lab-footer {
+  border-top: 1px solid var(--border-default);
+  padding: var(--spacing-5) var(--spacing-4);
+  text-align: center;
+  font: var(--text-weight-body) var(--text-size-caption)/1.6 var(--font-primary);
+  color: var(--text-tertiary);
+}
+.lab-footer strong { color: var(--text-secondary); font-weight: 600; }
+
+/* Glossary utility row */
+.gl-utility-bar { max-width: 1100px; margin: 0 auto; padding: var(--spacing-5) var(--spacing-4) var(--spacing-4); }
+.gl-utility-link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3) var(--spacing-4);
+  text-decoration: none;
+  color: inherit;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+}
+.gl-utility-link:hover { background: var(--surface-2); border-color: var(--border-strong); }
+.gl-utility-link:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.gl-utility-title {
+  font: var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary);
+  color: var(--text-primary);
+}
+.gl-utility-desc {
+  font: var(--text-weight-body) var(--text-size-caption)/1.4 var(--font-primary);
+  color: var(--text-secondary);
+}
+.gl-utility-arrow {
+  margin-left: auto;
+  color: var(--text-tertiary);
+  display: inline-flex;
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
 .gl-utility-link:hover .gl-utility-arrow { transform: translateX(3px); }
 `
 
-const TokenIcon = () => (
-  <svg width="32" height="32" viewBox="0 0 160 120" xmlns="http://www.w3.org/2000/svg">
-    <rect x="0"  y="0"  width="36" height="22" rx="4" fill="rgba(56,189,248,0.15)"  stroke="#38bdf8" strokeWidth="2"/>
-    <rect x="40" y="0"  width="28" height="22" rx="4" fill="rgba(129,140,248,0.15)" stroke="#818cf8" strokeWidth="2"/>
-    <rect x="72" y="0"  width="44" height="22" rx="4" fill="rgba(52,211,153,0.15)"  stroke="#34d399" strokeWidth="2"/>
-    <rect x="120" y="0" width="22" height="22" rx="4" fill="rgba(251,191,36,0.15)"  stroke="#fbbf24" strokeWidth="2"/>
-    <rect x="0"  y="30" width="50" height="22" rx="4" fill="rgba(249,115,22,0.15)"  stroke="#f97316" strokeWidth="2"/>
-    <rect x="54" y="30" width="30" height="22" rx="4" fill="rgba(56,189,248,0.15)"  stroke="#38bdf8" strokeWidth="2"/>
-    <rect x="88" y="30" width="52" height="22" rx="4" fill="rgba(129,140,248,0.15)" stroke="#818cf8" strokeWidth="2"/>
-    <line x1="70" y1="58" x2="70" y2="72" stroke="#38bdf8" strokeWidth="2" strokeOpacity="0.5"/>
-    <polygon points="62,72 78,72 70,82" fill="#38bdf8" opacity="0.5"/>
-    <rect x="0"  y="88" width="22" height="14" rx="3" fill="rgba(56,189,248,0.25)"  stroke="#38bdf8" strokeWidth="2"/>
-    <rect x="26" y="88" width="16" height="14" rx="3" fill="rgba(129,140,248,0.25)" stroke="#818cf8" strokeWidth="2"/>
-    <rect x="46" y="88" width="28" height="14" rx="3" fill="rgba(52,211,153,0.25)"  stroke="#34d399" strokeWidth="2"/>
-    <rect x="78" y="88" width="14" height="14" rx="3" fill="rgba(251,191,36,0.25)"  stroke="#fbbf24" strokeWidth="2"/>
-    <rect x="96" y="88" width="20" height="14" rx="3" fill="rgba(249,115,22,0.25)"  stroke="#f97316" strokeWidth="2"/>
-  </svg>
-)
-
-const AgentLoopIcon = () => (
-  <svg width="28" height="28" viewBox="-80 -80 160 160" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <marker id="ag-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-        <path d="M2 1L8 5L2 9" fill="none" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      </marker>
-    </defs>
-    <path d="M 0 -68 A 68 68 0 1 1 -48 48" fill="none" stroke="#34d399" strokeWidth="7" strokeLinecap="round" markerEnd="url(#ag-arrow)"/>
-    <path d="M 0 40 A 40 40 0 1 0 28 -28" fill="none" stroke="#34d399" strokeWidth="4" strokeLinecap="round" strokeOpacity="0.4" markerEnd="url(#ag-arrow)"/>
-    <circle cx="0" cy="0" r="10" fill="#34d399" fillOpacity="0.15" stroke="#34d399" strokeWidth="2"/>
-    <circle cx="0" cy="0" r="4" fill="#34d399"/>
-  </svg>
-)
-
-const RAGIcon = () => (
-  <svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg" width="30" height="30">
-    <ellipse cx="25" cy="22" rx="15" ry="7" stroke="#06b6d4" strokeWidth="2.5"/>
-    <rect x="10" y="22" width="30" height="28" fill="none" stroke="#06b6d4" strokeWidth="2.5"/>
-    <ellipse cx="25" cy="50" rx="15" ry="7" stroke="#06b6d4" strokeWidth="2.5"/>
-    <path d="M46 45 L58 45" stroke="#06b6d4" strokeWidth="2.5" strokeLinecap="round"/>
-    <path d="M55 39 L63 45 L55 51" stroke="#06b6d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <rect x="64" y="30" width="18" height="30" rx="4" stroke="#06b6d4" strokeWidth="2.5"/>
-  </svg>
-)
-
-function LLMIcon() {
-  return (
-    <svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg" width="30" height="30">
-      <rect x="12" y="20" width="66" height="50" rx="6" stroke="#a78bfa" strokeWidth="2.5"/>
-      <circle cx="30" cy="45" r="6" stroke="#a78bfa" strokeWidth="2.5"/>
-      <circle cx="45" cy="45" r="6" stroke="#a78bfa" strokeWidth="2.5"/>
-      <circle cx="60" cy="45" r="6" stroke="#a78bfa" strokeWidth="2.5"/>
-      <path d="M36 45 L39 45" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M51 45 L54 45" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M30 14 L30 20" stroke="#a78bfa" strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M45 14 L45 20" stroke="#a78bfa" strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M60 14 L60 20" stroke="#a78bfa" strokeWidth="2.5" strokeLinecap="round"/>
-    </svg>
-  )
-}
-
-function NeuralNetworksIcon() {
-  return (
-    <svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg" width="30" height="30">
-      <circle cx="18" cy="32" r="5" stroke="#818cf8" strokeWidth="2"/>
-      <circle cx="18" cy="58" r="5" stroke="#818cf8" strokeWidth="2"/>
-      <circle cx="45" cy="22" r="5" stroke="#818cf8" strokeWidth="2"/>
-      <circle cx="45" cy="45" r="5" stroke="#818cf8" strokeWidth="2"/>
-      <circle cx="45" cy="68" r="5" stroke="#818cf8" strokeWidth="2"/>
-      <circle cx="72" cy="45" r="5" stroke="#818cf8" strokeWidth="2"/>
-      <line x1="23" y1="32" x2="40" y2="22" stroke="#818cf8" strokeWidth="1.5" strokeOpacity="0.6"/>
-      <line x1="23" y1="32" x2="40" y2="45" stroke="#818cf8" strokeWidth="1.5" strokeOpacity="0.6"/>
-      <line x1="23" y1="32" x2="40" y2="68" stroke="#818cf8" strokeWidth="1.5" strokeOpacity="0.6"/>
-      <line x1="23" y1="58" x2="40" y2="22" stroke="#818cf8" strokeWidth="1.5" strokeOpacity="0.6"/>
-      <line x1="23" y1="58" x2="40" y2="45" stroke="#818cf8" strokeWidth="1.5" strokeOpacity="0.6"/>
-      <line x1="23" y1="58" x2="40" y2="68" stroke="#818cf8" strokeWidth="1.5" strokeOpacity="0.6"/>
-      <line x1="50" y1="22" x2="67" y2="45" stroke="#818cf8" strokeWidth="1.5" strokeOpacity="0.6"/>
-      <line x1="50" y1="45" x2="67" y2="45" stroke="#818cf8" strokeWidth="1.5" strokeOpacity="0.6"/>
-      <line x1="50" y1="68" x2="67" y2="45" stroke="#818cf8" strokeWidth="1.5" strokeOpacity="0.6"/>
-    </svg>
-  )
-}
-
-function GlossaryIcon() {
-  return (
-    <svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg" width="30" height="30">
-      <rect x="18" y="12" width="54" height="66" rx="5" stroke="#94a3b8" strokeWidth="2.5"/>
-      <path d="M18 24 L72 24" stroke="#94a3b8" strokeWidth="2"/>
-      <path d="M30 38 L60 38" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M30 48 L60 48" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M30 58 L50 58" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round"/>
-      <rect x="18" y="12" width="8" height="66" rx="2" fill="rgba(148,163,184,0.15)" stroke="none"/>
-    </svg>
-  )
-}
-
-function TypesOfLLMsIcon() {
-  return (
-    <svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg" width="30" height="30">
-      <rect x="8" y="14" width="22" height="12" rx="3" stroke="#fb923c" strokeWidth="2"/>
-      <path d="M30 20 L38 20" stroke="#fb923c" strokeWidth="2" strokeLinecap="round"/>
-      <polygon points="38,17 44,20 38,23" fill="#fb923c"/>
-      <rect x="8" y="38" width="22" height="12" rx="3" stroke="#fbbf24" strokeWidth="2"/>
-      <path d="M30 44 L44 44" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round"/>
-      <polygon points="38,41 44,44 38,47" fill="#fbbf24"/>
-      <polygon points="32,41 26,44 32,47" fill="#fbbf24" opacity="0.5"/>
-      <rect x="8" y="62" width="16" height="12" rx="3" stroke="#34d399" strokeWidth="2"/>
-      <rect x="30" y="62" width="16" height="12" rx="3" stroke="#38bdf8" strokeWidth="2"/>
-      <path d="M24 68 L30 68" stroke="#fb923c" strokeWidth="2" strokeLinecap="round"/>
-      <rect x="54" y="14" width="28" height="20" rx="3" stroke="#818cf8" strokeWidth="2"/>
-      <circle cx="61" cy="20" r="3" stroke="#818cf8" strokeWidth="1.5"/>
-      <path d="M54 28 L64 22 L72 28 L82 28" stroke="#818cf8" strokeWidth="1.5" strokeLinecap="round"/>
-      <path d="M54 42 L82 42" stroke="#818cf8" strokeWidth="2" strokeLinecap="round" strokeOpacity="0.5"/>
-      <path d="M54 48 L74 48" stroke="#818cf8" strokeWidth="2" strokeLinecap="round" strokeOpacity="0.3"/>
-    </svg>
-  )
-}
-
-function ImageGenerationIcon() {
-  return (
-    <svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg" width="30" height="30">
-      <rect x="10" y="18" width="70" height="54" rx="6" stroke="#e879f9" strokeWidth="2.5"/>
-      <circle cx="28" cy="36" r="7" stroke="#e879f9" strokeWidth="2" strokeOpacity="0.7"/>
-      <path d="M10 58 L30 40 L46 54 L60 42 L80 58" stroke="#e879f9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      <circle cx="68" cy="28" r="4" fill="rgba(232,121,249,0.3)" stroke="#e879f9" strokeWidth="1.5"/>
-      <path d="M63 28 L54 28" stroke="#e879f9" strokeWidth="1.5" strokeLinecap="round" strokeOpacity="0.5"/>
-      <path d="M68 23 L68 14" stroke="#e879f9" strokeWidth="1.5" strokeLinecap="round" strokeOpacity="0.5"/>
-      <path d="M73 28 L82 28" stroke="#e879f9" strokeWidth="1.5" strokeLinecap="round" strokeOpacity="0.5"/>
-    </svg>
-  )
-}
-
-function WorkflowIcon() {
-  return (
-    <svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg" width="30" height="30">
-      <rect x="8" y="36" width="20" height="18" rx="4" stroke="#10b981" strokeWidth="2"/>
-      <rect x="36" y="14" width="20" height="18" rx="4" stroke="#3b82f6" strokeWidth="2"/>
-      <rect x="36" y="58" width="20" height="18" rx="4" stroke="#f97316" strokeWidth="2"/>
-      <rect x="64" y="36" width="20" height="18" rx="4" stroke="#eab308" strokeWidth="2"/>
-      <path d="M28 45 L36 23" stroke="#3a5a7a" strokeWidth="1.5" strokeLinecap="round"/>
-      <path d="M28 45 L36 67" stroke="#3a5a7a" strokeWidth="1.5" strokeLinecap="round"/>
-      <path d="M56 23 L64 45" stroke="#3a5a7a" strokeWidth="1.5" strokeLinecap="round"/>
-      <path d="M56 67 L64 45" stroke="#3a5a7a" strokeWidth="1.5" strokeLinecap="round"/>
-    </svg>
-  )
-}
-
-function BoardBriefingIcon() {
-  return (
-    <svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg" width="30" height="30">
-      <rect x="14" y="22" width="62" height="50" rx="5" stroke="#c9a84c" strokeWidth="2.5"/>
-      <path d="M34 22 L34 16 Q34 13 37 13 L53 13 Q56 13 56 16 L56 22" stroke="#c9a84c" strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M24 36 L66 36" stroke="#c9a84c" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M24 46 L60 46" stroke="#c9a84c" strokeWidth="2" strokeLinecap="round" strokeOpacity="0.7"/>
-      <path d="M24 56 L52 56" stroke="#c9a84c" strokeWidth="2" strokeLinecap="round" strokeOpacity="0.5"/>
-      <circle cx="68" cy="62" r="8" fill="rgba(201,168,76,0.25)" stroke="#e8c96e" strokeWidth="2"/>
-      <path d="M64 62 L67 65 L72 59" stroke="#e8c96e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  )
-}
-
-function ResourcesIcon() {
-  return <GraduationCapIcon size={28} weight="duotone" color="#2dd4bf" />
-}
-
-function VectorEmbeddingsIcon() {
-  return <ChartScatterIcon size={28} weight="duotone" color="#f97316" />
-}
-
-function TemperatureIcon() {
-  return <ThermometerSimpleIcon size={28} weight="duotone" color="#ec4899" />
-}
-
+// Phosphor icons, outlined / duotone, 28px. Card differentiation is icon
+// shape only — Prism §9 + §5.1. All icons inherit colour from the card
+// icon wrap (--text-primary), so no per-card accent leaks back in.
 const ICON_MAP = {
-  'intro-llms': LLMIcon,
-  'token-optimization': TokenIcon,
-  'agents-tools': AgentLoopIcon,
-  'temperature-sampling': TemperatureIcon,
-  'vector-embeddings': VectorEmbeddingsIcon,
-  'rag': RAGIcon,
-  'glossary': GlossaryIcon,
-  'neural-networks': NeuralNetworksIcon,
-  'image-generation': ImageGenerationIcon,
-  'types-of-llms': TypesOfLLMsIcon,
-  'workflow-canvas': WorkflowIcon,
-  'board-briefing': BoardBriefingIcon,
-  'learn-claude': ResourcesIcon,
+  'learn-claude':         GraduationCapIcon,
+  'intro-llms':           BrainIcon,
+  'types-of-llms':        PuzzlePieceIcon,
+  'image-generation':     PaletteIcon,
+  'agents-tools':         RobotIcon,
+  'workflow-canvas':      FlowArrowIcon,
+  'token-optimization':   HashIcon,
+  'temperature-sampling': ThermometerSimpleIcon,
+  'rag':                  BooksIcon,
+  'agent-simulation':     LightningIcon,
+  'board-briefing':       PresentationChartIcon,
+  'neural-networks':      GraphIcon,
+  'vector-embeddings':    ChartScatterIcon,
+  'glossary':             BookOpenIcon,
 }
 
+// Card data — no per-card palette. Differentiation is icon + tag.
 const VISUALIZATIONS = [
-  // ── Row 1: Foundations & Generative ──────────────────────────────────────────
-  {
-    path: '/learn-claude',
-    icon: null,
-    tag: 'Learn Claude',
-    title: 'Claude Learning Resources',
-    desc: 'Curated official + community resources for learning Claude — as a guided path for your level.',
-    pills: ['Beginner', 'Intermediate', 'Developer'],
-    accent: '#2dd4bf',
-    accentDim: 'rgba(45,212,191,0.2)',
-    iconBg: 'rgba(45,212,191,0.1)',
-    glow: 'radial-gradient(ellipse at 0% 0%, rgba(45,212,191,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(45,212,191,0.09)',
-    ready: true,
-  },
-  {
-    path: '/intro-llms',
-    icon: null,
-    tag: 'Foundations',
-    title: 'Introduction to LLMs',
-    desc: 'Understand how large language models work — from next-token prediction to emergent abilities.',
-    pills: ['What is an LLM?', 'How LLMs Learn', 'Tokens & Context', 'Prompts & Responses', 'Limitations'],
-    accent: '#a78bfa',
-    accentDim: 'rgba(167,139,250,0.15)',
-    iconBg: 'rgba(167,139,250,0.1)',
-    glow: 'radial-gradient(ellipse at 0% 0%, rgba(167,139,250,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(167,139,250,0.09)',
-    ready: true,
-  },
-  {
-    path: '/types-of-llms',
-    icon: null,
-    tag: 'LLM Landscape',
-    title: 'Types of LLMs',
-    desc: 'Compare encoder, decoder, and encoder-decoder architectures — and understand when to use GPT, BERT, T5, and multimodal models.',
-    pills: ['Decoder-only', 'Encoder-only', 'Encoder-Decoder', 'Multimodal', 'Model Selection'],
-    accent: '#fb923c',
-    accentDim: 'rgba(251,146,60,0.2)',
-    iconBg: 'rgba(251,146,60,0.1)',
-    glow: 'radial-gradient(ellipse at 0% 0%, rgba(251,146,60,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(251,146,60,0.09)',
-    ready: true,
-  },
-  {
-    path: '/image-generation',
-    icon: null,
-    tag: 'Generative AI',
-    title: 'Image Generation',
-    desc: 'Explore how diffusion models turn text prompts into images — from noise to pixels, CFG scale, samplers, and prompt engineering.',
-    pills: ['Diffusion Process', 'Prompt Craft', 'CFG Scale', 'Samplers', 'Quiz'],
-    accent: '#e879f9', accentDim: 'rgba(232,121,249,0.2)', iconBg: 'rgba(232,121,249,0.1)',
-    glow: 'radial-gradient(ellipse at 0% 0%, rgba(232,121,249,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(232,121,249,0.09)',
-    ready: true,
-  },
-  {
-    path: '/agents-tools',
-    icon: null,
-    tag: 'Agentic AI',
-    title: 'Agents, Tools & Context',
-    desc: 'See how AI agents think in loops, call tools, and how context engineering shapes every decision they make.',
-    pills: ['Agent Loop', 'Tool Calling', 'ReAct Pattern', 'Context Engineering', 'Multi-Agent'],
-    accent: '#34d399', accentDim: 'rgba(52,211,153,0.2)', iconBg: 'rgba(52,211,153,0.1)',
-    glow: 'radial-gradient(ellipse at 0% 0%, rgba(52,211,153,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(52,211,153,0.08)', ready: true,
-  },
-  // ── Row 2: Applied AI & LLM Fundamentals ─────────────────────────────────────
-  {
-    path: '/workflow-canvas',
-    icon: null,
-    tag: 'AI Tools',
-    title: 'Workflow Canvas',
-    desc: 'Design AI-ready workflows with a drag-and-drop canvas. Map human vs AI tasks and get an instant automation readiness report.',
-    pills: ['Visual Builder', 'Node Types', 'AI Readiness', 'Automation Score'],
-    accent: '#2dd4bf',
-    accentDim: 'rgba(45,212,191,0.2)',
-    iconBg: 'rgba(45,212,191,0.1)',
-    glow: 'radial-gradient(ellipse at 0% 0%, rgba(45,212,191,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(45,212,191,0.09)',
-    ready: true,
-  },
-  {
-    path: '/token-optimization',
-    icon: null,
-    tag: 'LLM Fundamentals',
-    title: 'Token Optimization',
-    desc: 'Understand how LLMs tokenize text, what tokens cost, and how to dramatically reduce your API spend.',
-    pills: ['Live Tokenizer', 'Cost Calculator', 'KV Cache', 'Context Windows', 'Quiz'],
-    accent: '#38bdf8', accentDim: 'rgba(56,189,248,0.2)', iconBg: 'rgba(56,189,248,0.1)',
-    glow: 'radial-gradient(ellipse at 0% 0%, rgba(56,189,248,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(56,189,248,0.08)', ready: true,
-  },
-  {
-    path: '/temperature-sampling',
-    icon: null,
-    tag: 'LLM Fundamentals', title: 'Temperature & Sampling',
-    desc: 'See how temperature, top-k and top-p affect LLM output distributions — and why it matters for your use case.',
-    pills: ['Temperature', 'Top-K', 'Top-P Nucleus', 'Comparison', 'Live Sampler', 'Quiz'],
-    accent: '#ec4899', accentDim: 'rgba(236,72,153,0.2)', iconBg: 'rgba(236,72,153,0.1)',
-    glow: 'radial-gradient(ellipse at 0% 0%, rgba(236,72,153,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(236,72,153,0.08)', ready: true,
-  },
-  {
-    path: '/rag',
-    icon: null,
-    tag: 'LLM Architecture',
-    title: 'Retrieval-Augmented Generation',
-    desc: 'See how RAG pipelines retrieve, chunk, and inject knowledge into LLM prompts.',
-    pills: ['Pipeline', 'Chunking', 'Retrieval', 'Prompt Assembly', 'RAG vs Fine-Tuning'],
-    accent: '#06b6d4',
-    accentDim: 'rgba(6,182,212,0.15)',
-    iconBg: 'rgba(6,182,212,0.1)',
-    glow: 'radial-gradient(ellipse at 0% 0%, rgba(6,182,212,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(6,182,212,0.09)',
-    ready: true,
-  },
-  {
-    path: '/agent-simulation',
-    icon: null,
-    tag: 'AI Agents',
-    title: 'Agent Simulation Sandbox',
-    desc: 'Walk through a real AI agent pipeline — inspect every node, explore risks, latency, and cost, and simulate the happy path step by step.',
-    pills: ['Agent Workflows', 'Decision Gates', 'Risk Analysis', 'Latency & Cost', 'Human-in-the-Loop'],
-    accent: '#6366f1',
-    accentDim: 'rgba(99,102,241,0.2)',
-    iconBg: 'rgba(99,102,241,0.1)',
-    glow: 'radial-gradient(ellipse at 0% 0%, rgba(99,102,241,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(99,102,241,0.08)',
-    ready: true,
-  },
-  {
-    path: '/board-briefing',
-    icon: null,
-    tag: 'Executive AI',
-    title: 'Board Briefing Generator',
-    desc: 'Generate a board-ready AI transformation brief from your company data.',
-    pills: ['Brief Generator', 'Risk Analysis', 'Strategic Recommendations'],
-    accent: '#c9a84c',
-    accentDim: 'rgba(201,168,76,0.22)',
-    iconBg: 'rgba(201,168,76,0.1)',
-    glow: 'radial-gradient(ellipse at 0% 0%, rgba(201,168,76,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(201,168,76,0.1)',
-    ready: true,
-  },
-  // ── Row 3: Deep Learning & Embeddings ────────────────────────────────────────
-  {
-    path: '/neural-networks',
-    icon: null,
-    tag: 'Deep Learning',
-    title: 'Neural Networks',
-    desc: 'Watch signals flow through a network, see activations, and understand how backpropagation trains weights.',
-    pills: ['Overview', 'Forward Pass', 'Activations', 'Backprop', 'Gradient Descent'],
-    accent: '#818cf8',
-    accentDim: 'rgba(129,140,248,0.2)',
-    iconBg: 'rgba(129,140,248,0.1)',
-    glow: 'radial-gradient(ellipse at 0% 0%, rgba(129,140,248,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(129,140,248,0.08)',
-    ready: true,
-  },
-  {
-    path: '/vector-embeddings',
-    icon: null,
-    tag: 'Embeddings', title: 'Vector Embeddings',
-    desc: 'Explore how words and concepts map to high-dimensional vectors, and why semantic similarity works.',
-    pills: ['Word Vectors', 'Cosine Similarity', 'Semantic Search', 'RAG', 'Quiz'],
-    accent: '#f97316', accentDim: 'rgba(249,115,22,0.2)', iconBg: 'rgba(249,115,22,0.1)',
-    glow: 'radial-gradient(ellipse at 0% 0%, rgba(249,115,22,0.08) 0%, transparent 60%)',
-    glowColor: 'rgba(249,115,22,0.08)', ready: true,
-  },
+  { path: '/learn-claude',         tag: 'Learn Claude',     title: 'Claude learning resources',          desc: 'Curated official and community resources for learning Claude — a guided path for your level.',                                pills: ['Beginner', 'Intermediate', 'Developer'],                                                ready: true },
+  { path: '/intro-llms',           tag: 'Foundations',      title: 'Introduction to LLMs',               desc: 'Understand how large language models work — from next-token prediction to emergent abilities.',                              pills: ['What is an LLM?', 'How LLMs learn', 'Tokens and context', 'Prompts and responses', 'Limitations'], ready: true },
+  { path: '/types-of-llms',        tag: 'LLM landscape',    title: 'Types of LLMs',                      desc: 'Compare encoder, decoder, and encoder-decoder architectures, and understand when to use GPT, BERT, T5, and multimodal models.', pills: ['Decoder-only', 'Encoder-only', 'Encoder-decoder', 'Multimodal', 'Model selection'],          ready: true },
+  { path: '/image-generation',     tag: 'Generative AI',    title: 'Image generation',                   desc: 'See how diffusion models turn text prompts into images — from noise to pixels, CFG scale, samplers, and prompt craft.',          pills: ['Diffusion process', 'Prompt craft', 'CFG scale', 'Samplers', 'Quiz'],                       ready: true },
+  { path: '/agents-tools',         tag: 'Agentic AI',       title: 'Agents, tools, and context',         desc: 'See how agents think in loops, call tools, and how context engineering shapes every decision they make.',                     pills: ['Agent loop', 'Tool calling', 'ReAct pattern', 'Context engineering', 'Multi-agent'],         ready: true },
+  { path: '/workflow-canvas',      tag: 'AI tools',         title: 'Workflow canvas',                    desc: 'Design AI-ready workflows on a drag-and-drop canvas. Map human and AI tasks and get an automation readiness report.',           pills: ['Visual builder', 'Node types', 'AI readiness', 'Automation score'],                         ready: true },
+  { path: '/token-optimization',   tag: 'LLM fundamentals', title: 'Token optimisation',                  desc: 'Understand how LLMs tokenise text, what tokens cost, and how to dramatically reduce your API spend.',                          pills: ['Live tokeniser', 'Cost calculator', 'KV cache', 'Context windows', 'Quiz'],                  ready: true },
+  { path: '/temperature-sampling', tag: 'LLM fundamentals', title: 'Temperature and sampling',           desc: 'See how temperature, top-K, and top-P shape LLM output distributions — and why it matters for your use case.',                pills: ['Temperature', 'Top-K', 'Top-P nucleus', 'Comparison', 'Live sampler', 'Quiz'],               ready: true },
+  { path: '/rag',                  tag: 'LLM architecture', title: 'Retrieval-augmented generation',     desc: 'See how RAG pipelines retrieve, chunk, and inject knowledge into LLM prompts.',                                              pills: ['Pipeline', 'Chunking', 'Retrieval', 'Prompt assembly', 'RAG vs fine-tuning'],                ready: true },
+  { path: '/agent-simulation',     tag: 'AI agents',        title: 'Agent simulation sandbox',           desc: 'Walk a real agent pipeline — inspect every node, explore risks, latency, and cost, then run the happy path step by step.',     pills: ['Agent workflows', 'Decision gates', 'Risk analysis', 'Latency and cost', 'Human-in-the-loop'], ready: true },
+  { path: '/board-briefing',       tag: 'Executive AI',     title: 'Board briefing generator',           desc: 'Generate a board-ready AI transformation brief from your company data.',                                                      pills: ['Brief generator', 'Risk analysis', 'Strategic recommendations'],                              ready: true },
+  { path: '/neural-networks',      tag: 'Deep learning',    title: 'Neural networks',                    desc: 'Watch signals flow through a network, see activations, and understand how back-propagation trains weights.',                    pills: ['Overview', 'Forward pass', 'Activations', 'Backprop', 'Gradient descent'],                   ready: true },
+  { path: '/vector-embeddings',    tag: 'Embeddings',       title: 'Vector embeddings',                  desc: 'Explore how words and concepts map to high-dimensional vectors, and why semantic similarity works.',                          pills: ['Word vectors', 'Cosine similarity', 'Semantic search', 'RAG', 'Quiz'],                       ready: true },
 ]
 
 export default function Home() {
@@ -429,14 +299,12 @@ export default function Home() {
       <style>{css}</style>
       <NavBar />
       <section className="hero">
-        <div className="hero-glow" />
-        <div className="hero-grid" />
-        <div className="hero-eyebrow">🧪 Interactive Learning Platform</div>
-        <h1 className="hero-title">Learn AI<span className="line2">Visually</span></h1>
-        <p className="hero-desc">Stop reading about AI. Start seeing it. Every visualization is interactive, hands-on, and built to give you real intuition — not just theory.</p>
+        <div className="hero-eyebrow">Interactive learning platform</div>
+        <h1 className="hero-title">Learn AI visually</h1>
+        <p className="hero-desc">Stop reading about AI. Start seeing it. Every visualisation is interactive, hands-on, and built to give you real intuition — not just theory.</p>
         <div className="hero-stats">
-          {[["8", "Visualizations"], ["53", "Glossary Terms"], ["100%", "Free & Open"]].map(([n, l]) => (
-            <div key={l} style={{ textAlign: "center" }}>
+          {[["13", "Visualisations"], ["53", "Glossary terms"], ["100%", "Free and open"]].map(([n, l]) => (
+            <div key={l} style={{ textAlign: 'center' }}>
               <div className="hero-stat-num">{n}</div>
               <div className="hero-stat-lbl">{l}</div>
             </div>
@@ -453,46 +321,58 @@ export default function Home() {
 
       <div className="gl-utility-bar">
         <Link to="/glossary" className="gl-utility-link">
-          <span style={{ fontSize: 18 }}>📖</span>
-          <span className="gl-utility-title">Glossary</span>
-          <span className="gl-utility-desc">53 terms · Foundations · Tokens · Sampling · Agents · Embeddings · RAG</span>
-          <span className="gl-utility-arrow">→</span>
+          <BookOpenIcon size={20} weight="duotone" />
+          <div>
+            <div className="gl-utility-title">Glossary</div>
+            <div className="gl-utility-desc">53 terms · Foundations · Tokens · Sampling · Agents · Embeddings · RAG</div>
+          </div>
+          <ArrowRightIcon size={16} weight="bold" className="gl-utility-arrow" />
         </Link>
       </div>
 
       <div className="lab-section">
         <div className="section-header">
-          <span className="section-label">✦ Live Now</span>
+          <span className="section-label">Live now</span>
           <div className="section-line" />
         </div>
         <div className="viz-grid">
-          {ready.map(v => (
-            <Link key={v.title} to={v.path} className="viz-card"
-              style={{ '--card-accent': v.accent, '--card-accent-dim': v.accentDim, '--card-icon-bg': v.iconBg, '--card-glow': v.glow, '--card-glow-color': v.glowColor, '--card-tag-bg': v.iconBg }}>
-              <div className="card-icon-wrap">{(() => { const IC = v.path && ICON_MAP[v.path.replace('/','')]; return IC ? <IC /> : v.icon })()}</div>
-              <div className="card-tag">{v.tag}</div>
-              <div className="card-title">{v.title}</div>
-              <div className="card-desc">{v.desc}</div>
-              <div className="card-pills">{v.pills.map(p => <span key={p} className="card-pill">{p}</span>)}</div>
-              <div className="card-arrow">→</div>
-            </Link>
-          ))}
-          {coming.map(v => (
-            <div key={v.title} className="viz-card coming-soon"
-              style={{ '--card-accent': v.accent, '--card-accent-dim': v.accentDim, '--card-icon-bg': v.iconBg, '--card-glow': v.glow, '--card-glow-color': v.glowColor, '--card-tag-bg': v.iconBg, position: 'relative' }}>
-              <div className="coming-label">Coming Soon</div>
-              <div className="card-icon-wrap">{(() => { const IC = v.path && ICON_MAP[v.path.replace('/','')]; return IC ? <IC /> : v.icon })()}</div>
-              <div className="card-tag">{v.tag}</div>
-              <div className="card-title">{v.title}</div>
-              <div className="card-desc">{v.desc}</div>
-              <div className="card-pills">{v.pills.map(p => <span key={p} className="card-pill">{p}</span>)}</div>
-            </div>
-          ))}
+          {ready.map(v => {
+            const Icon = v.path && ICON_MAP[v.path.replace('/', '')]
+            return (
+              <Link key={v.title} to={v.path} className="viz-card">
+                <div className="card-icon-wrap">
+                  {Icon ? <Icon size={28} weight="duotone" /> : null}
+                </div>
+                <div className="card-tag">{v.tag}</div>
+                <div className="card-title">{v.title}</div>
+                <div className="card-desc">{v.desc}</div>
+                <div className="card-pills">{v.pills.map(p => <span key={p} className="card-pill">{p}</span>)}</div>
+                <span className="card-arrow"><ArrowRightIcon size={18} weight="bold" /></span>
+              </Link>
+            )
+          })}
+          {coming.map(v => {
+            const Icon = v.path && ICON_MAP[v.path.replace('/', '')]
+            return (
+              <div key={v.title} className="viz-card coming-soon" style={{ position: 'relative' }}>
+                <div className="coming-label">Coming soon</div>
+                <div className="card-icon-wrap">
+                  {Icon ? <Icon size={28} weight="duotone" /> : null}
+                </div>
+                <div className="card-tag">{v.tag}</div>
+                <div className="card-title">{v.title}</div>
+                <div className="card-desc">{v.desc}</div>
+                <div className="card-pills">{v.pills.map(p => <span key={p} className="card-pill">{p}</span>)}</div>
+              </div>
+            )
+          })}
         </div>
       </div>
 
       <footer className="lab-footer">
-        <div style={{ marginBottom: 6 }}>Designed by <span style={{ color: '#7a9bbf' }}>Babar M Bhatti</span> · <span style={{ color: '#4a6a8a' }}>Dallas AI · PrismSkills.ai</span></div>
+        <div style={{ marginBottom: 'var(--spacing-1)' }}>
+          Designed by <strong>Babar M Bhatti</strong> · Dallas AI · PrismSkills.ai
+        </div>
         <div>Built with React + Vite · Deployed on Vercel · thebabar/ai-practice</div>
       </footer>
     </div>
