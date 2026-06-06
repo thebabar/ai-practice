@@ -1,117 +1,453 @@
 import { useState, useEffect, useRef } from 'react'
 import NavBar from '../components/NavBar.jsx'
+import {
+  MagnifyingGlassIcon, SparkleIcon, CompassIcon, LinkIcon,
+  BrainIcon, TargetIcon, LockKeyIcon, LightningIcon,
+  QuestionIcon, HashIcon, FileTextIcon, RobotIcon, CheckCircleIcon,
+  ArrowRightIcon,
+} from '@phosphor-icons/react'
+
+const ICON_BY_KEY = {
+  search: MagnifyingGlassIcon, sparkle: SparkleIcon, compass: CompassIcon, link: LinkIcon,
+  brain: BrainIcon, target: TargetIcon, lock: LockKeyIcon, lightning: LightningIcon,
+  question: QuestionIcon, hash: HashIcon, file: FileTextIcon, robot: RobotIcon, check: CheckCircleIcon,
+}
+const IconFor = ({ name, ...rest }) => {
+  const C = ICON_BY_KEY[name]
+  return C ? <C {...rest} /> : null
+}
 
 const css = `
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
+/* ── Phase 5c: Vector Embeddings rebound to Prism tokens.
+ *  Per §5.3 — the similarity axis is the page's organizing semantic:
+ *  cosine-similar pairs read with --color-success, mid match → orange,
+ *  unrelated → text-tertiary. Two signals total + neutrals. ───── */
 
-.ve-root { min-height: 100vh; background: #050810; color: #e0e8f0; font-family: 'IBM Plex Mono', monospace; overflow-x: hidden; }
+.ve-root { min-height: 100vh; background: var(--surface-base); color: var(--text-primary); overflow-x: hidden; }
 
-.ve-hero { text-align: center; padding: 48px 24px 28px; position: relative; }
-.ve-hero::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 700px; height: 320px; background: radial-gradient(ellipse at 50% 0%, rgba(249,115,22,0.09) 0%, transparent 70%); pointer-events: none; }
-.ve-eyebrow { font-size: 16px; letter-spacing: 0.22em; color: #f97316; text-transform: uppercase; margin-bottom: 14px; }
-.ve-title { font-family: 'IBM Plex Sans', sans-serif; font-size: clamp(28px, 5vw, 52px); font-weight: 800; letter-spacing: -0.02em; color: #fff; line-height: 1.05; margin-bottom: 12px; }
-.ve-title span { color: #f97316; }
-.ve-subtitle { font-size: 16px; color: #7a6a5a; max-width: 540px; margin: 0 auto 32px; line-height: 1.8; }
+.ve-hero {
+  position: relative;
+  text-align: center;
+  padding: var(--spacing-7) var(--spacing-4) var(--spacing-6);
+  background: var(--text-primary);
+  color: var(--surface-base);
+  overflow: hidden;
+}
+:root[data-theme="dark"] .ve-hero {
+  background: var(--surface-base);
+  color: var(--text-primary);
+}
+.ve-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-refracted-b);
+  opacity: var(--refracted-opacity-standard);
+  pointer-events: none;
+}
+.ve-hero > * { position: relative; }
+.ve-eyebrow {
+  font: var(--text-weight-label) var(--text-size-caption)/var(--text-lh-caption) var(--font-primary);
+  letter-spacing: 0.08em;
+  color: var(--orange-300);
+  margin-bottom: var(--spacing-3);
+}
+.ve-title {
+  font: var(--text-weight-h1) var(--text-size-h1)/var(--text-lh-h1) var(--font-primary);
+  letter-spacing: var(--text-ls-h1);
+  margin-bottom: var(--spacing-3);
+}
+.ve-subtitle {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  max-width: 540px;
+  margin: 0 auto;
+  opacity: 0.85;
+}
 
-.ve-tabs { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; padding: 0 16px 32px; }
-.ve-tab { background: transparent; border: 1px solid #2a1e12; color: #7a6a5a; font-family: 'IBM Plex Mono', monospace; font-size: 16px; letter-spacing: 0.1em; padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: all 0.18s; text-transform: uppercase; }
-.ve-tab:hover { border-color: #f97316; color: #f97316; }
-.ve-tab.active { background: rgba(249,115,22,0.1); border-color: #f97316; color: #f97316; }
+.ve-tabs-row {
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-5) var(--spacing-4) var(--spacing-6);
+  background: var(--surface-base);
+}
 
-.ve-panel { max-width: 920px; margin: 0 auto; padding: 0 20px 80px; }
-.ve-section-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 8px; }
-.ve-section-sub { font-size: 16px; color: #7a6a5a; margin-bottom: 28px; line-height: 1.8; }
+.ve-panel { max-width: 920px; margin: 0 auto; padding: 0 var(--spacing-4) var(--spacing-7); }
+.ve-section-title {
+  font: var(--text-weight-h2) var(--text-size-h2)/var(--text-lh-h2) var(--font-primary);
+  letter-spacing: var(--text-ls-h2);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-2);
+}
+.ve-section-sub {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-6);
+  max-width: 720px;
+}
 
-.ve-card { background: #0a0c10; border: 1px solid #1e1408; border-radius: 14px; padding: 24px; margin-bottom: 20px; }
-.ve-card-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #f97316; margin-bottom: 16px; }
+.ve-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-e2);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-5);
+  margin-bottom: var(--spacing-5);
+}
+.ve-card-title {
+  font: var(--text-weight-h3) var(--text-size-h3)/var(--text-lh-h3) var(--font-primary);
+  letter-spacing: var(--text-ls-h3);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-4);
+}
 
 /* ── What are embeddings ── */
-.word-to-vec { display: flex; align-items: center; gap: 0; flex-wrap: wrap; justify-content: center; margin: 20px 0; }
-.wtv-word { background: rgba(249,115,22,0.1); border: 1px solid rgba(249,115,22,0.3); border-radius: 8px; padding: 10px 18px; font-family: 'IBM Plex Sans', sans-serif; font-size: 18px; font-weight: 700; color: #f97316; }
-.wtv-arrow { font-size: 22px; color: #3a2a1a; margin: 0 12px; }
+.word-to-vec {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: var(--spacing-5) 0;
+}
+.wtv-word {
+  background: var(--orange-50);
+  border: 1px solid var(--orange-500);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3) var(--spacing-4);
+  font: var(--text-weight-label) var(--text-size-h3)/1.2 var(--font-primary);
+  color: var(--orange-500);
+}
+.wtv-arrow { color: var(--text-tertiary); margin: 0 var(--spacing-3); display: inline-flex; }
 .wtv-vector { display: flex; gap: 4px; flex-wrap: wrap; max-width: 340px; }
-.wtv-dim { width: 28px; height: 28px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 500; transition: all 0.4s; border: 1px solid transparent; }
+.wtv-dim {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--text-size-meta);
+  border: 1px solid transparent;
+  transition: background-color var(--duration-deliberate) var(--ease-standard);
+}
 
-.analogy-box { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr; gap: 8px; align-items: center; margin: 16px 0; }
+.analogy-box { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr; gap: var(--spacing-2); align-items: center; margin: var(--spacing-4) 0; }
 @media (max-width: 600px) { .analogy-box { grid-template-columns: 1fr auto 1fr; } }
-.analogy-word { background: rgba(249,115,22,0.08); border: 1px solid rgba(249,115,22,0.2); border-radius: 8px; padding: 10px; text-align: center; }
-.analogy-word .aw-word { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #f97316; }
-.analogy-word .aw-vec { font-size: 10px; color: #5a4a3a; margin-top: 4px; }
-.analogy-op { font-size: 18px; color: #5a4a3a; text-align: center; font-weight: 700; }
-.analogy-result { background: rgba(52,211,153,0.08); border: 2px solid rgba(52,211,153,0.3); border-radius: 8px; padding: 10px; text-align: center; }
-.analogy-result .aw-word { color: #34d399; }
+.analogy-word {
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3);
+  text-align: center;
+}
+.analogy-word .aw-word {
+  font: var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary);
+  color: var(--text-primary);
+}
+.analogy-word .aw-vec {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--text-size-meta);
+  color: var(--text-tertiary);
+  margin-top: var(--spacing-1);
+}
+.analogy-op {
+  font: var(--text-weight-label) var(--text-size-h3)/1 var(--font-primary);
+  color: var(--text-secondary);
+  text-align: center;
+}
+.analogy-result {
+  background: var(--surface-1);
+  border: 2px solid var(--color-success);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3);
+  text-align: center;
+}
+.analogy-result .aw-word { color: var(--color-success); }
 
 /* ── 2D Space ── */
-.space-canvas { background: #06080c; border: 1px solid #1e1408; border-radius: 10px; position: relative; overflow: hidden; cursor: crosshair; }
-.space-point { position: absolute; transform: translate(-50%, -50%); transition: all 0.4s cubic-bezier(.4,0,.2,1); }
-.space-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid; transition: all 0.3s; cursor: pointer; }
-.space-dot:hover { transform: scale(1.4); }
-.space-label { position: absolute; font-size: 11px; white-space: nowrap; font-family: 'IBM Plex Mono', monospace; pointer-events: none; }
-.space-line { position: absolute; pointer-events: none; transform-origin: 0 0; }
-.cluster-label { position: absolute; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.4; pointer-events: none; }
-.space-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 14px; font-size: 12px; }
+.space-canvas {
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  position: relative;
+  overflow: hidden;
+}
+.space-point { position: absolute; transform: translate(-50%, -50%); transition: transform var(--duration-deliberate) var(--ease-standard); }
+.space-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid;
+  transition: background-color var(--duration-fast) var(--ease-standard), transform var(--duration-fast) var(--ease-standard);
+  cursor: pointer;
+}
+.space-label {
+  position: absolute;
+  font: var(--text-weight-body) var(--text-size-caption)/1 var(--font-primary);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.cluster-label {
+  position: absolute;
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
+  letter-spacing: 0.1em;
+  pointer-events: none;
+  opacity: 0.7;
+}
+.space-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-3);
+  font: var(--text-weight-body) var(--text-size-caption)/1 var(--font-primary);
+  color: var(--text-secondary);
+}
 .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; vertical-align: middle; }
 
 /* ── Similarity ── */
-.sim-pair { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center; margin-bottom: 12px; }
-.sim-word-box { background: #06080c; border: 1px solid #1e1408; border-radius: 8px; padding: 12px 16px; text-align: center; }
-.sim-word { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #e0e8f0; }
+.sim-pair { display: grid; grid-template-columns: 1fr auto 1fr; gap: var(--spacing-3); align-items: center; margin-bottom: var(--spacing-3); }
+.sim-word-box {
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3);
+  text-align: center;
+}
+.sim-word {
+  font: var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary);
+  color: var(--text-primary);
+}
 .sim-score-col { text-align: center; }
-.sim-bar-wrap { width: 100%; background: #06080c; border-radius: 100px; height: 8px; overflow: hidden; border: 1px solid #1e1408; margin-top: 4px; }
-.sim-bar { height: 100%; border-radius: 100px; transition: width 0.6s cubic-bezier(.4,0,.2,1); }
-.sim-val { font-family: 'IBM Plex Sans', sans-serif; font-size: 18px; font-weight: 800; }
-.sim-label { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #5a4a3a; margin-top: 2px; }
-.sim-selector { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-.sim-btn { background: transparent; border: 1px solid #2a1e12; color: #7a6a5a; font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.18s; }
-.sim-btn:hover, .sim-btn.active { background: rgba(249,115,22,0.1); border-color: #f97316; color: #f97316; }
+.sim-bar-wrap {
+  width: 100%;
+  background: var(--surface-2);
+  border-radius: 100px;
+  height: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border-default);
+  margin-top: var(--spacing-1);
+}
+.sim-bar { height: 100%; border-radius: 100px; transition: width var(--duration-deliberate) var(--ease-standard); }
+.sim-val {
+  font: var(--text-weight-h2) var(--text-size-h3)/1 var(--font-primary);
+}
+.sim-label {
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
+  color: var(--text-tertiary);
+  margin-top: var(--spacing-1);
+}
+.sim-selector { display: flex; gap: var(--spacing-2); flex-wrap: wrap; margin-bottom: var(--spacing-5); }
+.sim-btn {
+  background: transparent;
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
+}
+.sim-btn:hover { background: var(--surface-2); border-color: var(--border-strong); color: var(--text-primary); }
+.sim-btn.active { background: var(--text-primary); border-color: var(--text-primary); color: var(--surface-base); }
+.sim-btn:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
 
 /* ── Semantic Search ── */
-.search-box { display: flex; gap: 10px; margin-bottom: 20px; }
-.search-input { flex: 1; background: #06080c; border: 1px solid #1e1408; border-radius: 8px; color: #e0e8f0; font-family: 'IBM Plex Mono', monospace; font-size: 16px; padding: 12px 16px; outline: none; transition: border-color 0.2s; }
-.search-input:focus { border-color: #f97316; }
-.search-btn { background: rgba(249,115,22,0.15); border: 1px solid #f97316; color: #f97316; font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 12px 20px; border-radius: 8px; cursor: pointer; white-space: nowrap; transition: all 0.18s; letter-spacing: 0.08em; text-transform: uppercase; }
-.search-btn:hover { background: rgba(249,115,22,0.25); }
-.search-result { display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: #06080c; border: 1px solid #1e1408; border-radius: 8px; margin-bottom: 8px; transition: all 0.3s; }
-.search-result.top { border-color: rgba(249,115,22,0.4); background: rgba(249,115,22,0.04); }
-.sr-rank { font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 700; color: #3a2a1a; width: 24px; flex-shrink: 0; }
-.sr-text { flex: 1; font-size: 16px; color: #b0a898; line-height: 1.5; }
+.search-result {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-2);
+  transition: background-color var(--duration-deliberate) var(--ease-standard), border-color var(--duration-deliberate) var(--ease-standard);
+}
+.search-result.top { border-color: var(--orange-500); background: var(--orange-50); }
+.sr-rank {
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  color: var(--text-tertiary);
+  width: 28px;
+  flex-shrink: 0;
+}
+.search-result.top .sr-rank { color: var(--orange-500); }
+.sr-text {
+  flex: 1;
+  font: var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-primary);
+}
 .sr-score-bar { width: 80px; flex-shrink: 0; }
-.sr-score-val { font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; font-weight: 700; color: #f97316; text-align: right; margin-bottom: 3px; }
-.sr-bar-bg { background: #1e1408; border-radius: 100px; height: 4px; overflow: hidden; }
-.sr-bar-fill { height: 100%; border-radius: 100px; background: #f97316; transition: width 0.5s; }
-.search-queries { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
-.query-chip { background: transparent; border: 1px solid #2a1e12; color: #7a6a5a; font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 5px 10px; border-radius: 100px; cursor: pointer; transition: all 0.18s; }
-.query-chip:hover, .query-chip.active { background: rgba(249,115,22,0.1); border-color: #f97316; color: #f97316; }
+.sr-score-val {
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  color: var(--text-secondary);
+  text-align: right;
+  margin-bottom: var(--spacing-1);
+}
+.search-result.top .sr-score-val { color: var(--orange-500); }
+.sr-bar-bg { background: var(--surface-3); border-radius: 100px; height: 4px; overflow: hidden; }
+.sr-bar-fill {
+  height: 100%;
+  border-radius: 100px;
+  background: var(--text-secondary);
+  transition: width var(--duration-deliberate) var(--ease-standard);
+}
+.search-result.top .sr-bar-fill { background: var(--orange-500); }
 
-/* ── RAG ── */
+.search-queries { display: flex; gap: var(--spacing-2); flex-wrap: wrap; margin-bottom: var(--spacing-4); }
+.query-chip {
+  background: transparent;
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: 100px;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
+}
+.query-chip:hover { background: var(--surface-2); border-color: var(--border-strong); color: var(--text-primary); }
+.query-chip.active { background: var(--text-primary); border-color: var(--text-primary); color: var(--surface-base); }
+.query-chip:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+
+/* ── RAG timeline ── */
 .rag-flow { display: flex; flex-direction: column; gap: 0; }
-.rag-step { display: flex; gap: 16px; }
-.rag-step::before { content: ''; width: 2px; margin-left: 19px; margin-top: 44px; height: 28px; background: linear-gradient(#1e1408, transparent); display: block; position: absolute; }
-.rag-dot { width: 40px; height: 40px; border-radius: 50%; border: 2px solid; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; margin-top: 2px; }
-.rag-body { flex: 1; padding-bottom: 20px; }
-.rag-type { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 6px; font-weight: 500; }
-.rag-content { background: #06080c; border: 1px solid #1e1408; border-radius: 8px; padding: 12px 16px; font-size: 16px; color: #9a8878; line-height: 1.7; }
-.rag-content strong { color: #e0e8f0; }
-.rag-connector { width: 2px; height: 24px; background: linear-gradient(#1e1408, #1e1408); margin-left: 19px; margin-bottom: 0; }
+.rag-step { display: flex; gap: var(--spacing-4); position: relative; }
+.rag-step::before {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 44px;
+  bottom: -12px;
+  width: 2px;
+  background: var(--border-default);
+}
+.rag-step:last-child::before { display: none; }
+.rag-dot {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--rag-tint);
+  background: var(--rag-soft);
+  color: var(--rag-tint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.rag-body { flex: 1; padding-bottom: var(--spacing-5); }
+.rag-type {
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  margin-bottom: var(--spacing-1);
+  color: var(--rag-tint);
+}
+.rag-content {
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3) var(--spacing-4);
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+}
+.rag-content strong { color: var(--text-primary); }
 
 /* ── Quiz ── */
-.ve-quiz-q { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 16px; line-height: 1.4; }
-.ve-quiz-opts { display: flex; flex-direction: column; gap: 8px; }
-.ve-quiz-opt { background: #06080c; border: 1px solid #1e1408; border-radius: 8px; padding: 12px 16px; font-size: 16px; color: #9a8878; cursor: pointer; text-align: left; font-family: 'IBM Plex Mono', monospace; transition: all 0.18s; }
-.ve-quiz-opt:hover:not(:disabled) { border-color: #f97316; color: #e0e8f0; }
-.ve-quiz-opt.correct { border-color: #34d399; background: rgba(52,211,153,0.08); color: #34d399; }
-.ve-quiz-opt.wrong   { border-color: #ef4444; background: rgba(239,68,68,0.06); color: #f87171; }
-.ve-quiz-exp { margin-top: 14px; padding: 12px; background: rgba(249,115,22,0.05); border: 1px solid rgba(249,115,22,0.18); border-radius: 8px; font-size: 16px; color: #b08060; line-height: 1.7; }
-.ve-quiz-next { margin-top: 12px; background: rgba(249,115,22,0.1); border: 1px solid #f97316; color: #f97316; font-family: 'IBM Plex Mono', monospace; font-size: 16px; padding: 9px 18px; border-radius: 6px; cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.18s; }
-.ve-quiz-next:hover { background: rgba(249,115,22,0.2); }
-.ve-progress { background: #0a0c10; border-radius: 100px; height: 4px; margin-bottom: 20px; overflow: hidden; }
-.ve-progress-fill { height: 100%; background: linear-gradient(90deg, #f97316, #fbbf24); border-radius: 100px; transition: width 0.4s; }
-.ve-score-num { font-family: 'IBM Plex Sans', sans-serif; font-size: 64px; font-weight: 800; color: #f97316; text-align: center; }
-
-.ve-diff-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 100px; border: 1px solid; margin-bottom: 14px; font-weight: 500; }
-.ve-diff-badge.easy   { color: #34d399; border-color: rgba(52,211,153,0.35);  background: rgba(52,211,153,0.08); }
-.ve-diff-badge.medium { color: #fbbf24; border-color: rgba(251,191,36,0.35);  background: rgba(251,191,36,0.08); }
-.ve-diff-badge.hard   { color: #f87171; border-color: rgba(248,113,113,0.35); background: rgba(239,68,68,0.08); }
+.ve-quiz-q {
+  font: var(--text-weight-h3) var(--text-size-h3)/var(--text-lh-h3) var(--font-primary);
+  letter-spacing: var(--text-ls-h3);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-4);
+}
+.ve-quiz-meta {
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  color: var(--text-tertiary);
+  margin-bottom: var(--spacing-3);
+}
+.ve-quiz-opts { display: flex; flex-direction: column; gap: var(--spacing-2); }
+.ve-quiz-opt {
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3) var(--spacing-4);
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+}
+.ve-quiz-opt:hover:not(:disabled) { background: var(--surface-2); border-color: var(--border-strong); }
+.ve-quiz-opt:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.ve-quiz-opt:disabled { cursor: default; }
+.ve-quiz-opt.correct { border-color: var(--color-success); }
+.ve-quiz-opt.wrong   { border-color: var(--color-error); }
+.ve-quiz-opt-letter {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  color: var(--text-tertiary);
+  margin-right: var(--spacing-2);
+}
+.ve-quiz-exp {
+  margin-top: var(--spacing-4);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+}
+.ve-quiz-next {
+  margin-top: var(--spacing-3);
+  background: var(--orange-500);
+  border: 1px solid var(--orange-500);
+  color: #fff;
+  font: 600 var(--text-size-body)/1 var(--font-primary);
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+}
+.ve-quiz-next:hover { background: #D45C10; border-color: #D45C10; }
+.ve-quiz-next:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.ve-progress {
+  background: var(--surface-3);
+  border-radius: 100px;
+  height: 4px;
+  margin-bottom: var(--spacing-5);
+  overflow: hidden;
+}
+.ve-progress-fill {
+  height: 100%;
+  background: var(--text-primary);
+  border-radius: 100px;
+  transition: width var(--duration-standard) var(--ease-standard);
+}
+.ve-score-num {
+  font: var(--text-weight-h1) var(--text-size-h1)/1 var(--font-primary);
+  letter-spacing: var(--text-ls-h1);
+  color: var(--text-primary);
+  text-align: center;
+  margin: var(--spacing-2) 0;
+}
+.ve-diff-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  padding: 3px 10px;
+  border-radius: 100px;
+  border: 1px solid;
+  background: var(--surface-1);
+  margin-bottom: var(--spacing-3);
+}
+.ve-diff-badge::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.ve-diff-badge.easy   { color: var(--color-success); border-color: var(--color-success); }
+.ve-diff-badge.medium { color: var(--color-warning); border-color: var(--color-warning); }
+.ve-diff-badge.hard   { color: var(--color-info);    border-color: var(--color-info); }
 `
 
 // ── Word vectors (simplified 8-dim) ──────────────────────────────────────────
@@ -133,27 +469,38 @@ function cosineSim(a, b) {
   return dot / (magA * magB)
 }
 
+// Activation intensity ramp: strong = orange-500, mid = orange-300, weak = surface-2.
+// Keeps the "vector dimension" cell to a single signal (orange) per §5.1.
 function vecColor(val) {
-  if (val > 0.7) return { bg: 'rgba(249,115,22,0.7)', border: '#f97316', color: '#fff' }
-  if (val > 0.4) return { bg: 'rgba(251,191,36,0.4)', border: '#fbbf24', color: '#fde68a' }
-  return { bg: 'rgba(255,255,255,0.04)', border: '#1e1408', color: '#4a3a2a' }
+  if (val > 0.7) return { bg: 'var(--orange-500)', border: 'var(--orange-500)', color: '#fff' }
+  if (val > 0.4) return { bg: 'var(--orange-100)', border: 'var(--orange-300)', color: 'var(--orange-500)' }
+  return { bg: 'var(--surface-2)', border: 'var(--border-default)', color: 'var(--text-tertiary)' }
 }
 
-// ── 2D word space (manual layout for clarity) ─────────────────────────────────
+// ── 2D word space ─────────────────────────────────────────────────────────────
+// Four clusters compressed to 2 signals + 2 neutrals per §5.1 (max two
+// signals visible). Same-side clusters share their tint so the eye still
+// reads "these belong together".
 const SPACE_WORDS = [
-  { word: 'king',    x: 22, y: 18, color: '#f97316', cluster: 'royalty' },
-  { word: 'queen',   x: 35, y: 15, color: '#f97316', cluster: 'royalty' },
-  { word: 'prince',  x: 28, y: 28, color: '#f97316', cluster: 'royalty' },
-  { word: 'man',     x: 18, y: 55, color: '#38bdf8', cluster: 'people' },
-  { word: 'woman',   x: 32, y: 58, color: '#38bdf8', cluster: 'people' },
-  { word: 'person',  x: 24, y: 68, color: '#38bdf8', cluster: 'people' },
-  { word: 'dog',     x: 65, y: 20, color: '#34d399', cluster: 'animals' },
-  { word: 'cat',     x: 75, y: 28, color: '#34d399', cluster: 'animals' },
-  { word: 'wolf',    x: 70, y: 38, color: '#34d399', cluster: 'animals' },
-  { word: 'paris',   x: 62, y: 68, color: '#818cf8', cluster: 'places' },
-  { word: 'london',  x: 72, y: 60, color: '#818cf8', cluster: 'places' },
-  { word: 'tokyo',   x: 82, y: 72, color: '#818cf8', cluster: 'places' },
-  { word: 'france',  x: 55, y: 80, color: '#818cf8', cluster: 'places' },
+  { word: 'king',    x: 22, y: 18, tint: 'var(--orange-500)', cluster: 'royalty' },
+  { word: 'queen',   x: 35, y: 15, tint: 'var(--orange-500)', cluster: 'royalty' },
+  { word: 'prince',  x: 28, y: 28, tint: 'var(--orange-500)', cluster: 'royalty' },
+  { word: 'man',     x: 18, y: 55, tint: 'var(--blue-500)',   cluster: 'people' },
+  { word: 'woman',   x: 32, y: 58, tint: 'var(--blue-500)',   cluster: 'people' },
+  { word: 'person',  x: 24, y: 68, tint: 'var(--blue-500)',   cluster: 'people' },
+  { word: 'dog',     x: 65, y: 20, tint: 'var(--text-primary)', cluster: 'animals' },
+  { word: 'cat',     x: 75, y: 28, tint: 'var(--text-primary)', cluster: 'animals' },
+  { word: 'wolf',    x: 70, y: 38, tint: 'var(--text-primary)', cluster: 'animals' },
+  { word: 'paris',   x: 62, y: 68, tint: 'var(--text-secondary)', cluster: 'places' },
+  { word: 'london',  x: 72, y: 60, tint: 'var(--text-secondary)', cluster: 'places' },
+  { word: 'tokyo',   x: 82, y: 72, tint: 'var(--text-secondary)', cluster: 'places' },
+  { word: 'france',  x: 55, y: 80, tint: 'var(--text-secondary)', cluster: 'places' },
+]
+const CLUSTER_LEGEND = [
+  { tint: 'var(--orange-500)',   label: 'Royalty' },
+  { tint: 'var(--blue-500)',     label: 'People' },
+  { tint: 'var(--text-primary)', label: 'Animals' },
+  { tint: 'var(--text-secondary)', label: 'Places' },
 ]
 
 // ── Similarity pairs ──────────────────────────────────────────────────────────
@@ -205,13 +552,15 @@ const QUERY_SCORES = {
 }
 
 // ── RAG steps ─────────────────────────────────────────────────────────────────
+// User input + retrieved context = orange (incoming / external content);
+// embed + search = blue (structured transformation); grounded answer = success.
 const RAG_STEPS = [
-  { icon: '❓', type: 'User Query', color: '#f97316', dotBg: 'rgba(249,115,22,0.15)', dotBorder: '#f97316', content: <span><strong>"What are the best practices for prompt engineering?"</strong> — Query is received by the RAG system.</span> },
-  { icon: '🔢', type: 'Embed Query', color: '#38bdf8', dotBg: 'rgba(56,189,248,0.15)', dotBorder: '#38bdf8', content: <span>The query is passed through an embedding model → <strong>[0.82, 0.14, 0.67, 0.31, ...]</strong> — a vector that captures its meaning.</span> },
-  { icon: '🔍', type: 'Vector Search', color: '#818cf8', dotBg: 'rgba(129,140,248,0.15)', dotBorder: '#818cf8', content: <span>Cosine similarity is computed between the query vector and all document vectors. The <strong>top-k most similar chunks</strong> are retrieved from the vector database.</span> },
-  { icon: '📄', type: 'Retrieved Context', color: '#fbbf24', dotBg: 'rgba(251,191,36,0.1)', dotBorder: '#fbbf24', content: <span>Top 3 chunks retrieved: <strong>"Be specific and provide examples..." | "Use delimiters to separate..." | "Chain-of-thought prompting..."</strong></span> },
-  { icon: '🤖', type: 'LLM Generation', color: '#34d399', dotBg: 'rgba(52,211,153,0.1)', dotBorder: '#34d399', content: <span>The query + retrieved context is sent to the LLM. It <strong>grounds its answer</strong> in the retrieved documents, not just training memory.</span> },
-  { icon: '✅', type: 'Grounded Answer', color: '#34d399', dotBg: 'rgba(52,211,153,0.1)', dotBorder: '#34d399', content: <span><strong>"Best practices include: (1) Be specific about the task... (2) Use structured formats... (3) Provide few-shot examples..."</strong> — accurate, sourced answer.</span> },
+  { iconKey: 'question', type: 'User query',         tint: 'var(--orange-500)',    soft: 'var(--orange-50)', content: <span><strong>"What are the best practices for prompt engineering?"</strong> — the query is received by the RAG system.</span> },
+  { iconKey: 'hash',     type: 'Embed query',        tint: 'var(--blue-500)',      soft: 'var(--blue-50)',   content: <span>The query is passed through an embedding model → <strong>[0.82, 0.14, 0.67, 0.31, …]</strong> — a vector that captures its meaning.</span> },
+  { iconKey: 'search',   type: 'Vector search',      tint: 'var(--blue-500)',      soft: 'var(--blue-50)',   content: <span>Cosine similarity is computed between the query vector and all document vectors. The <strong>top-k most similar chunks</strong> are retrieved from the vector database.</span> },
+  { iconKey: 'file',     type: 'Retrieved context',  tint: 'var(--orange-500)',    soft: 'var(--orange-50)', content: <span>Top 3 chunks retrieved: <strong>"Be specific and provide examples…" | "Use delimiters to separate…" | "Chain-of-thought prompting…"</strong></span> },
+  { iconKey: 'robot',    type: 'LLM generation',     tint: 'var(--blue-500)',      soft: 'var(--blue-50)',   content: <span>The query + retrieved context is sent to the LLM. It <strong>grounds its answer</strong> in the retrieved documents, not just training memory.</span> },
+  { iconKey: 'check',    type: 'Grounded answer',    tint: 'var(--color-success)', soft: 'var(--surface-1)', content: <span><strong>"Best practices include: (1) be specific about the task… (2) use structured formats… (3) provide few-shot examples…"</strong> — an accurate, sourced answer.</span> },
 ]
 
 // ── Quiz ──────────────────────────────────────────────────────────────────────
@@ -330,7 +679,7 @@ function pickQuestion(targetDiff, usedIds, quiz) {
 // ═════════════════════════════════════════════════════════════════════════════
 export default function VectorEmbeddings() {
   const [tab, setTab] = useState(0)
-  const TABS = ['What are Embeddings?', 'Vector Space', 'Similarity', 'Semantic Search', 'RAG', 'Quiz']
+  const TABS = ['What are embeddings?', 'Vector space', 'Similarity', 'Semantic search', 'RAG', 'Quiz']
 
   // word selector
   const [selectedWord, setSelectedWord] = useState('king')
@@ -407,34 +756,44 @@ export default function VectorEmbeddings() {
       <style>{css}</style>
       <NavBar />
 
-      <div className="ve-hero">
-        <div className="ve-eyebrow">Interactive Guide</div>
-        <h1 className="ve-title">Vector <span>Embeddings</span></h1>
+      <header className="ve-hero">
+        <div className="ve-eyebrow">Interactive guide</div>
+        <h1 className="ve-title">Vector embeddings</h1>
         <p className="ve-subtitle">How AI turns words, sentences, and concepts into numbers — and why nearby numbers mean similar meanings.</p>
-      </div>
+      </header>
 
-      <div className="ve-tabs">
-        {TABS.map((t, i) => (
-          <button key={i} className={`ve-tab${tab === i ? ' active' : ''}`} onClick={() => setTab(i)}>{t}</button>
-        ))}
+      <div className="ve-tabs-row">
+        <div className="prism-tabs" role="tablist" aria-label="Sections">
+          {TABS.map((t, i) => (
+            <button
+              key={i}
+              role="tab"
+              className="prism-tab"
+              aria-selected={tab === i}
+              onClick={() => setTab(i)}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* ── Tab 0: What are embeddings ── */}
       {tab === 0 && (
         <div className="ve-panel">
-          <div className="ve-section-title">What Are Vector Embeddings?</div>
+          <div className="ve-section-title">What are vector embeddings?</div>
           <p className="ve-section-sub">An embedding converts text (or any data) into a list of numbers called a vector. Words with similar meanings end up with similar numbers — so the meaning is baked into the math. Click a word to see its vector.</p>
 
           <div className="ve-card">
-            <div className="ve-card-title">// Word → Vector</div>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
+            <div className="ve-card-title">Word → vector</div>
+            <div style={{ display: 'flex', gap: 'var(--spacing-2)', flexWrap: 'wrap', marginBottom: 'var(--spacing-5)' }}>
               {Object.keys(WORDS).map(w => (
                 <button key={w} className={`sim-btn${selectedWord === w ? ' active' : ''}`} onClick={() => setSelectedWord(w)}>{w}</button>
               ))}
             </div>
             <div className="word-to-vec">
               <div className="wtv-word">"{selectedWord}"</div>
-              <div className="wtv-arrow">→</div>
+              <div className="wtv-arrow"><ArrowRightIcon size={20} weight="bold" /></div>
               <div className="wtv-vector">
                 {vec.map((v, i) => {
                   const c = vecColor(v)
@@ -447,27 +806,26 @@ export default function VectorEmbeddings() {
                 })}
               </div>
             </div>
-            <p style={{ fontSize: 12, color: '#5a4a3a', marginTop: 14, lineHeight: 1.7 }}>
+            <p style={{ font: 'var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)', marginTop: 'var(--spacing-3)' }}>
               Each number represents how strongly the word activates a learned dimension. Real embeddings have 768–3072 dimensions — we're showing 8 for clarity.
-              <span style={{ color: '#f97316', marginLeft: 8 }}>Darker orange = stronger activation.</span>
+              <span style={{ color: 'var(--orange-500)', marginLeft: 'var(--spacing-2)' }}>Darker orange means stronger activation.</span>
             </p>
           </div>
 
           <div className="ve-card">
-            <div className="ve-card-title">// The Famous Analogy: king − man + woman ≈ queen</div>
-            <p style={{ fontSize: 13, color: '#7a6a5a', marginBottom: 16, lineHeight: 1.7 }}>
-              Because meaning is encoded geometrically, you can do arithmetic on embeddings.
-              The direction from "man" to "woman" is the same as from "king" to "queen".
+            <div className="ve-card-title">The famous analogy: king − man + woman ≈ queen</div>
+            <p style={{ font: 'var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)', marginBottom: 'var(--spacing-4)' }}>
+              Because meaning is encoded geometrically, you can do arithmetic on embeddings. The direction from "man" to "woman" is the same as from "king" to "queen".
             </p>
             <div className="analogy-box">
               {[
-                { word: 'king',   vec: '[0.9, 0.1, 0.8...]' },
+                { word: 'king',   vec: '[0.9, 0.1, 0.8…]' },
                 { op: '−' },
-                { word: 'man',    vec: '[0.4, 0.1, 0.3...]' },
+                { word: 'man',    vec: '[0.4, 0.1, 0.3…]' },
                 { op: '+' },
-                { word: 'woman',  vec: '[0.4, 0.8, 0.3...]' },
+                { word: 'woman',  vec: '[0.4, 0.8, 0.3…]' },
                 { op: '≈' },
-                { word: 'queen',  vec: '[0.9, 0.8, 0.8...]', result: true },
+                { word: 'queen',  vec: '[0.9, 0.8, 0.8…]', result: true },
               ].map((item, i) => item.op
                 ? <div key={i} className="analogy-op">{item.op}</div>
                 : <div key={i} className={item.result ? 'analogy-result' : 'analogy-word'}>
@@ -476,25 +834,25 @@ export default function VectorEmbeddings() {
                   </div>
               )}
             </div>
-            <div style={{ marginTop: 14, padding: '10px 14px', background: 'rgba(249,115,22,0.06)', border: '1px solid rgba(249,115,22,0.2)', borderRadius: 8, fontSize: 13, color: '#c08060', lineHeight: 1.7 }}>
-              💡 This works because the embedding space learned that "royalty" and "gender" are separate, independent directions. Vector arithmetic navigates these directions.
+            <div style={{ marginTop: 'var(--spacing-4)', padding: 'var(--spacing-3) var(--spacing-4)', background: 'var(--surface-2)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', font: 'var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)' }}>
+              This works because the embedding space learned that "royalty" and "gender" are separate, independent directions. Vector arithmetic navigates those directions.
             </div>
           </div>
 
           <div className="ve-card">
-            <div className="ve-card-title">// Why Do Embeddings Matter?</div>
-            <div style={{ display: 'grid', gap: 12 }}>
+            <div className="ve-card-title">Why do embeddings matter?</div>
+            <div style={{ display: 'grid', gap: 'var(--spacing-3)' }}>
               {[
-                ['🔍 Semantic Search', 'Find documents that mean the same thing, even if they use different words. "automobile" and "car" end up near each other.'],
-                ['🤖 RAG Systems', 'Retrieve the most relevant context for an LLM by comparing query embeddings to document embeddings.'],
-                ['🧭 Recommendations', 'Netflix, Spotify, and Amazon all use embeddings to find items similar to ones you liked.'],
-                ['🔗 Cross-modal matching', 'Text and image embeddings can share the same space — enabling search like "find images similar to this sentence."'],
-              ].map(([title, desc]) => (
-                <div key={title} style={{ display: 'flex', gap: 12 }}>
-                  <span style={{ fontSize: 18, flexShrink: 0 }}>{title.split(' ')[0]}</span>
+                { iconKey: 'search',   title: 'Semantic search',         desc: 'Find documents that mean the same thing, even if they use different words. "automobile" and "car" end up near each other.' },
+                { iconKey: 'sparkle',  title: 'RAG systems',             desc: 'Retrieve the most relevant context for an LLM by comparing query embeddings to document embeddings.' },
+                { iconKey: 'compass',  title: 'Recommendations',         desc: 'Netflix, Spotify, and Amazon all use embeddings to find items similar to ones you liked.' },
+                { iconKey: 'link',     title: 'Cross-modal matching',    desc: 'Text and image embeddings can share the same space — enabling search like "find images similar to this sentence."' },
+              ].map(({ iconKey, title, desc }) => (
+                <div key={title} style={{ display: 'flex', gap: 'var(--spacing-3)' }}>
+                  <span style={{ color: 'var(--orange-500)', flexShrink: 0, marginTop: 2 }}><IconFor name={iconKey} size={20} weight="duotone" /></span>
                   <div>
-                    <div style={{ fontFamily: "'IBM Plex Sans',sans-serif", fontSize: 14, fontWeight: 700, color: '#e0e8f0', marginBottom: 3 }}>{title.slice(2)}</div>
-                    <div style={{ fontSize: 13, color: '#7a6a5a', lineHeight: 1.6 }}>{desc}</div>
+                    <div style={{ font: 'var(--text-weight-label) var(--text-size-body)/1.4 var(--font-primary)', color: 'var(--text-primary)', marginBottom: 'var(--spacing-1)' }}>{title}</div>
+                    <div style={{ font: 'var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)' }}>{desc}</div>
                   </div>
                 </div>
               ))}
@@ -506,24 +864,12 @@ export default function VectorEmbeddings() {
       {/* ── Tab 1: Vector Space ── */}
       {tab === 1 && (
         <div className="ve-panel">
-          <div className="ve-section-title">Vector Space Visualization</div>
+          <div className="ve-section-title">Vector space visualisation</div>
           <p className="ve-section-sub">In a real embedding space, similar words cluster together. This 2D map is a simplified projection — imagine it in 768+ dimensions. Hover over any word.</p>
 
           <div className="ve-card">
-            <div className="ve-card-title">// 2D Embedding Space (simplified projection)</div>
+            <div className="ve-card-title">2D embedding space (simplified projection)</div>
             <div className="space-canvas" style={{ height: 380 }}>
-              {/* Cluster background regions */}
-              <div style={{ position: 'absolute', left: '10%', top: '8%', width: '34%', height: '32%', background: 'rgba(249,115,22,0.04)', border: '1px dashed rgba(249,115,22,0.15)', borderRadius: 12 }} />
-              <div style={{ position: 'absolute', left: '8%', top: '44%', width: '32%', height: '34%', background: 'rgba(56,189,248,0.04)', border: '1px dashed rgba(56,189,248,0.15)', borderRadius: 12 }} />
-              <div style={{ position: 'absolute', left: '57%', top: '8%', width: '36%', height: '38%', background: 'rgba(52,211,153,0.04)', border: '1px dashed rgba(52,211,153,0.15)', borderRadius: 12 }} />
-              <div style={{ position: 'absolute', left: '48%', top: '52%', width: '44%', height: '40%', background: 'rgba(129,140,248,0.04)', border: '1px dashed rgba(129,140,248,0.15)', borderRadius: 12 }} />
-
-              {/* Cluster labels */}
-              <div className="cluster-label" style={{ left: '12%', top: '10%', color: '#f97316' }}>Royalty</div>
-              <div className="cluster-label" style={{ left: '10%', top: '46%', color: '#38bdf8' }}>People</div>
-              <div className="cluster-label" style={{ left: '60%', top: '10%', color: '#34d399' }}>Animals</div>
-              <div className="cluster-label" style={{ left: '51%', top: '54%', color: '#818cf8' }}>Places</div>
-
               {/* Words */}
               {SPACE_WORDS.map(w => (
                 <div key={w.word} className="space-point"
@@ -531,24 +877,29 @@ export default function VectorEmbeddings() {
                   onMouseEnter={() => setHoveredWord(w.word)}
                   onMouseLeave={() => setHoveredWord(null)}>
                   <div className="space-dot" style={{
-                    background: hoveredWord === w.word ? w.color : `${w.color}30`,
-                    borderColor: w.color,
+                    background: hoveredWord === w.word ? w.tint : 'transparent',
+                    borderColor: w.tint,
                     transform: hoveredWord === w.word ? 'scale(1.6)' : 'scale(1)',
                   }} />
                   <div className="space-label" style={{
-                    color: hoveredWord === w.word ? w.color : `${w.color}90`,
+                    color: w.tint,
                     top: -18, left: 8,
-                    fontWeight: hoveredWord === w.word ? 700 : 400,
-                    fontSize: hoveredWord === w.word ? 13 : 11,
+                    fontWeight: hoveredWord === w.word ? 600 : 400,
                   }}>{w.word}</div>
                 </div>
               ))}
 
+              {/* Cluster labels */}
+              <div className="cluster-label" style={{ left: '12%', top: '10%', color: 'var(--orange-500)' }}>Royalty</div>
+              <div className="cluster-label" style={{ left: '10%', top: '46%', color: 'var(--blue-500)' }}>People</div>
+              <div className="cluster-label" style={{ left: '60%', top: '10%', color: 'var(--text-primary)' }}>Animals</div>
+              <div className="cluster-label" style={{ left: '51%', top: '54%', color: 'var(--text-secondary)' }}>Places</div>
+
               {/* Hover info */}
               {hoveredWord && (
-                <div style={{ position: 'absolute', bottom: 12, left: 12, background: 'rgba(10,12,16,0.95)', border: '1px solid #2a1e12', borderRadius: 8, padding: '8px 14px', fontSize: 12, color: '#b0a898' }}>
-                  <span style={{ color: '#f97316', fontWeight: 700 }}>{hoveredWord}</span>
-                  {' '}— cluster: <span style={{ color: SPACE_WORDS.find(w => w.word === hoveredWord)?.color }}>
+                <div style={{ position: 'absolute', bottom: 12, left: 12, background: 'var(--surface-1)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-sm)', padding: 'var(--spacing-2) var(--spacing-3)', font: 'var(--text-weight-body) var(--text-size-caption)/1 var(--font-primary)', color: 'var(--text-secondary)', boxShadow: 'var(--shadow-e1)' }}>
+                  <strong style={{ color: 'var(--text-primary)' }}>{hoveredWord}</strong>
+                  {' '}— cluster: <span style={{ color: SPACE_WORDS.find(w => w.word === hoveredWord)?.tint }}>
                     {SPACE_WORDS.find(w => w.word === hoveredWord)?.cluster}
                   </span>
                 </div>
@@ -556,26 +907,26 @@ export default function VectorEmbeddings() {
             </div>
 
             <div className="space-legend">
-              {[['#f97316','Royalty'],['#38bdf8','People'],['#34d399','Animals'],['#818cf8','Places']].map(([c, l]) => (
-                <div key={l} style={{ display: 'flex', alignItems: 'center', fontSize: 12, color: '#7a6a5a' }}>
-                  <span className="legend-dot" style={{ background: c }} />{l}
+              {CLUSTER_LEGEND.map(({ tint, label }) => (
+                <div key={label} style={{ display: 'flex', alignItems: 'center' }}>
+                  <span className="legend-dot" style={{ background: tint }} />{label}
                 </div>
               ))}
             </div>
           </div>
 
           <div className="ve-card">
-            <div className="ve-card-title">// Key Insight: Distance = Meaning</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="ve-card-title">Key insight: distance equals meaning</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-3)' }}>
               {[
-                { label: '📍 Close in space', color: '#34d399', bg: 'rgba(52,211,153,0.05)', border: 'rgba(52,211,153,0.2)', points: ['"dog" and "cat" are nearby', '"paris" and "london" are nearby', '"king" and "queen" are nearby', 'Same semantic category → close'] },
-                { label: '🌐 Far in space', color: '#f97316', bg: 'rgba(249,115,22,0.05)', border: 'rgba(249,115,22,0.2)', points: ['"dog" and "paris" are far apart', '"king" and "wolf" are far apart', 'Different categories → distant', 'Distance encodes difference'] },
+                { label: 'Close in space', tint: 'var(--color-success)', soft: 'var(--surface-1)', points: ['"dog" and "cat" are nearby', '"paris" and "london" are nearby', '"king" and "queen" are nearby', 'Same semantic category — vectors agree'] },
+                { label: 'Far in space',   tint: 'var(--orange-500)',    soft: 'var(--orange-50)', points: ['"dog" and "paris" are far apart', '"king" and "wolf" are far apart', 'Different categories — vectors diverge', 'Distance encodes difference'] },
               ].map(col => (
-                <div key={col.label} style={{ background: col.bg, border: `1px solid ${col.border}`, borderRadius: 10, padding: 16 }}>
-                  <div style={{ fontFamily: "'IBM Plex Sans',sans-serif", fontWeight: 700, fontSize: 13, color: col.color, marginBottom: 10 }}>{col.label}</div>
+                <div key={col.label} style={{ background: col.soft, border: `1px solid ${col.tint}`, borderRadius: 'var(--radius-md)', padding: 'var(--spacing-4)' }}>
+                  <div style={{ font: 'var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary)', color: col.tint, marginBottom: 'var(--spacing-3)' }}>{col.label}</div>
                   {col.points.map(p => (
-                    <div key={p} style={{ display: 'flex', gap: 8, marginBottom: 6, fontSize: 12, color: '#7a6a5a', lineHeight: 1.5 }}>
-                      <span style={{ color: col.color, flexShrink: 0 }}>▸</span>{p}
+                    <div key={p} style={{ display: 'flex', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-1)', font: 'var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)' }}>
+                      <span style={{ color: col.tint, flexShrink: 0 }}>▸</span>{p}
                     </div>
                   ))}
                 </div>
@@ -588,11 +939,11 @@ export default function VectorEmbeddings() {
       {/* ── Tab 2: Similarity ── */}
       {tab === 2 && (
         <div className="ve-panel">
-          <div className="ve-section-title">Cosine Similarity</div>
-          <p className="ve-section-sub">Cosine similarity measures the angle between two vectors — not their distance. A score of 1.0 means identical direction (same meaning), 0 means unrelated. Select a set to explore.</p>
+          <div className="ve-section-title">Cosine similarity</div>
+          <p className="ve-section-sub">Cosine similarity measures the angle between two vectors, not their distance. A score of 1.0 means identical direction (same meaning), 0 means unrelated. Select a set to explore.</p>
 
           <div className="ve-card">
-            <div className="ve-card-title">// Similarity Explorer</div>
+            <div className="ve-card-title">Similarity explorer</div>
             <div className="sim-selector">
               {Object.keys(SIM_SETS).map(k => (
                 <button key={k} className={`sim-btn${simSet === k ? ' active' : ''}`} onClick={() => setSimSet(k)}>{k}</button>
@@ -600,19 +951,19 @@ export default function VectorEmbeddings() {
             </div>
             {SIM_SETS[simSet].map((pair, i) => {
               const pct = pair.score * 100
-              const color = pair.score > 0.8 ? '#34d399' : pair.score > 0.5 ? '#f97316' : '#ef4444'
+              const tint = pair.score > 0.85 ? 'var(--color-success)' : pair.score > 0.5 ? 'var(--orange-500)' : 'var(--text-tertiary)'
               return (
-                <div key={i} style={{ marginBottom: 16 }}>
+                <div key={i} style={{ marginBottom: 'var(--spacing-4)' }}>
                   <div className="sim-pair">
                     <div className="sim-word-box"><div className="sim-word">{pair.a}</div></div>
                     <div className="sim-score-col">
-                      <div className="sim-val" style={{ color }}>{pair.score.toFixed(2)}</div>
+                      <div className="sim-val" style={{ color: tint }}>{pair.score.toFixed(2)}</div>
                       <div className="sim-label">{pair.label}</div>
                     </div>
                     <div className="sim-word-box"><div className="sim-word">{pair.b}</div></div>
                   </div>
                   <div className="sim-bar-wrap">
-                    <div className="sim-bar" style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${color}80, ${color})` }} />
+                    <div className="sim-bar" style={{ width: `${pct}%`, background: tint }} />
                   </div>
                 </div>
               )
@@ -620,23 +971,26 @@ export default function VectorEmbeddings() {
           </div>
 
           <div className="ve-card">
-            <div className="ve-card-title">// How Cosine Similarity Works</div>
-            <p style={{ fontSize: 13, color: '#7a6a5a', lineHeight: 1.8, marginBottom: 14 }}>
-              Instead of measuring how far apart two points are (Euclidean distance), cosine similarity measures the angle between them. This makes it <span style={{ color: '#f97316' }}>length-independent</span> — a short and long document about the same topic will still score high.
+            <div className="ve-card-title">How cosine similarity works</div>
+            <p style={{ font: 'var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)', marginBottom: 'var(--spacing-4)' }}>
+              Instead of measuring how far apart two points are (Euclidean distance), cosine similarity measures the angle between them. This makes it <strong style={{ color: 'var(--text-primary)' }}>length-independent</strong> — a short and long document about the same topic will still score high.
             </p>
-            <div style={{ background: '#06080c', border: '1px solid rgba(249,115,22,0.2)', borderRadius: 8, padding: 16, fontFamily: "'IBM Plex Mono',monospace", fontSize: 13, color: '#f97316', lineHeight: 2 }}>
-              <div style={{ color: '#5a4a3a' }}>// Formula</div>
-              similarity(A, B) = <span style={{ color: '#fbbf24' }}>cos(θ)</span> = <span style={{ color: '#34d399' }}>(A · B)</span> / <span style={{ color: '#38bdf8' }}>(|A| × |B|)</span>
-              <div style={{ marginTop: 8, fontSize: 12, color: '#5a4a3a' }}>
-                <span style={{ color: '#34d399' }}>A · B</span> = dot product &nbsp;|&nbsp;
-                <span style={{ color: '#38bdf8' }}>|A|, |B|</span> = vector magnitudes
+            <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-4)', fontFamily: 'IBM Plex Mono, ui-monospace, monospace', fontSize: 'var(--text-size-caption)', color: 'var(--text-primary)', lineHeight: 1.9 }}>
+              <div style={{ color: 'var(--text-tertiary)' }}>// Formula</div>
+              similarity(A, B) = <span style={{ color: 'var(--orange-500)' }}>cos(θ)</span> = <span style={{ color: 'var(--blue-500)' }}>(A · B)</span> / <span style={{ color: 'var(--blue-500)' }}>(|A| × |B|)</span>
+              <div style={{ marginTop: 'var(--spacing-2)', font: 'var(--text-weight-body) var(--text-size-meta)/1.4 var(--font-primary)', color: 'var(--text-tertiary)' }}>
+                A · B is the dot product · |A|, |B| are vector magnitudes.
               </div>
             </div>
-            <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10 }}>
-              {[['1.0', 'Identical', '#34d399'], ['0.5', 'Related', '#f97316'], ['0.0', 'Unrelated', '#818cf8']].map(([val, label, color]) => (
-                <div key={val} style={{ background: '#06080c', border: `1px solid ${color}30`, borderRadius: 8, padding: 12, textAlign: 'center' }}>
-                  <div style={{ fontFamily: "'IBM Plex Sans',sans-serif", fontSize: 22, fontWeight: 800, color }}>{val}</div>
-                  <div style={{ fontSize: 12, color: '#5a4a3a', marginTop: 4 }}>{label}</div>
+            <div style={{ marginTop: 'var(--spacing-4)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--spacing-2)' }}>
+              {[
+                { val: '1.0', label: 'Identical',  tint: 'var(--color-success)' },
+                { val: '0.5', label: 'Related',    tint: 'var(--orange-500)' },
+                { val: '0.0', label: 'Unrelated',  tint: 'var(--text-tertiary)' },
+              ].map(({ val, label, tint }) => (
+                <div key={val} style={{ background: 'var(--surface-2)', border: `1px solid ${tint}`, borderRadius: 'var(--radius-md)', padding: 'var(--spacing-3)', textAlign: 'center' }}>
+                  <div style={{ font: 'var(--text-weight-h2) var(--text-size-h2)/1 var(--font-primary)', letterSpacing: 'var(--text-ls-h2)', color: tint }}>{val}</div>
+                  <div style={{ font: 'var(--text-weight-body) var(--text-size-caption)/1 var(--font-primary)', color: 'var(--text-tertiary)', marginTop: 'var(--spacing-1)' }}>{label}</div>
                 </div>
               ))}
             </div>
@@ -647,28 +1001,29 @@ export default function VectorEmbeddings() {
       {/* ── Tab 3: Semantic Search ── */}
       {tab === 3 && (
         <div className="ve-panel">
-          <div className="ve-section-title">Semantic Search</div>
+          <div className="ve-section-title">Semantic search</div>
           <p className="ve-section-sub">Unlike keyword search (which matches exact words), semantic search finds documents with similar meaning. Click a query to see how the results change based on semantic similarity — not word overlap.</p>
 
           <div className="ve-card">
-            <div className="ve-card-title">// Live Semantic Search Demo</div>
-            <div style={{ fontSize: 13, color: '#7a6a5a', marginBottom: 12 }}>Try a query:</div>
+            <div className="ve-card-title">Live semantic search demo</div>
+            <div style={{ font: 'var(--text-weight-body) var(--text-size-caption)/1.4 var(--font-primary)', color: 'var(--text-secondary)', marginBottom: 'var(--spacing-3)' }}>Try a query:</div>
             <div className="search-queries">
               {Object.keys(QUERIES).map(q => (
                 <button key={q} className={`query-chip${activeQuery === q ? ' active' : ''}`} onClick={() => setActiveQuery(q)}>"{q}"</button>
               ))}
             </div>
-            <div style={{ marginBottom: 16, padding: '10px 14px', background: 'rgba(249,115,22,0.06)', border: '1px solid rgba(249,115,22,0.2)', borderRadius: 8, fontSize: 13, color: '#b08060' }}>
-              🔍 Query: <span style={{ color: '#f97316', fontWeight: 600 }}>"{activeQuery}"</span>
+            <div style={{ marginBottom: 'var(--spacing-4)', padding: 'var(--spacing-3) var(--spacing-4)', background: 'var(--orange-50)', border: '1px solid var(--orange-100)', borderRadius: 'var(--radius-md)', font: 'var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)' }}>
+              <MagnifyingGlassIcon size={16} weight="duotone" color="var(--orange-500)" />
+              Query: <strong style={{ color: 'var(--orange-500)' }}>"{activeQuery}"</strong>
             </div>
             {searchResults.map((r, i) => (
               <div key={i} className={`search-result${i === 0 ? ' top' : ''}`}>
-                <div className="sr-rank" style={{ color: i === 0 ? '#f97316' : '#3a2a1a' }}>#{r.rank}</div>
+                <div className="sr-rank">#{r.rank}</div>
                 <div className="sr-text">{r.text}</div>
                 <div className="sr-score-bar">
                   <div className="sr-score-val">{r.score.toFixed(2)}</div>
                   <div className="sr-bar-bg">
-                    <div className="sr-bar-fill" style={{ width: `${r.score * 100}%`, opacity: 0.6 + i * -0.06 }} />
+                    <div className="sr-bar-fill" style={{ width: `${r.score * 100}%` }} />
                   </div>
                 </div>
               </div>
@@ -676,17 +1031,17 @@ export default function VectorEmbeddings() {
           </div>
 
           <div className="ve-card">
-            <div className="ve-card-title">// Keyword Search vs. Semantic Search</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="ve-card-title">Keyword search vs semantic search</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-3)' }}>
               {[
-                { label: '❌ Keyword Search', color: '#f87171', bg: 'rgba(239,68,68,0.05)', border: 'rgba(239,68,68,0.2)', points: ['Matches exact words only', '"car" won\'t find "automobile"', '"ML" won\'t find "machine learning"', 'Order and context ignored'] },
-                { label: '✅ Semantic Search', color: '#34d399', bg: 'rgba(52,211,153,0.05)', border: 'rgba(52,211,153,0.2)', points: ['Matches meaning, not words', '"car" finds "automobile", "vehicle"', 'Paraphrases match correctly', 'Context and nuance captured'] },
+                { label: 'Keyword search',  tint: 'var(--color-error)',   soft: 'var(--surface-1)', points: ['Matches exact words only', '"car" won\'t find "automobile"', '"ML" won\'t find "machine learning"', 'Order and context ignored'] },
+                { label: 'Semantic search', tint: 'var(--color-success)', soft: 'var(--surface-1)', points: ['Matches meaning, not words', '"car" finds "automobile" and "vehicle"', 'Paraphrases match correctly', 'Context and nuance captured'] },
               ].map(col => (
-                <div key={col.label} style={{ background: col.bg, border: `1px solid ${col.border}`, borderRadius: 10, padding: 16 }}>
-                  <div style={{ fontFamily: "'IBM Plex Sans',sans-serif", fontWeight: 700, fontSize: 13, color: col.color, marginBottom: 10 }}>{col.label}</div>
+                <div key={col.label} style={{ background: col.soft, border: `1px solid ${col.tint}`, borderRadius: 'var(--radius-md)', padding: 'var(--spacing-4)' }}>
+                  <div style={{ font: 'var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary)', color: col.tint, marginBottom: 'var(--spacing-3)' }}>{col.label}</div>
                   {col.points.map(p => (
-                    <div key={p} style={{ display: 'flex', gap: 8, marginBottom: 6, fontSize: 12, color: '#7a6a5a', lineHeight: 1.5 }}>
-                      <span style={{ color: col.color, flexShrink: 0 }}>▸</span>{p}
+                    <div key={p} style={{ display: 'flex', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-1)', font: 'var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)' }}>
+                      <span style={{ color: col.tint, flexShrink: 0 }}>▸</span>{p}
                     </div>
                   ))}
                 </div>
@@ -699,41 +1054,40 @@ export default function VectorEmbeddings() {
       {/* ── Tab 4: RAG ── */}
       {tab === 4 && (
         <div className="ve-panel">
-          <div className="ve-section-title">Retrieval-Augmented Generation (RAG)</div>
-          <p className="ve-section-sub">RAG combines embeddings + vector search + LLMs. Instead of relying on training memory alone, the model retrieves relevant documents at query time and grounds its answer in real data.</p>
+          <div className="ve-section-title">Retrieval-augmented generation (RAG)</div>
+          <p className="ve-section-sub">RAG combines embeddings, vector search, and LLMs. Instead of relying on training memory alone, the model retrieves relevant documents at query time and grounds its answer in real data.</p>
 
           <div className="ve-card">
-            <div className="ve-card-title">// RAG Pipeline</div>
+            <div className="ve-card-title">RAG pipeline</div>
             <div className="rag-flow">
               {RAG_STEPS.map((step, i) => (
-                <div key={i}>
-                  <div className="rag-step">
-                    <div className="rag-dot" style={{ background: step.dotBg, borderColor: step.dotBorder, color: step.color }}>{step.icon}</div>
-                    <div className="rag-body">
-                      <div className="rag-type" style={{ color: step.color }}>{step.type}</div>
-                      <div className="rag-content">{step.content}</div>
-                    </div>
+                <div key={i} className="rag-step">
+                  <div className="rag-dot" style={{ '--rag-tint': step.tint, '--rag-soft': step.soft }}>
+                    <IconFor name={step.iconKey} size={18} weight="duotone" />
                   </div>
-                  {i < RAG_STEPS.length - 1 && <div className="rag-connector" />}
+                  <div className="rag-body">
+                    <div className="rag-type" style={{ '--rag-tint': step.tint }}>{step.type}</div>
+                    <div className="rag-content">{step.content}</div>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
           <div className="ve-card">
-            <div className="ve-card-title">// Why RAG Matters</div>
-            <div style={{ display: 'grid', gap: 12 }}>
+            <div className="ve-card-title">Why RAG matters</div>
+            <div style={{ display: 'grid', gap: 'var(--spacing-3)' }}>
               {[
-                ['🧠 Overcomes knowledge cutoffs', 'LLMs have training cutoffs. RAG lets them answer questions about documents from today — no retraining required.'],
-                ['🎯 Reduces hallucination', 'By grounding answers in retrieved text, the model is less likely to invent facts. It\'s citing sources, not guessing.'],
-                ['🔒 Private knowledge', 'Your internal documents never leave your system. The LLM reads chunks at inference time — no fine-tuning needed.'],
-                ['⚡ More efficient than fine-tuning', 'Adding new knowledge via RAG is instant and cheap. Fine-tuning a model costs thousands of dollars and hours of compute.'],
-              ].map(([title, desc]) => (
-                <div key={title} style={{ display: 'flex', gap: 12 }}>
-                  <span style={{ fontSize: 18, flexShrink: 0 }}>{title.split(' ')[0]}</span>
+                { iconKey: 'brain',     title: 'Overcomes knowledge cutoffs',     desc: "LLMs have training cutoffs. RAG lets them answer questions about documents from today — no retraining required." },
+                { iconKey: 'target',    title: 'Reduces hallucination',           desc: "By grounding answers in retrieved text, the model is less likely to invent facts. It's citing sources, not guessing." },
+                { iconKey: 'lock',      title: 'Private knowledge stays private', desc: "Your internal documents never leave your system. The LLM reads chunks at inference time — no fine-tuning needed." },
+                { iconKey: 'lightning', title: 'More efficient than fine-tuning', desc: "Adding new knowledge via RAG is instant and cheap. Fine-tuning a model costs thousands of dollars and hours of compute." },
+              ].map(({ iconKey, title, desc }) => (
+                <div key={title} style={{ display: 'flex', gap: 'var(--spacing-3)' }}>
+                  <span style={{ color: 'var(--blue-500)', flexShrink: 0, marginTop: 2 }}><IconFor name={iconKey} size={20} weight="duotone" /></span>
                   <div>
-                    <div style={{ fontFamily: "'IBM Plex Sans',sans-serif", fontSize: 14, fontWeight: 700, color: '#e0e8f0', marginBottom: 3 }}>{title.slice(2)}</div>
-                    <div style={{ fontSize: 13, color: '#7a6a5a', lineHeight: 1.6 }}>{desc}</div>
+                    <div style={{ font: 'var(--text-weight-label) var(--text-size-body)/1.4 var(--font-primary)', color: 'var(--text-primary)', marginBottom: 'var(--spacing-1)' }}>{title}</div>
+                    <div style={{ font: 'var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)' }}>{desc}</div>
                   </div>
                 </div>
               ))}
@@ -745,42 +1099,56 @@ export default function VectorEmbeddings() {
       {/* ── Tab 5: Quiz ── */}
       {tab === 5 && (
         <div className="ve-panel">
-          <div className="ve-section-title">Quick Quiz</div>
-          <p className="ve-section-sub">Test your understanding of vector embeddings, similarity, and RAG.</p>
+          <div className="ve-section-title">Quick quiz</div>
+          <p className="ve-section-sub">Six questions to check what stuck. The next question is picked from a harder or easier pool based on how you do.</p>
           {!done ? (
             <div className="ve-card">
               {currentQ && (
                 <>
                   <div className="ve-progress"><div className="ve-progress-fill" style={{ width: `${(qNum / SESSION_SIZE) * 100}%` }} /></div>
-                  <div style={{ fontSize: 12, color: '#5a4a3a', marginBottom: 16 }}>QUESTION {qNum + 1} / {SESSION_SIZE}</div>
-                  <span className={`ve-diff-badge ${currentQ.difficulty}`}>⬤ {currentQ.difficulty}</span>
+                  <div className="ve-quiz-meta">Question {qNum + 1} of {SESSION_SIZE}</div>
+                  <span className={`ve-diff-badge ${currentQ.difficulty}`}>{currentQ.difficulty}</span>
                   <div className="ve-quiz-q">{currentQ.q}</div>
-                  <div className="ve-quiz-opts">
+                  <div className="ve-quiz-opts" role="radiogroup">
                     {currentQ.opts.map((opt, i) => (
-                      <button key={i} disabled={chosen !== null}
+                      <button
+                        key={i}
+                        disabled={chosen !== null}
+                        role="radio"
+                        aria-checked={chosen === i}
                         className={`ve-quiz-opt${chosen !== null && i === currentQ.correct ? ' correct' : ''}${chosen === i && i !== currentQ.correct ? ' wrong' : ''}`}
-                        onClick={() => handleQuiz(i)}>
-                        {['A','B','C','D'][i]}. {opt}
+                        onClick={() => handleQuiz(i)}
+                      >
+                        <span className="ve-quiz-opt-letter">{['A','B','C','D'][i]}.</span>
+                        {opt}
                       </button>
                     ))}
                   </div>
                   {chosen !== null && (
                     <>
                       <div className="ve-quiz-exp">{currentQ.explanation}</div>
-                      <button className="ve-quiz-next" onClick={nextQ}>{qNum + 1 < SESSION_SIZE ? 'Next Question →' : 'See Results →'}</button>
+                      <button className="ve-quiz-next" onClick={nextQ}>
+                        {qNum + 1 < SESSION_SIZE ? 'Next question' : 'See results'}
+                      </button>
                     </>
                   )}
                 </>
               )}
             </div>
           ) : (
-            <div className="ve-card" style={{ textAlign: 'center', padding: 40 }}>
-              <div style={{ fontSize: 12, color: '#5a4a3a', marginBottom: 12, letterSpacing: '0.12em' }}>FINAL SCORE</div>
+            <div className="ve-card" style={{ textAlign: 'center', padding: 'var(--spacing-7)' }}>
+              <div className="ve-quiz-meta" style={{ textAlign: 'center' }}>Final score</div>
               <div className="ve-score-num">{score}/{SESSION_SIZE}</div>
-              <div style={{ fontSize: 14, color: '#7a6a5a', marginTop: 8 }}>
-                {score >= SESSION_SIZE ? 'Perfect! You understand embeddings deeply. 🎉' : score >= SESSION_SIZE / 2 ? 'Good work! Review the sections you found tricky. 📚' : 'Keep exploring — embeddings take time to click. 💪'}
+              <div style={{ font: 'var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)', marginTop: 'var(--spacing-2)' }}>
+                {score >= SESSION_SIZE
+                  ? 'You understand embeddings deeply.'
+                  : score >= SESSION_SIZE / 2
+                    ? 'Solid run. Worth a quick re-read of the trickier sections.'
+                    : 'Embeddings take a couple of passes to click. Try a tab you skipped, then retake.'}
               </div>
-              <button className="ve-quiz-next" style={{ marginTop: 24 }} onClick={retake}>Retake Quiz ↺</button>
+              <button className="ve-quiz-next" style={{ marginTop: 'var(--spacing-6)' }} onClick={retake}>
+                Retake quiz
+              </button>
             </div>
           )}
         </div>
