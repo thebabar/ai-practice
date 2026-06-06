@@ -158,6 +158,41 @@ const navStyle = `
     transition: all 0.18s;
   }
   .nav-themebtn:hover { border-color: #94a3b8; color: #e2e8f0; }
+
+  /* Right-side controls cluster — gap shrinks on mobile */
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .nav-logo-suffix { display: inline; }
+
+  @media (max-width: 720px) {
+    .nav-bar { padding: 10px 14px; gap: 8px; }
+    .nav-right { gap: 6px; }
+    .nav-logo { font-size: 14px; gap: 6px; }
+    /* Hide the "Visual Lab" tail and the decorative badge to free up space */
+    .nav-logo-suffix { display: none; }
+    .nav-badge { display: none; }
+    .nav-glossary {
+      font-size: 11px;
+      padding: 4px 8px;
+      letter-spacing: 0.04em;
+    }
+    .nav-back {
+      font-size: 12px;
+      padding: 4px 8px;
+      letter-spacing: 0.04em;
+    }
+  }
+
+  @media (max-width: 480px) {
+    /* Glossary becomes icon-style: drop letter-spacing, very compact */
+    .nav-glossary { padding: 4px 6px; font-size: 10px; }
+    .nav-back     { padding: 4px 6px; font-size: 11px; }
+  }
 `
 
 export default function NavBar({ title }) {
@@ -173,9 +208,9 @@ export default function NavBar({ title }) {
       <style>{navStyle}</style>
       <nav className="nav-bar">
         <Link to="/" className="nav-logo">
-          🧪 <span>AI</span> Visual Lab
+          🧪 <span>AI</span><span className="nav-logo-suffix"> Visual Lab</span>
         </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div className="nav-right">
           <Link to="/glossary" className={`nav-glossary${isGlossary ? ' active' : ''}`}>Glossary</Link>
           {!isHome && !isGlossary && (
             <Link to="/" className="nav-back">← Back</Link>
