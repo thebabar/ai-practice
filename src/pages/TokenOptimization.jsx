@@ -1,183 +1,471 @@
 import { useState, useEffect, useRef } from "react";
 import NavBar from '../components/NavBar.jsx'
+import {
+  ArrowsInLineHorizontalIcon, BracketsCurlyIcon, LightningIcon, TargetIcon,
+  ArrowCounterClockwiseIcon, CheckCircleIcon, WarningCircleIcon,
+} from '@phosphor-icons/react'
+
+const TECH_ICON = {
+  compress: ArrowsInLineHorizontalIcon,
+  structured: BracketsCurlyIcon,
+  cache: LightningIcon,
+  fewshot: TargetIcon,
+}
 
 const styleTag = `
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
+/* ── Phase 5a: Token Optimization rebound to Prism tokens.
+ *  Per §5.3 — blue for context/structure, orange for cost/spend
+ *  emphasis, --color-success for KV-cache hits. ──────────────── */
 
-.tok-root {
-  min-height: 100vh;
-  background: #050810;
-  color: #e0e8f0;
-  font-family: 'IBM Plex Mono', monospace;
-  overflow-x: hidden;
-}
+.tok-root { min-height: 100vh; background: var(--surface-base); color: var(--text-primary); overflow-x: hidden; }
 
+/* Hero — obsidian + refracted light (§5.2). Dark theme drops the obsidian
+ * block since the page is already dark; gradient sits straight on base. */
 .tok-hero {
-  text-align: center;
-  padding: 48px 24px 28px;
   position: relative;
+  text-align: center;
+  padding: var(--spacing-7) var(--spacing-4) var(--spacing-6);
+  background: var(--text-primary);
+  color: var(--surface-base);
+  overflow: hidden;
 }
-
+:root[data-theme="dark"] .tok-hero {
+  background: var(--surface-base);
+  color: var(--text-primary);
+}
 .tok-hero::before {
   content: '';
   position: absolute;
-  top: 0; left: 50%;
-  transform: translateX(-50%);
-  width: 600px; height: 300px;
-  background: radial-gradient(ellipse at 50% 0%, rgba(56,189,248,0.1) 0%, transparent 70%);
+  inset: 0;
+  background: var(--gradient-refracted-b);
+  opacity: var(--refracted-opacity-standard);
   pointer-events: none;
 }
-
+.tok-hero > * { position: relative; }
 .tok-eyebrow {
-  font-size: 16px;
-  letter-spacing: 0.22em;
-  color: #38bdf8;
-  text-transform: uppercase;
-  margin-bottom: 14px;
+  font: var(--text-weight-label) var(--text-size-caption)/var(--text-lh-caption) var(--font-primary);
+  letter-spacing: 0.08em;
+  color: var(--blue-300);
+  margin-bottom: var(--spacing-3);
 }
-
 .tok-title {
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: clamp(28px, 5vw, 50px);
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: #fff;
-  line-height: 1.1;
-  margin-bottom: 12px;
+  font: var(--text-weight-h1) var(--text-size-h1)/var(--text-lh-h1) var(--font-primary);
+  letter-spacing: var(--text-ls-h1);
+  margin-bottom: var(--spacing-3);
 }
-
-.tok-title span { color: #38bdf8; }
-
 .tok-subtitle {
-  font-size: 16px;
-  color: #7a9bbf;
-  max-width: 500px;
-  margin: 0 auto 32px;
-  line-height: 1.7;
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  max-width: 540px;
+  margin: 0 auto;
+  opacity: 0.85;
 }
 
-.tok-nav {
+.tok-nav-row {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  padding: 0 16px 32px;
+  padding: var(--spacing-5) var(--spacing-4) var(--spacing-6);
+  background: var(--surface-base);
 }
 
-.tok-nav-btn {
+.tok-panel { max-width: 920px; margin: 0 auto; padding: 0 var(--spacing-4) var(--spacing-7); }
+
+.tok-section-title {
+  font: var(--text-weight-h2) var(--text-size-h2)/var(--text-lh-h2) var(--font-primary);
+  letter-spacing: var(--text-ls-h2);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-2);
+}
+.tok-section-sub {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-6);
+  max-width: 720px;
+}
+
+.tok-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-e2);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-5);
+  margin-bottom: var(--spacing-5);
+}
+.tok-card-title {
+  font: var(--text-weight-h3) var(--text-size-h3)/var(--text-lh-h3) var(--font-primary);
+  letter-spacing: var(--text-ls-h3);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-4);
+}
+
+.tok-input {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--text-size-body);
+  padding: var(--spacing-3);
+  resize: vertical;
+  min-height: 80px;
+  outline: none;
+  transition: border-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
+}
+.tok-input:focus-visible {
+  border-color: var(--purple-500);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.tok-tokens-display { display: flex; flex-wrap: wrap; gap: 4px; margin-top: var(--spacing-4); min-height: 40px; }
+.tok-token {
+  display: inline-block;
+  padding: 3px 7px;
+  border-radius: var(--radius-sm);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--text-size-caption);
+  border: 1px solid transparent;
+  cursor: default;
+}
+
+.tok-stats-row { display: flex; gap: var(--spacing-3); margin-top: var(--spacing-4); flex-wrap: wrap; }
+.tok-stat {
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3) var(--spacing-4);
+  flex: 1;
+  min-width: 110px;
+  text-align: center;
+}
+.tok-stat-val {
+  font: var(--text-weight-h2) var(--text-size-h2)/1 var(--font-primary);
+  letter-spacing: var(--text-ls-h2);
+  color: var(--text-primary);
+}
+.tok-stat-lbl {
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  color: var(--text-tertiary);
+  margin-top: var(--spacing-1);
+}
+
+.cost-bar-wrap { margin-bottom: var(--spacing-3); }
+.cost-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font: var(--text-weight-body) var(--text-size-caption)/1 var(--font-primary);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-1);
+}
+.cost-bar-track {
+  background: var(--surface-2);
+  border-radius: 100px;
+  height: 22px;
+  overflow: hidden;
+  border: 1px solid var(--border-default);
+}
+.cost-bar-fill {
+  height: 100%;
+  border-radius: 100px;
+  transition: width var(--duration-deliberate) var(--ease-standard);
+}
+
+/* Slider — token-driven; defaults to blue (structured). Add .tok-slider--orange
+ * for cost/exploratory inputs (per §5.3 cost emphasis is orange). */
+.tok-slider {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 24px;
   background: transparent;
-  border: 1px solid #1e3048;
-  color: #7a9bbf;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 16px;
-  letter-spacing: 0.1em;
-  padding: 8px 16px;
-  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.18s;
-  text-transform: uppercase;
+  padding: 0;
+  margin: var(--spacing-2) 0;
 }
-.tok-nav-btn:hover { border-color: #38bdf8; color: #38bdf8; }
-.tok-nav-btn.active { background: rgba(56,189,248,0.12); border-color: #38bdf8; color: #38bdf8; }
+.tok-slider::-webkit-slider-runnable-track { height: 4px; background: var(--border-default); border-radius: 2px; }
+.tok-slider::-moz-range-track { height: 4px; background: var(--border-default); border-radius: 2px; }
+.tok-slider::-moz-range-progress { height: 4px; background: var(--blue-500); border-radius: 2px; }
+.tok-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--surface-1);
+  border: 2px solid var(--blue-500);
+  box-shadow: var(--shadow-e1);
+  margin-top: -6px;
+  cursor: pointer;
+}
+.tok-slider::-moz-range-thumb {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--surface-1);
+  border: 2px solid var(--blue-500);
+  box-shadow: var(--shadow-e1);
+  cursor: pointer;
+}
+.tok-slider:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; border-radius: var(--radius-sm); }
+.tok-slider--orange::-webkit-slider-thumb { border-color: var(--orange-500); }
+.tok-slider--orange::-moz-range-thumb { border-color: var(--orange-500); }
+.tok-slider--orange::-moz-range-progress { background: var(--orange-500); }
 
-.tok-panel { max-width: 860px; margin: 0 auto; padding: 0 20px 80px; }
+/* Optimization techniques */
+.technique-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--spacing-3); margin-bottom: var(--spacing-5); }
+.technique-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
+}
+.technique-card:hover { background: var(--surface-2); border-color: var(--border-strong); }
+.technique-card.selected { background: var(--blue-50); border-color: var(--blue-500); box-shadow: var(--shadow-e2); }
+.technique-card:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.technique-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-bottom: var(--spacing-2);
+  color: var(--blue-500);
+}
+.technique-name {
+  font: var(--text-weight-h3) var(--text-size-h3)/var(--text-lh-h3) var(--font-primary);
+  letter-spacing: var(--text-ls-h3);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-1);
+}
+.technique-desc {
+  font: var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+}
+.technique-saving {
+  display: inline-block;
+  margin-top: var(--spacing-3);
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--orange-50);
+  border: 1px solid var(--orange-100);
+  color: var(--orange-500);
+}
 
-.tok-section-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 8px; }
-.tok-section-sub { font-size: 16px; color: #7a9bbf; margin-bottom: 28px; line-height: 1.7; }
+/* Before / After compare boxes */
+.ba-compare { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-3); }
+@media (max-width: 600px) { .ba-compare { grid-template-columns: 1fr; } }
+.ba-box {
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+  border: 1px solid var(--border-default);
+}
+.ba-label {
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  margin-bottom: var(--spacing-2);
+}
+.ba-text {
+  font: var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-secondary);
+  color: var(--text-primary);
+  white-space: pre-wrap;
+}
+.ba-tok-count {
+  margin-top: var(--spacing-2);
+  font: var(--text-weight-body) var(--text-size-caption)/1 var(--font-primary);
+  color: var(--text-secondary);
+}
+.ba-tok-count strong { font-weight: 600; }
 
-.tok-card { background: #0d1520; border: 1px solid #1e3048; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
-.tok-card-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #38bdf8; margin-bottom: 14px; }
+/* Savings callout — uses --color-success per §5.3 */
+.savings-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  background: var(--surface-1);
+  border: 1px solid var(--color-success);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3);
+  margin-top: var(--spacing-3);
+  font: var(--text-weight-label) var(--text-size-body)/1 var(--font-primary);
+  color: var(--color-success);
+}
 
-.tok-input { width: 100%; background: #07101a; border: 1px solid #1e3048; border-radius: 8px; color: #e0e8f0; font-family: 'IBM Plex Mono', monospace; font-size: 16px; padding: 14px; resize: vertical; min-height: 80px; outline: none; transition: border-color 0.2s; }
-.tok-input:focus { border-color: #38bdf8; }
-
-.tok-tokens-display { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 14px; min-height: 40px; }
-
-.tok-token { display: inline-block; padding: 3px 7px; border-radius: 4px; font-size: 16px; font-family: 'IBM Plex Mono', monospace; border: 1px solid transparent; transition: transform 0.15s; cursor: default; }
-.tok-token:hover { transform: scale(1.08); }
-
-.tok-stats-row { display: flex; gap: 16px; margin-top: 16px; flex-wrap: wrap; }
-.tok-stat { background: #07101a; border: 1px solid #1e3048; border-radius: 8px; padding: 10px 16px; flex: 1; min-width: 100px; text-align: center; }
-.tok-stat-val { font-family: 'IBM Plex Sans', sans-serif; font-size: 22px; font-weight: 800; color: #38bdf8; }
-.tok-stat-lbl { font-size: 12px; color: #7a9bbf; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
-
-.cost-bar-wrap { margin-bottom: 14px; }
-.cost-bar-label { display: flex; justify-content: space-between; font-size: 16px; color: #7a9bbf; margin-bottom: 5px; }
-.cost-bar-track { background: #07101a; border-radius: 100px; height: 22px; overflow: hidden; border: 1px solid #1e3048; }
-.cost-bar-fill { height: 100%; border-radius: 100px; transition: width 0.5s cubic-bezier(.4,0,.2,1); }
-
-.tok-slider { width: 100%; accent-color: #38bdf8; margin: 8px 0 4px; cursor: pointer; }
-
-.technique-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 20px; }
-
-.technique-card { background: #07101a; border: 1px solid #1e3048; border-radius: 10px; padding: 18px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
-.technique-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--accent, #38bdf8), transparent); opacity: 0; transition: opacity 0.2s; }
-.technique-card:hover, .technique-card.selected { border-color: var(--accent, #38bdf8); box-shadow: 0 0 24px rgba(56,189,248,0.08); }
-.technique-card:hover::before, .technique-card.selected::before { opacity: 1; }
-
-.technique-icon { font-size: 22px; margin-bottom: 10px; }
-.technique-name { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #e0e8f0; margin-bottom: 6px; }
-.technique-desc { font-size: 16px; color: #7a9bbf; line-height: 1.6; }
-.technique-saving { display: inline-block; margin-top: 10px; font-size: 12px; padding: 3px 8px; border-radius: 4px; border: 1px solid; letter-spacing: 0.06em; }
-
-.ba-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-@media (max-width: 560px) { .ba-compare { grid-template-columns: 1fr; } }
-.ba-box { background: #07101a; border-radius: 8px; padding: 14px; border: 1px solid #1e3048; }
-.ba-label { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; font-weight: 500; }
-.ba-text { font-size: 16px; color: #b0c8e0; line-height: 1.7; white-space: pre-wrap; }
-.ba-tok-count { margin-top: 10px; font-size: 16px; color: #7a9bbf; }
-.ba-tok-count span { font-family: 'IBM Plex Sans', sans-serif; font-weight: 700; font-size: 16px; }
-
-.savings-badge { display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.2); border-radius: 8px; padding: 10px; margin-top: 12px; font-size: 16px; color: #34d399; }
-
-.kv-visual { display: flex; gap: 6px; flex-wrap: wrap; margin: 14px 0; }
-.kv-block { height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; transition: all 0.3s; min-width: 50px; flex: 1; }
-.kv-cached { background: rgba(56,189,248,0.15); border: 1px solid rgba(56,189,248,0.4); color: #38bdf8; }
-.kv-new    { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.35); color: #fbbf24; }
-.kv-legend { display: flex; gap: 18px; font-size: 16px; color: #7a9bbf; margin-bottom: 14px; }
+/* KV-cache visual */
+.kv-visual { display: flex; gap: 6px; flex-wrap: wrap; margin: var(--spacing-3) 0; }
+.kv-block {
+  height: 36px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
+  transition: background-color var(--duration-deliberate) var(--ease-standard);
+  min-width: 50px;
+  flex: 1;
+}
+.kv-cached { background: var(--surface-1); border: 1px solid var(--color-success); color: var(--color-success); }
+.kv-new    { background: var(--orange-50); border: 1px solid var(--orange-500); color: var(--orange-500); }
+.kv-legend {
+  display: flex;
+  gap: var(--spacing-4);
+  font: var(--text-weight-body) var(--text-size-caption)/1.4 var(--font-primary);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-3);
+}
 .kv-dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; margin-right: 5px; vertical-align: middle; }
 
-.ctx-bar { background: #07101a; border: 1px solid #1e3048; border-radius: 10px; height: 48px; overflow: hidden; display: flex; margin: 16px 0 8px; }
-.ctx-segment { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 500; transition: width 0.5s cubic-bezier(.4,0,.2,1); overflow: hidden; white-space: nowrap; }
-.ctx-system  { background: rgba(139,92,246,0.3);  color: #c4b5fd; }
-.ctx-history { background: rgba(56,189,248,0.2);  color: #7dd3fc; }
-.ctx-user    { background: rgba(251,191,36,0.2);  color: #fde68a; }
-.ctx-reserve { background: rgba(52,211,153,0.15); color: #6ee7b7; }
-.ctx-overflow{ background: rgba(239,68,68,0.2);   color: #fca5a5; }
+/* Context-window stack — system=blue, history=blue-soft, user=orange,
+ * reserve=neutral, overflow=error. No purple — system isn't AI Coach. */
+.ctx-bar {
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  height: 48px;
+  overflow: hidden;
+  display: flex;
+  margin: var(--spacing-4) 0 var(--spacing-2);
+}
+.ctx-segment {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  transition: width var(--duration-deliberate) var(--ease-standard);
+  overflow: hidden;
+  white-space: nowrap;
+  color: #fff;
+}
+.ctx-system  { background: var(--blue-500); }
+.ctx-history { background: var(--blue-300); color: var(--text-primary); }
+.ctx-user    { background: var(--orange-500); }
+.ctx-reserve { background: var(--surface-3); color: var(--text-tertiary); }
+.ctx-overflow{ background: var(--color-error); }
 
-.info-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-.info-chip { font-size: 16px; padding: 4px 10px; border-radius: 100px; border: 1px solid; display: flex; align-items: center; gap: 5px; }
+.info-row { display: flex; gap: var(--spacing-2); flex-wrap: wrap; margin-top: var(--spacing-2); }
+.info-chip {
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  padding: 4px 10px;
+  border-radius: 100px;
+  border: 1px solid var(--border-default);
+  background: var(--surface-1);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.info-chip--ok    { border-color: var(--color-success); color: var(--color-success); }
+.info-chip--warn  { border-color: var(--color-error);   color: var(--color-error); }
 
-.quiz-q { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 16px; line-height: 1.4; }
-.quiz-opts { display: flex; flex-direction: column; gap: 8px; }
-.quiz-opt { background: #07101a; border: 1px solid #1e3048; border-radius: 8px; padding: 12px 16px; font-size: 16px; color: #b0c8e0; cursor: pointer; text-align: left; font-family: 'IBM Plex Mono', monospace; transition: all 0.18s; }
-.quiz-opt:hover:not(:disabled) { border-color: #38bdf8; color: #e0e8f0; }
-.quiz-opt.correct { border-color: #34d399; background: rgba(52,211,153,0.1); color: #34d399; }
-.quiz-opt.wrong   { border-color: #ef4444; background: rgba(239,68,68,0.08); color: #f87171; }
-.quiz-explanation { margin-top: 14px; padding: 12px; background: rgba(56,189,248,0.06); border: 1px solid rgba(56,189,248,0.2); border-radius: 8px; font-size: 16px; color: #93c5fd; line-height: 1.7; }
-.quiz-next { margin-top: 14px; background: rgba(56,189,248,0.15); border: 1px solid #38bdf8; color: #38bdf8; font-family: 'IBM Plex Mono', monospace; font-size: 16px; padding: 10px 20px; border-radius: 6px; cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.18s; }
-.quiz-next:hover { background: rgba(56,189,248,0.25); }
+/* Quiz */
+.quiz-q {
+  font: var(--text-weight-h3) var(--text-size-h3)/var(--text-lh-h3) var(--font-primary);
+  letter-spacing: var(--text-ls-h3);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-4);
+}
+.quiz-meta {
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  color: var(--text-tertiary);
+  margin-bottom: var(--spacing-3);
+}
+.quiz-opts { display: flex; flex-direction: column; gap: var(--spacing-2); }
+.quiz-opt {
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3) var(--spacing-4);
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+}
+.quiz-opt:hover:not(:disabled) { background: var(--surface-2); border-color: var(--border-strong); }
+.quiz-opt:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.quiz-opt:disabled { cursor: default; }
+.quiz-opt.correct { border-color: var(--color-success); }
+.quiz-opt.wrong   { border-color: var(--color-error); }
+.quiz-opt-letter { font-family: 'IBM Plex Mono', ui-monospace, monospace; color: var(--text-tertiary); margin-right: var(--spacing-2); }
+.quiz-explanation {
+  margin-top: var(--spacing-4);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+}
+.quiz-next {
+  margin-top: var(--spacing-3);
+  background: var(--orange-500);
+  border: 1px solid var(--orange-500);
+  color: #fff;
+  font: 600 var(--text-size-body)/1 var(--font-primary);
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+}
+.quiz-next:hover { background: #D45C10; border-color: #D45C10; }
+.quiz-next:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
 
-.progress-bar { background: #0d1520; border-radius: 100px; height: 4px; margin-bottom: 20px; overflow: hidden; }
-.progress-fill { height: 100%; background: linear-gradient(90deg, #38bdf8, #818cf8); border-radius: 100px; transition: width 0.4s; }
+.progress-bar {
+  background: var(--surface-3);
+  border-radius: 100px;
+  height: 4px;
+  margin-bottom: var(--spacing-5);
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--text-primary);
+  border-radius: 100px;
+  transition: width var(--duration-standard) var(--ease-standard);
+}
 
-.score-display { text-align: center; padding: 30px; }
-.score-num { font-family: 'IBM Plex Sans', sans-serif; font-size: 64px; font-weight: 800; color: #38bdf8; }
-.score-sub { font-size: 16px; color: #7a9bbf; margin-top: 8px; }
+.score-display { text-align: center; padding: var(--spacing-6); }
+.score-num {
+  font: var(--text-weight-h1) var(--text-size-h1)/1 var(--font-primary);
+  letter-spacing: var(--text-ls-h1);
+  color: var(--text-primary);
+  margin: var(--spacing-2) 0;
+}
+.score-sub {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+}
 
-.tok-diff-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 100px; border: 1px solid; margin-bottom: 14px; font-weight: 500; }
-.tok-diff-badge.easy   { color: #34d399; border-color: rgba(52,211,153,0.35);  background: rgba(52,211,153,0.08); }
-.tok-diff-badge.medium { color: #fbbf24; border-color: rgba(251,191,36,0.35);  background: rgba(251,191,36,0.08); }
-.tok-diff-badge.hard   { color: #f87171; border-color: rgba(248,113,113,0.35); background: rgba(239,68,68,0.08); }
+.tok-diff-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  padding: 3px 10px;
+  border-radius: 100px;
+  border: 1px solid;
+  background: var(--surface-1);
+  margin-bottom: var(--spacing-3);
+}
+.tok-diff-badge::before {
+  content: '';
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.tok-diff-badge.easy   { color: var(--color-success); border-color: var(--color-success); }
+.tok-diff-badge.medium { color: var(--color-warning); border-color: var(--color-warning); }
+.tok-diff-badge.hard   { color: var(--color-info);    border-color: var(--color-info); }
 `;
 
+// Token chips alternate through a 4-step semantic ramp (§5.3): blue =
+// structured / common tokens, orange = exploratory / rarer tokens. No
+// rainbow. Background / border use the Prism soft-bg + 100 fills.
 const TOKEN_COLORS = [
-  { bg: "rgba(56,189,248,0.15)",  border: "rgba(56,189,248,0.5)",  color: "#38bdf8" },
-  { bg: "rgba(129,140,248,0.15)", border: "rgba(129,140,248,0.5)", color: "#818cf8" },
-  { bg: "rgba(52,211,153,0.15)",  border: "rgba(52,211,153,0.5)",  color: "#34d399" },
-  { bg: "rgba(251,191,36,0.15)",  border: "rgba(251,191,36,0.5)",  color: "#fbbf24" },
-  { bg: "rgba(249,115,22,0.15)",  border: "rgba(249,115,22,0.5)",  color: "#f97316" },
-  { bg: "rgba(236,72,153,0.15)",  border: "rgba(236,72,153,0.5)",  color: "#ec4899" },
+  { bg: "var(--blue-50)",   border: "var(--blue-100)",   color: "var(--blue-500)" },
+  { bg: "var(--blue-50)",   border: "var(--blue-100)",   color: "var(--blue-500)" },
+  { bg: "var(--surface-2)", border: "var(--border-default)", color: "var(--text-tertiary)" },
+  { bg: "var(--orange-50)", border: "var(--orange-100)", color: "var(--orange-500)" },
 ];
 
 function tokenize(text) {
@@ -200,13 +488,14 @@ function tokenize(text) {
   return tokens;
 }
 
-const SECTIONS = ["What are Tokens?", "Cost & Speed", "Optimization Tips", "KV Cache", "Context Windows", "Quick Quiz"];
+const SECTIONS = ["What are tokens?", "Cost and speed", "Optimisation tips", "KV cache", "Context windows", "Quick quiz"];
 
+// Phosphor icons keyed by id so we render at the correct slot.
 const TECHNIQUES = [
-  { id: "compress", icon: "🗜️", name: "Compress Verbose Prompts", desc: "Remove pleasantries, filler, and redundant instructions.", saving: "20–40% fewer tokens", accent: "#38bdf8", before: `Hello! I hope you're doing well today. I was wondering if you could please help me with something. I need you to summarize the following text for me. The text is quite long and I need it shorter. Please make sure the summary is concise. Here is the text:`, after: `Summarize this text concisely:`, beforeCount: 52, afterCount: 5 },
-  { id: "structured", icon: "📐", name: "Use Structured Formats", desc: "JSON, XML, or bullet lists reduce ambiguity and save tokens.", saving: "15–30% fewer tokens", accent: "#818cf8", before: `Please extract the name of the person, their age, and their job title from the text. Return the name, then the age, then the job title, each on a new line.`, after: `Extract from text. Return JSON: {name, age, title}`, beforeCount: 38, afterCount: 11 },
-  { id: "cache", icon: "⚡", name: "Prompt Caching", desc: "Place static content first. Repeated prefixes are cached and free.", saving: "Up to 90% cost on cached tokens", accent: "#34d399", before: `[Long system prompt repeated every call — 2,000 tokens each time × 1,000 calls]`, after: `[Same system prompt, cached — paid once, reused 1,000 times]`, beforeCount: 2000000, afterCount: 2000 },
-  { id: "fewshot", icon: "🎯", name: "Optimize Few-Shot Examples", desc: "Use minimal but representative examples. Quality beats quantity.", saving: "50–80% fewer example tokens", accent: "#fbbf24", before: `Here are 8 examples of good customer emails...\n[800 tokens of examples]`, after: `Here are 2 examples:\nExample 1: [concise]\nExample 2: [concise]`, beforeCount: 820, afterCount: 160 },
+  { id: "compress",   iconKey: "compress",   name: "Compress verbose prompts", desc: "Remove pleasantries, filler, and redundant instructions.",                  saving: "20–40% fewer tokens",          before: `Hello! I hope you're doing well today. I was wondering if you could please help me with something. I need you to summarize the following text for me. The text is quite long and I need it shorter. Please make sure the summary is concise. Here is the text:`, after: `Summarise this text concisely:`,                                            beforeCount: 52,      afterCount: 5    },
+  { id: "structured", iconKey: "structured", name: "Use structured formats",   desc: "JSON, XML, or bullet lists reduce ambiguity and save tokens.",              saving: "15–30% fewer tokens",          before: `Please extract the name of the person, their age, and their job title from the text. Return the name, then the age, then the job title, each on a new line.`,                                                                                                  after: `Extract from text. Return JSON: {name, age, title}`,                          beforeCount: 38,      afterCount: 11   },
+  { id: "cache",      iconKey: "cache",      name: "Prompt caching",           desc: "Place static content first. Repeated prefixes are cached and free.",       saving: "Up to 90% off cached tokens",  before: `[Long system prompt repeated every call — 2,000 tokens each time × 1,000 calls]`,                                                                                                                                                                  after: `[Same system prompt, cached — paid once, reused 1,000 times]`,             beforeCount: 2000000, afterCount: 2000 },
+  { id: "fewshot",    iconKey: "fewshot",    name: "Optimise few-shot examples", desc: "Use minimal but representative examples. Quality beats quantity.",       saving: "50–80% fewer example tokens",  before: `Here are 8 examples of good customer emails...\n[800 tokens of examples]`,                                                                                                                                                                          after: `Here are 2 examples:\nExample 1: [concise]\nExample 2: [concise]`,         beforeCount: 820,     afterCount: 160  },
 ];
 
 const KV_TURNS = [
@@ -257,10 +546,12 @@ function pickQuestion(targetDiff, usedIds, quiz) {
   return pool[Math.floor(Math.random() * pool.length)]
 }
 
+// Cost spectrum (§5.3 — orange = cost / spend emphasis). Cheap → premium
+// reads as blue → neutral → orange so the visual ladder *means* "more spend".
 const COSTS = [
-  { name: "Haiku 3.5", inputPer1M: 0.80, outputPer1M: 4,  color: "#34d399" },
-  { name: "Sonnet 4",  inputPer1M: 3,     outputPer1M: 15, color: "#38bdf8" },
-  { name: "Opus 4",    inputPer1M: 15,    outputPer1M: 75, color: "#818cf8" },
+  { name: "Haiku 3.5", inputPer1M: 0.80, outputPer1M: 4,  color: "var(--blue-500)" },
+  { name: "Sonnet 4",  inputPer1M: 3,    outputPer1M: 15, color: "var(--text-primary)" },
+  { name: "Opus 4",    inputPer1M: 15,   outputPer1M: 75, color: "var(--orange-500)" },
 ];
 
 export default function TokenOptimization() {
@@ -353,28 +644,38 @@ export default function TokenOptimization() {
       <style>{styleTag}</style>
       <NavBar />
 
-      <div className="tok-hero">
-        <div className="tok-eyebrow">Interactive Guide</div>
-        <h1 className="tok-title">LLM <span>Token</span> Optimization</h1>
-        <p className="tok-subtitle">Understand what tokens are, how they affect cost & speed, and learn practical techniques to optimize your prompts.</p>
-      </div>
+      <header className="tok-hero">
+        <div className="tok-eyebrow">Interactive guide</div>
+        <h1 className="tok-title">LLM token optimisation</h1>
+        <p className="tok-subtitle">Shape prompts to cut tokens, cost, and latency — without losing what the model needs to do the job.</p>
+      </header>
 
-      <div className="tok-nav">
-        {SECTIONS.map((s, i) => (
-          <button key={i} className={`tok-nav-btn${section === i ? " active" : ""}`} onClick={() => setSection(i)}>{s}</button>
-        ))}
+      <div className="tok-nav-row">
+        <div className="prism-tabs" role="tablist" aria-label="Sections">
+          {SECTIONS.map((s, i) => (
+            <button
+              key={i}
+              role="tab"
+              className="prism-tab"
+              aria-selected={section === i}
+              onClick={() => setSection(i)}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
       </div>
 
       {section === 0 && (
         <div className="tok-panel">
-          <div className="tok-section-title">What Are Tokens?</div>
-          <p className="tok-section-sub">Tokens are the fundamental unit LLMs use to read and write text. Type anything below to see it tokenized in real-time.</p>
+          <div className="tok-section-title">What are tokens?</div>
+          <p className="tok-section-sub">Tokens are the fundamental unit LLMs use to read and write text. Type anything below to see it tokenised in real time.</p>
           <div className="tok-card">
-            <div className="tok-card-title">// Live Tokenizer</div>
-            <textarea className="tok-input" value={inputText} onChange={e => setInputText(e.target.value)} placeholder="Type something to tokenize..." />
+            <div className="tok-card-title">Live tokeniser</div>
+            <textarea className="tok-input" value={inputText} onChange={e => setInputText(e.target.value)} placeholder="Type something to tokenise…" />
             <div className="tok-tokens-display">
               {tokens.filter(t => !t.isSpace || t.text.trim()).length === 0
-                ? <span style={{ color: "#3a5a7a", fontSize: 16 }}>tokens appear here...</span>
+                ? <span style={{ color: 'var(--text-tertiary)', font: 'var(--text-weight-body) var(--text-size-body)/1.5 var(--font-primary)' }}>tokens appear here…</span>
                 : tokens.map((t, i) => {
                     if (/^\s+$/.test(t.text)) return null;
                     const c = TOKEN_COLORS[i % TOKEN_COLORS.length];
@@ -382,43 +683,43 @@ export default function TokenOptimization() {
                   })}
             </div>
             <div className="tok-stats-row">
-              {[["Tokens", tokenCount], ["Characters", charCount], ["Chars/Token", tokenCount > 0 ? (charCount / tokenCount).toFixed(1) : "—"], ["Est. Input Cost*", `$${cost}`]].map(([lbl, val]) => (
+              {[["Tokens", tokenCount], ["Characters", charCount], ["Chars / token", tokenCount > 0 ? (charCount / tokenCount).toFixed(1) : "—"], ["Est. input cost*", `$${cost}`]].map(([lbl, val]) => (
                 <div key={lbl} className="tok-stat"><div className="tok-stat-val">{val}</div><div className="tok-stat-lbl">{lbl}</div></div>
               ))}
             </div>
           </div>
           <div className="tok-card">
-            <div className="tok-card-title">// Key Facts</div>
-            <div style={{ display: "grid", gap: 12 }}>
-              {[["~¾ word = 1 token", "In English, 1 token ≈ 0.75 words on average. 1,000 tokens ≈ 750 words."], ["Common words = 1 token", '"the", "cat", "run" are single tokens. Rare words split into subwords.'], ["Spaces are baked in", 'Most tokenizers attach leading spaces: " hello" is one token, not two.'], ["Non-English is denser", "Languages like Chinese or Arabic use more tokens per concept than English."]].map(([title, desc]) => (
-                <div key={title} style={{ display: "flex", gap: 12 }}>
-                  <div style={{ color: "#38bdf8", fontSize: 16, flexShrink: 0 }}>▸</div>
+            <div className="tok-card-title">Key facts</div>
+            <div style={{ display: "grid", gap: 'var(--spacing-3)' }}>
+              {[["~¾ word = 1 token", "In English, 1 token is about 0.75 words on average. 1,000 tokens is roughly 750 words."], ["Common words = 1 token", '"the", "cat", "run" are single tokens. Rare words split into subwords.'], ["Spaces are baked in", 'Most tokenisers attach leading spaces: " hello" is one token, not two.'], ["Non-English is denser", "Languages like Chinese or Arabic use more tokens per concept than English."]].map(([title, desc]) => (
+                <div key={title} style={{ display: "flex", gap: 'var(--spacing-3)' }}>
+                  <div style={{ color: 'var(--blue-500)', flexShrink: 0, lineHeight: 1.5 }}>▸</div>
                   <div>
-                    <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontSize: 16, fontWeight: 700, color: "#e0e8f0", marginBottom: 3 }}>{title}</div>
-                    <div style={{ fontSize: 16, color: "#7a9bbf", lineHeight: 1.6 }}>{desc}</div>
+                    <div style={{ font: 'var(--text-weight-label) var(--text-size-body)/1.4 var(--font-primary)', color: 'var(--text-primary)', marginBottom: 'var(--spacing-1)' }}>{title}</div>
+                    <div style={{ font: 'var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)' }}>{desc}</div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-          <p style={{ fontSize: 12, color: "#3a5a7a" }}>* Uses Claude Sonnet input pricing ($3/M tokens). Tokenization is illustrative.</p>
+          <p style={{ font: 'var(--text-weight-body) var(--text-size-meta)/var(--text-lh-meta) var(--font-primary)', color: 'var(--text-tertiary)' }}>* Uses Claude Sonnet input pricing ($3/M tokens). Tokenisation is illustrative.</p>
         </div>
       )}
 
       {section === 1 && (
         <div className="tok-panel">
-          <div className="tok-section-title">Cost & Speed</div>
+          <div className="tok-section-title">Cost and speed</div>
           <p className="tok-section-sub">Every token costs money and latency. Understanding the economics helps you make smart trade-offs.</p>
           <div className="tok-card">
-            <div className="tok-card-title">// Model Cost Comparison (per 1M tokens)</div>
+            <div className="tok-card-title">Model cost comparison (per 1M tokens)</div>
             {COSTS.map(m => (
-              <div key={m.name} style={{ marginBottom: 18 }}>
-                <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 700, fontSize: 16, color: m.color, marginBottom: 8 }}>{m.name}</div>
+              <div key={m.name} style={{ marginBottom: 'var(--spacing-4)' }}>
+                <div style={{ font: 'var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary)', color: m.color, marginBottom: 'var(--spacing-2)' }}>{m.name}</div>
                 {[["Input", m.inputPer1M], ["Output", m.outputPer1M]].map(([label, price]) => (
                   <div key={label} className="cost-bar-wrap">
                     <div className="cost-bar-label"><span>{label}</span><span>${price}/M</span></div>
                     <div className="cost-bar-track">
-                      <div className="cost-bar-fill" style={{ width: `${(price / barMax) * 100}%`, background: label === "Input" ? `${m.color}55` : `${m.color}88`, borderRight: `2px solid ${m.color}` }} />
+                      <div className="cost-bar-fill" style={{ width: `${(price / barMax) * 100}%`, background: m.color, opacity: label === 'Input' ? 0.4 : 0.85 }} />
                     </div>
                   </div>
                 ))}
@@ -426,29 +727,29 @@ export default function TokenOptimization() {
             ))}
           </div>
           <div className="tok-card">
-            <div className="tok-card-title">// Interactive Cost Calculator</div>
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 16, color: "#7a9bbf", marginBottom: 4 }}>
+            <div className="tok-card-title">Interactive cost calculator</div>
+            <div style={{ marginBottom: 'var(--spacing-4)' }}>
+              <div style={{ display: "flex", justifyContent: "space-between", font: 'var(--text-weight-body) var(--text-size-caption)/1 var(--font-primary)', color: 'var(--text-secondary)', marginBottom: 'var(--spacing-1)' }}>
                 <span>Tokens per request</span>
-                <span style={{ color: "#38bdf8", fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 700 }}>{tokenSlider.toLocaleString()}</span>
+                <span style={{ color: 'var(--orange-500)', font: 'var(--text-weight-h3) var(--text-size-h3)/1 var(--font-primary)' }}>{tokenSlider.toLocaleString()}</span>
               </div>
-              <input type="range" className="tok-slider" min={100} max={100000} step={100} value={tokenSlider} onChange={e => setTokenSlider(+e.target.value)} />
+              <input type="range" className="tok-slider tok-slider--orange" min={100} max={100000} step={100} value={tokenSlider} onChange={e => setTokenSlider(+e.target.value)} />
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 'var(--spacing-2)' }}>
               {[10, 1000, 100000].map(calls => (
                 <div key={calls} className="tok-stat">
-                  <div style={{ fontSize: 12, color: "#7a9bbf", marginBottom: 6 }}>{calls.toLocaleString()} calls</div>
+                  <div style={{ font: 'var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary)', color: 'var(--text-tertiary)', marginBottom: 'var(--spacing-2)' }}>{calls.toLocaleString()} calls</div>
                   {COSTS.map(m => (
-                    <div key={m.name} style={{ fontSize: 16, color: m.color, margin: "3px 0" }}>
-                      <span style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 700 }}>${((tokenSlider / 1_000_000) * m.inputPer1M * calls).toFixed(calls >= 1000 ? 1 : 3)}</span>
-                      <span style={{ fontSize: 12, color: "#3a5a7a", marginLeft: 4 }}>{m.name.split(" ")[0]}</span>
+                    <div key={m.name} style={{ font: 'var(--text-weight-body) var(--text-size-caption)/1.4 var(--font-primary)', color: m.color, margin: '3px 0' }}>
+                      <span style={{ fontWeight: 600 }}>${((tokenSlider / 1_000_000) * m.inputPer1M * calls).toFixed(calls >= 1000 ? 1 : 3)}</span>
+                      <span style={{ font: 'var(--text-weight-body) var(--text-size-meta)/1 var(--font-primary)', color: 'var(--text-tertiary)', marginLeft: 4 }}>{m.name.split(" ")[0]}</span>
                     </div>
                   ))}
                 </div>
               ))}
             </div>
-            <div style={{ marginTop: 14, padding: "10px 14px", background: "rgba(251,191,36,0.08)", border: "1px solid rgba(251,191,36,0.2)", borderRadius: 8, fontSize: 16, color: "#fbbf24" }}>
-              ⚡ At scale, halving token usage = halving your bill.
+            <div style={{ marginTop: 'var(--spacing-4)', padding: 'var(--spacing-3) var(--spacing-4)', background: 'var(--orange-50)', border: '1px solid var(--orange-100)', borderRadius: 'var(--radius-md)', font: 'var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)' }}>
+              At scale, halving token usage halves your bill.
             </div>
           </div>
         </div>
@@ -456,47 +757,63 @@ export default function TokenOptimization() {
 
       {section === 2 && (
         <div className="tok-panel">
-          <div className="tok-section-title">Optimization Techniques</div>
-          <p className="tok-section-sub">Click a technique to see a before/after comparison with real token savings.</p>
+          <div className="tok-section-title">Optimisation techniques</div>
+          <p className="tok-section-sub">Pick a technique to see a before/after with real token savings.</p>
           <div className="technique-grid">
-            {TECHNIQUES.map((t, i) => (
-              <div key={t.id} className={`technique-card${selectedTech === i ? " selected" : ""}`} style={{ "--accent": t.accent }} onClick={() => setSelectedTech(i)}>
-                <div className="technique-icon">{t.icon}</div>
-                <div className="technique-name">{t.name}</div>
-                <div className="technique-desc">{t.desc}</div>
-                <div className="technique-saving" style={{ background: `${t.accent}18`, borderColor: `${t.accent}40`, color: t.accent }}>{t.saving}</div>
-              </div>
-            ))}
+            {TECHNIQUES.map((t, i) => {
+              const Icon = TECH_ICON[t.iconKey]
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  className={`technique-card${selectedTech === i ? " selected" : ""}`}
+                  onClick={() => setSelectedTech(i)}
+                  aria-pressed={selectedTech === i}
+                >
+                  <span className="technique-icon">{Icon ? <Icon size={32} weight="duotone" /> : null}</span>
+                  <div className="technique-name">{t.name}</div>
+                  <div className="technique-desc">{t.desc}</div>
+                  <div className="technique-saving">{t.saving}</div>
+                </button>
+              )
+            })}
           </div>
           <div className="tok-card">
-            <div className="tok-card-title" style={{ color: tech.accent }}>// {tech.name} — Before vs After</div>
+            <div className="tok-card-title">{tech.name} — before vs after</div>
             <div className="ba-compare">
-              {[{ label: "✗ BEFORE", text: tech.before, count: tech.beforeCount, barPct: 100, color: "#f87171", barBg: "rgba(239,68,68,0.4)", borderColor: "#ef444440" },
-                { label: "✓ AFTER",  text: tech.after,  count: tech.afterCount,  barPct: pct(tech.afterCount), color: "#34d399", barBg: "rgba(52,211,153,0.5)", borderColor: "#34d39940" }].map(box => (
-                <div key={box.label} className="ba-box" style={{ borderColor: box.borderColor }}>
-                  <div className="ba-label" style={{ color: box.color }}>{box.label}</div>
+              {[
+                { label: "Before", text: tech.before, count: tech.beforeCount, barPct: 100,                 tint: 'var(--color-error)' },
+                { label: "After",  text: tech.after,  count: tech.afterCount,  barPct: pct(tech.afterCount), tint: 'var(--color-success)' },
+              ].map(box => (
+                <div key={box.label} className="ba-box" style={{ borderColor: box.tint }}>
+                  <div className="ba-label" style={{ color: box.tint }}>{box.label}</div>
                   <div className="ba-text">{box.text}</div>
-                  <div className="ba-tok-count"><span style={{ color: box.color }}>{box.count.toLocaleString()}</span> tokens</div>
-                  <div style={{ marginTop: 8, background: "#07101a", borderRadius: 6, height: 8, overflow: "hidden" }}>
-                    <div style={{ width: `${box.barPct}%`, height: "100%", background: box.barBg, borderRadius: 6, transition: "width 0.5s" }} />
+                  <div className="ba-tok-count">
+                    <strong style={{ color: box.tint }}>{box.count.toLocaleString()}</strong> tokens
+                  </div>
+                  <div style={{ marginTop: 'var(--spacing-2)', background: 'var(--surface-3)', borderRadius: 6, height: 8, overflow: 'hidden' }}>
+                    <div style={{ width: `${box.barPct}%`, height: '100%', background: box.tint, borderRadius: 6, transition: 'width var(--duration-deliberate) var(--ease-standard)' }} />
                   </div>
                 </div>
               ))}
             </div>
-            <div className="savings-badge">🎉 Saved <strong style={{ margin: "0 4px" }}>{(tech.beforeCount - tech.afterCount).toLocaleString()}</strong> tokens ({Math.round((1 - tech.afterCount / tech.beforeCount) * 100)}% reduction)</div>
+            <div className="savings-badge">
+              <CheckCircleIcon size={18} weight="fill" />
+              Saved <strong style={{ margin: '0 4px' }}>{(tech.beforeCount - tech.afterCount).toLocaleString()}</strong> tokens ({Math.round((1 - tech.afterCount / tech.beforeCount) * 100)}% reduction)
+            </div>
           </div>
         </div>
       )}
 
       {section === 3 && (
         <div className="tok-panel">
-          <div className="tok-section-title">KV Cache & Prompt Caching</div>
+          <div className="tok-section-title">KV cache and prompt caching</div>
           <p className="tok-section-sub">The KV cache stores attention computations so they don't have to be repeated on every request.</p>
           <div className="tok-card">
-            <div className="tok-card-title">// Conversation KV Cache Animation</div>
+            <div className="tok-card-title">Conversation KV cache animation</div>
             <div className="kv-legend">
-              <div><span className="kv-dot" style={{ background: "rgba(56,189,248,0.4)", border: "1px solid #38bdf8" }} />Cached</div>
-              <div><span className="kv-dot" style={{ background: "rgba(251,191,36,0.3)", border: "1px solid #fbbf24" }} />New tokens</div>
+              <div><span className="kv-dot" style={{ background: 'var(--color-success)' }} />Cached</div>
+              <div><span className="kv-dot" style={{ background: 'var(--orange-500)' }} />New tokens</div>
             </div>
             <div className="kv-visual">
               {KV_TURNS.slice(0, kvTurn + 1).map((turn, i) =>
@@ -507,29 +824,37 @@ export default function TokenOptimization() {
                 ))
               )}
             </div>
-            <div style={{ fontSize: 16, color: "#7a9bbf", marginTop: 12 }}>
-              Turn <strong style={{ color: "#38bdf8" }}>{Math.min(kvTurn + 1, KV_TURNS.length)}</strong> of {KV_TURNS.length} — only new tokens cost compute.
+            <div style={{ font: 'var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)', marginTop: 'var(--spacing-3)' }}>
+              Turn <strong style={{ color: 'var(--text-primary)' }}>{Math.min(kvTurn + 1, KV_TURNS.length)}</strong> of {KV_TURNS.length} — only new tokens cost compute.
               {kvTurn >= KV_TURNS.length - 1 && (
-                <button onClick={() => setKvTurn(0)} style={{ marginLeft: 12, background: "none", border: "1px solid #38bdf8", color: "#38bdf8", fontSize: 16, padding: "3px 10px", borderRadius: 4, cursor: "pointer" }}>Replay ↺</button>
+                <button
+                  onClick={() => setKvTurn(0)}
+                  style={{ marginLeft: 'var(--spacing-3)', background: 'transparent', border: '1px solid var(--border-default)', color: 'var(--text-primary)', font: 'var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary)', padding: '4px 10px', borderRadius: 'var(--radius-sm)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                >
+                  <ArrowCounterClockwiseIcon size={14} weight="bold" />
+                  Replay
+                </button>
               )}
             </div>
           </div>
           <div className="tok-card">
-            <div className="tok-card-title">// Prompt Caching Cost Comparison</div>
-            <div style={{ display: "grid", gap: 14 }}>
-              {[{ label: "Without caching", detail: "Every API call re-computes the full system prompt (2,000 tokens × $3/M × 1,000 calls = $6.00)", color: "#ef4444", val: "$6.00" },
-                { label: "With prompt caching", detail: "System prompt computed once, cached. 999 subsequent calls pay ~10% of normal price.", color: "#34d399", val: "$0.60" }].map(row => (
-                <div key={row.label} style={{ display: "flex", gap: 14, padding: 12, background: "#07101a", borderRadius: 8, border: `1px solid ${row.color}30` }}>
-                  <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 800, fontSize: 22, color: row.color, minWidth: 60 }}>{row.val}</div>
+            <div className="tok-card-title">Prompt caching cost comparison</div>
+            <div style={{ display: "grid", gap: 'var(--spacing-4)' }}>
+              {[
+                { label: "Without caching",     detail: "Every API call recomputes the full system prompt (2,000 tokens × $3/M × 1,000 calls = $6.00).", tint: 'var(--color-error)',   val: "$6.00" },
+                { label: "With prompt caching", detail: "System prompt computed once, cached. 999 subsequent calls pay roughly 10% of normal price.",  tint: 'var(--color-success)', val: "$0.60" },
+              ].map(row => (
+                <div key={row.label} style={{ display: 'flex', gap: 'var(--spacing-4)', padding: 'var(--spacing-3)', background: 'var(--surface-2)', borderRadius: 'var(--radius-md)', border: `1px solid ${row.tint}` }}>
+                  <div style={{ font: 'var(--text-weight-h2) var(--text-size-h2)/1 var(--font-primary)', color: row.tint, minWidth: 80 }}>{row.val}</div>
                   <div>
-                    <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 700, fontSize: 16, color: row.color, marginBottom: 4 }}>{row.label}</div>
-                    <div style={{ fontSize: 16, color: "#7a9bbf", lineHeight: 1.6 }}>{row.detail}</div>
+                    <div style={{ font: 'var(--text-weight-label) var(--text-size-body)/1.4 var(--font-primary)', color: row.tint, marginBottom: 'var(--spacing-1)' }}>{row.label}</div>
+                    <div style={{ font: 'var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)' }}>{row.detail}</div>
                   </div>
                 </div>
               ))}
             </div>
-            <div style={{ marginTop: 14, fontSize: 16, color: "#34d399", background: "rgba(52,211,153,0.06)", border: "1px solid rgba(52,211,153,0.2)", borderRadius: 8, padding: "10px 14px" }}>
-              💡 Always put your static system prompt and documents FIRST in the message.
+            <div style={{ marginTop: 'var(--spacing-4)', font: 'var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)', background: 'var(--surface-2)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-3) var(--spacing-4)' }}>
+              Put your static system prompt and any reusable documents first in the message — that's the prefix the cache can hit.
             </div>
           </div>
         </div>
@@ -537,18 +862,20 @@ export default function TokenOptimization() {
 
       {section === 4 && (
         <div className="tok-panel">
-          <div className="tok-section-title">Context Window Management</div>
+          <div className="tok-section-title">Context window management</div>
           <p className="tok-section-sub">The context window is the total tokens the model can see at once. Drag the sliders to explore.</p>
           <div className="tok-card">
-            <div className="tok-card-title">// Context Window Visualizer (Max: 8,192 tokens)</div>
-            {[{ label: "System Prompt", val: systemToks, set: setSystemToks, max: 3000, color: "#8b5cf6" },
-              { label: "Conversation History", val: historyToks, set: setHistoryToks, max: 6000, color: "#38bdf8" },
-              { label: "User Input", val: userToks, set: setUserToks, max: 2000, color: "#fbbf24" }].map(s => (
-              <div key={s.label} style={{ marginBottom: 14 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 16, color: "#7a9bbf", marginBottom: 4 }}>
-                  <span style={{ color: s.color }}>{s.label}</span><span>{s.val.toLocaleString()} tokens</span>
+            <div className="tok-card-title">Context window (max 8,192 tokens)</div>
+            {[
+              { label: "System prompt",        val: systemToks,  set: setSystemToks,  max: 3000, sliderClass: "tok-slider",                 tint: 'var(--blue-500)' },
+              { label: "Conversation history", val: historyToks, set: setHistoryToks, max: 6000, sliderClass: "tok-slider",                 tint: 'var(--blue-300)' },
+              { label: "User input",           val: userToks,    set: setUserToks,    max: 2000, sliderClass: "tok-slider tok-slider--orange", tint: 'var(--orange-500)' },
+            ].map(s => (
+              <div key={s.label} style={{ marginBottom: 'var(--spacing-3)' }}>
+                <div style={{ display: "flex", justifyContent: "space-between", font: 'var(--text-weight-body) var(--text-size-caption)/1 var(--font-primary)', color: 'var(--text-secondary)', marginBottom: 'var(--spacing-1)' }}>
+                  <span style={{ color: s.tint, fontWeight: 600 }}>{s.label}</span><span>{s.val.toLocaleString()} tokens</span>
                 </div>
-                <input type="range" className="tok-slider" min={0} max={s.max} step={50} value={s.val} onChange={e => s.set(+e.target.value)} style={{ accentColor: s.color }} />
+                <input type="range" className={s.sliderClass} min={0} max={s.max} step={50} value={s.val} onChange={e => s.set(+e.target.value)} />
               </div>
             ))}
             <div className="ctx-bar">
@@ -556,17 +883,17 @@ export default function TokenOptimization() {
               <div className="ctx-segment ctx-history" style={{ width: `${ctxPct(Math.min(historyToks, Math.max(0, CTX_MAX - systemToks)))}%` }}>History</div>
               <div className="ctx-segment ctx-user"    style={{ width: `${ctxPct(Math.min(userToks, Math.max(0, CTX_MAX - systemToks - historyToks)))}%` }}>User</div>
               {overflowToks === 0 && <div className="ctx-segment ctx-reserve" style={{ width: `${reservePct}%` }}>Reserve</div>}
-              {overflowToks > 0  && <div className="ctx-segment ctx-overflow" style={{ width: "8%" }}>⚠ Over</div>}
+              {overflowToks > 0  && <div className="ctx-segment ctx-overflow" style={{ width: "8%" }}>Over</div>}
             </div>
             <div className="info-row">
-              <div className="info-chip" style={{ borderColor: "#38bdf840", color: "#7dd3fc" }}>Used: {Math.min(ctxUsed, CTX_MAX).toLocaleString()} / {CTX_MAX.toLocaleString()}</div>
+              <div className="info-chip">Used: {Math.min(ctxUsed, CTX_MAX).toLocaleString()} / {CTX_MAX.toLocaleString()}</div>
               {overflowToks > 0
-                ? <div className="info-chip" style={{ borderColor: "#ef444450", color: "#fca5a5" }}>⚠ Overflow: {overflowToks.toLocaleString()} tokens lost</div>
-                : <div className="info-chip" style={{ borderColor: "#34d39940", color: "#6ee7b7" }}>✓ Reserve: {(CTX_MAX - ctxUsed).toLocaleString()} tokens</div>}
+                ? <div className="info-chip info-chip--warn"><WarningCircleIcon size={14} weight="fill" /> Overflow: {overflowToks.toLocaleString()} tokens lost</div>
+                : <div className="info-chip info-chip--ok"><CheckCircleIcon size={14} weight="fill" /> Reserve: {(CTX_MAX - ctxUsed).toLocaleString()} tokens</div>}
             </div>
             {overflowToks > 0 && (
-              <div style={{ marginTop: 14, fontSize: 16, color: "#fca5a5", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 8, padding: "10px 14px" }}>
-                ⚠ {overflowToks.toLocaleString()} tokens will be truncated — the model will lose that context.
+              <div style={{ marginTop: 'var(--spacing-4)', font: 'var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary)', color: 'var(--color-error)', background: 'var(--surface-2)', border: '1px solid var(--color-error)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-3) var(--spacing-4)' }}>
+                {overflowToks.toLocaleString()} tokens will be truncated — the model will lose that context.
               </div>
             )}
           </div>
@@ -575,29 +902,37 @@ export default function TokenOptimization() {
 
       {section === 5 && (
         <div className="tok-panel">
-          <div className="tok-section-title">Quick Quiz</div>
-          <p className="tok-section-sub">Test what you've learned about token optimization.</p>
+          <div className="tok-section-title">Quick quiz</div>
+          <p className="tok-section-sub">Six questions to check what stuck. The next question is picked from a harder or easier pool based on how you do.</p>
           {!done ? (
             <div className="tok-card">
               {currentQ && (
                 <>
                   <div className="progress-bar"><div className="progress-fill" style={{ width: `${(qNum / SESSION_SIZE) * 100}%` }} /></div>
-                  <div style={{ fontSize: 16, color: "#7a9bbf", marginBottom: 16 }}>QUESTION {qNum + 1} / {SESSION_SIZE}</div>
-                  <span className={`tok-diff-badge ${currentQ.difficulty}`}>⬤ {currentQ.difficulty}</span>
+                  <div className="quiz-meta">Question {qNum + 1} of {SESSION_SIZE}</div>
+                  <span className={`tok-diff-badge ${currentQ.difficulty}`}>{currentQ.difficulty}</span>
                   <div className="quiz-q">{currentQ.q}</div>
-                  <div className="quiz-opts">
+                  <div className="quiz-opts" role="radiogroup">
                     {currentQ.opts.map((opt, i) => (
-                      <button key={i} disabled={chosen !== null}
+                      <button
+                        key={i}
+                        disabled={chosen !== null}
+                        role="radio"
+                        aria-checked={chosen === i}
                         className={`quiz-opt${chosen !== null && i === currentQ.correct ? " correct" : ""}${chosen === i && i !== currentQ.correct ? " wrong" : ""}`}
-                        onClick={() => handleQuiz(i)}>
-                        {["A","B","C","D"][i]}. {opt}
+                        onClick={() => handleQuiz(i)}
+                      >
+                        <span className="quiz-opt-letter">{["A","B","C","D"][i]}.</span>
+                        {opt}
                       </button>
                     ))}
                   </div>
                   {chosen !== null && (
                     <>
                       <div className="quiz-explanation">{currentQ.explanation}</div>
-                      <button className="quiz-next" onClick={nextQ}>{qNum + 1 < SESSION_SIZE ? "Next Question →" : "See Results →"}</button>
+                      <button className="quiz-next" onClick={nextQ}>
+                        {qNum + 1 < SESSION_SIZE ? "Next question" : "See results"}
+                      </button>
                     </>
                   )}
                 </>
@@ -606,10 +941,18 @@ export default function TokenOptimization() {
           ) : (
             <div className="tok-card">
               <div className="score-display">
-                <div style={{ fontSize: 16, color: "#7a9bbf", marginBottom: 12 }}>FINAL SCORE</div>
+                <div className="quiz-meta">Final score</div>
                 <div className="score-num">{score}/{SESSION_SIZE}</div>
-                <div className="score-sub">{score >= SESSION_SIZE ? "Perfect! You're a token expert. 🎉" : score >= SESSION_SIZE / 2 ? "Good work! Review the tricky sections. 📚" : "Keep exploring to build your knowledge. 💪"}</div>
-                <button className="quiz-next" style={{ marginTop: 24 }} onClick={retake}>Retake Quiz ↺</button>
+                <div className="score-sub">
+                  {score >= SESSION_SIZE
+                    ? "You've got tokens cold."
+                    : score >= SESSION_SIZE / 2
+                      ? "Solid run. Worth a quick re-read of the trickier sections."
+                      : "These take a couple of passes to click. Try a tab you skipped, then retake."}
+                </div>
+                <button className="quiz-next" style={{ marginTop: 'var(--spacing-6)' }} onClick={retake}>
+                  Retake quiz
+                </button>
               </div>
             </div>
           )}
