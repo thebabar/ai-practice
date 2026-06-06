@@ -176,6 +176,7 @@ const css = `
   margin-top: var(--spacing-3);
 }
 .sample-btn:hover { background: #D45C10; border-color: #D45C10; }
+.sample-btn:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
 .sample-btn:disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
 .sample-btn--ghost {
   background: transparent;
@@ -195,6 +196,7 @@ const css = `
   transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
 }
 .sample-chip:hover { background: var(--surface-2); border-color: var(--border-strong); color: var(--text-primary); }
+.sample-chip:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
 .sample-chip.is-active { background: var(--text-primary); border-color: var(--text-primary); color: var(--surface-base); }
 
 /* Sample output area */
@@ -346,24 +348,118 @@ const css = `
 }
 .tradeoff-bullet .b-mark { flex-shrink: 0; }
 
-/* ── Quiz ── */
-.ts-quiz-q { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 16px; line-height: 1.4; }
-.ts-quiz-opts { display: flex; flex-direction: column; gap: 8px; }
-.ts-quiz-opt { background: #06040a; border: 1px solid #1e1020; border-radius: 8px; padding: 12px 16px; font-size: 16px; color: #9a8a9a; cursor: pointer; text-align: left; font-family: 'IBM Plex Mono', monospace; transition: all 0.18s; }
-.ts-quiz-opt:hover:not(:disabled) { border-color: #ec4899; color: #e0e8f0; }
-.ts-quiz-opt.correct { border-color: #34d399; background: rgba(52,211,153,0.08); color: #34d399; }
-.ts-quiz-opt.wrong   { border-color: #ef4444; background: rgba(239,68,68,0.06); color: #f87171; }
-.ts-quiz-exp { margin-top: 14px; padding: 12px; background: rgba(236,72,153,0.05); border: 1px solid rgba(236,72,153,0.18); border-radius: 8px; font-size: 16px; color: #b08090; line-height: 1.7; }
-.ts-quiz-next { margin-top: 12px; background: rgba(236,72,153,0.1); border: 1px solid #ec4899; color: #ec4899; font-family: 'IBM Plex Mono', monospace; font-size: 16px; padding: 9px 18px; border-radius: 6px; cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.18s; }
-.ts-quiz-next:hover { background: rgba(236,72,153,0.2); }
-.ts-progress { background: #0a080e; border-radius: 100px; height: 4px; margin-bottom: 20px; overflow: hidden; }
-.ts-progress-fill { height: 100%; background: linear-gradient(90deg, #ec4899, #f97316); border-radius: 100px; transition: width 0.4s; }
-.ts-score-num { font-family: 'IBM Plex Sans', sans-serif; font-size: 64px; font-weight: 800; color: #ec4899; text-align: center; }
+/* ── Quiz (Phase 4c) ───────────────────────────────────────── */
+.ts-quiz-q {
+  font: var(--text-weight-h3) var(--text-size-h3)/var(--text-lh-h3) var(--font-primary);
+  letter-spacing: var(--text-ls-h3);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-4);
+}
+.ts-quiz-meta {
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  color: var(--text-tertiary);
+  margin-bottom: var(--spacing-3);
+}
+.ts-quiz-opts { display: flex; flex-direction: column; gap: var(--spacing-2); }
+.ts-quiz-opt {
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3) var(--spacing-4);
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--duration-fast) var(--ease-standard),
+              border-color var(--duration-fast) var(--ease-standard);
+}
+.ts-quiz-opt:hover:not(:disabled) { background: var(--surface-2); border-color: var(--border-strong); }
+.ts-quiz-opt:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.ts-quiz-opt:disabled { cursor: default; }
+.ts-quiz-opt.correct {
+  border-color: var(--color-success);
+  background: var(--surface-1);
+  color: var(--text-primary);
+}
+.ts-quiz-opt.wrong {
+  border-color: var(--color-error);
+  background: var(--surface-1);
+  color: var(--text-primary);
+}
+.ts-quiz-opt-letter {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  color: var(--text-tertiary);
+  margin-right: var(--spacing-2);
+}
 
-.ts-diff-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 100px; border: 1px solid; margin-bottom: 14px; font-weight: 500; }
-.ts-diff-badge.easy   { color: #34d399; border-color: rgba(52,211,153,0.35);  background: rgba(52,211,153,0.08); }
-.ts-diff-badge.medium { color: #fbbf24; border-color: rgba(251,191,36,0.35);  background: rgba(251,191,36,0.08); }
-.ts-diff-badge.hard   { color: #f87171; border-color: rgba(248,113,113,0.35); background: rgba(239,68,68,0.08); }
+.ts-quiz-exp {
+  margin-top: var(--spacing-4);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+}
+
+.ts-quiz-next {
+  margin-top: var(--spacing-3);
+  background: var(--orange-500);
+  border: 1px solid var(--orange-500);
+  color: #fff;
+  font: 600 var(--text-size-body)/1 var(--font-primary);
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard),
+              border-color var(--duration-fast) var(--ease-standard);
+}
+.ts-quiz-next:hover { background: #D45C10; border-color: #D45C10; }
+.ts-quiz-next:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+
+.ts-progress {
+  background: var(--surface-3);
+  border-radius: 100px;
+  height: 4px;
+  margin-bottom: var(--spacing-5);
+  overflow: hidden;
+}
+.ts-progress-fill {
+  height: 100%;
+  background: var(--text-primary);
+  border-radius: 100px;
+  transition: width var(--duration-standard) var(--ease-standard);
+}
+.ts-score-num {
+  font: var(--text-weight-h1) var(--text-size-h1)/1 var(--font-primary);
+  letter-spacing: var(--text-ls-h1);
+  color: var(--text-primary);
+  text-align: center;
+  margin: var(--spacing-2) 0;
+}
+
+/* Difficulty badge — feedback palette; "hard" reads as info/advanced,
+ * not error, since the question itself isn't a failure state. */
+.ts-diff-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  padding: 3px 10px;
+  border-radius: 100px;
+  border: 1px solid;
+  background: var(--surface-1);
+  margin-bottom: var(--spacing-3);
+}
+.ts-diff-badge::before {
+  content: '';
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.ts-diff-badge.easy   { color: var(--color-success); border-color: var(--color-success); }
+.ts-diff-badge.medium { color: var(--color-warning); border-color: var(--color-warning); }
+.ts-diff-badge.hard   { color: var(--color-info);    border-color: var(--color-info); }
 `
 
 // ── Token vocabulary with base logits ─────────────────────────────────────────
@@ -1107,42 +1203,58 @@ export default function TemperatureSampling() {
       {/* ── Tab 5: Quiz ── */}
       {tab === 5 && (
         <div className="ts-panel">
-          <div className="ts-section-title">Quick Quiz</div>
-          <p className="ts-section-sub">Test your understanding of temperature and sampling strategies.</p>
+          <div className="ts-section-title">Quick quiz</div>
+          <p className="ts-section-sub">Six questions to check what stuck. The next question is picked from a harder or easier pool based on how you do.</p>
           {!done ? (
             <div className="ts-card">
               {currentQ && (
                 <>
-                  <div className="ts-progress"><div className="ts-progress-fill" style={{ width: `${(qNum / SESSION_SIZE) * 100}%` }} /></div>
-                  <div style={{ fontSize: 12, color: '#5a4a5a', marginBottom: 16 }}>QUESTION {qNum + 1} / {SESSION_SIZE}</div>
-                  <span className={`ts-diff-badge ${currentQ.difficulty}`}>⬤ {currentQ.difficulty}</span>
+                  <div className="ts-progress">
+                    <div className="ts-progress-fill" style={{ width: `${(qNum / SESSION_SIZE) * 100}%` }} />
+                  </div>
+                  <div className="ts-quiz-meta">Question {qNum + 1} of {SESSION_SIZE}</div>
+                  <span className={`ts-diff-badge ${currentQ.difficulty}`}>{currentQ.difficulty}</span>
                   <div className="ts-quiz-q">{currentQ.q}</div>
-                  <div className="ts-quiz-opts">
+                  <div className="ts-quiz-opts" role="radiogroup">
                     {currentQ.opts.map((opt, i) => (
-                      <button key={i} disabled={chosen !== null}
+                      <button
+                        key={i}
+                        disabled={chosen !== null}
+                        role="radio"
+                        aria-checked={chosen === i}
                         className={`ts-quiz-opt${chosen !== null && i === currentQ.correct ? ' correct' : ''}${chosen === i && i !== currentQ.correct ? ' wrong' : ''}`}
-                        onClick={() => handleQuiz(i)}>
-                        {['A','B','C','D'][i]}. {opt}
+                        onClick={() => handleQuiz(i)}
+                      >
+                        <span className="ts-quiz-opt-letter">{['A','B','C','D'][i]}.</span>
+                        {opt}
                       </button>
                     ))}
                   </div>
                   {chosen !== null && (
                     <>
                       <div className="ts-quiz-exp">{currentQ.explanation}</div>
-                      <button className="ts-quiz-next" onClick={nextQ}>{qNum + 1 < SESSION_SIZE ? 'Next Question →' : 'See Results →'}</button>
+                      <button className="ts-quiz-next" onClick={nextQ}>
+                        {qNum + 1 < SESSION_SIZE ? 'Next question' : 'See results'}
+                      </button>
                     </>
                   )}
                 </>
               )}
             </div>
           ) : (
-            <div className="ts-card" style={{ textAlign: 'center', padding: 40 }}>
-              <div style={{ fontSize: 12, color: '#5a4a5a', marginBottom: 12, letterSpacing: '0.12em' }}>FINAL SCORE</div>
+            <div className="ts-card" style={{ textAlign: 'center', padding: 'var(--spacing-7)' }}>
+              <div className="ts-quiz-meta" style={{ textAlign: 'center' }}>Final score</div>
               <div className="ts-score-num">{score}/{SESSION_SIZE}</div>
-              <div style={{ fontSize: 14, color: '#7a5a6a', marginTop: 8 }}>
-                {score >= SESSION_SIZE ? 'Perfect! You understand sampling deeply. 🎉' : score >= SESSION_SIZE / 2 ? 'Good work! Review the tricky sections. 📚' : 'Keep exploring — sampling strategies take time to click. 💪'}
+              <div style={{ font: 'var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)', marginTop: 'var(--spacing-2)' }}>
+                {score >= SESSION_SIZE
+                  ? 'You understand sampling deeply.'
+                  : score >= SESSION_SIZE / 2
+                    ? 'Solid run. Worth a quick re-read of the trickier sections.'
+                    : 'Sampling takes a couple of passes to click. Try a tab you skipped, then retake.'}
               </div>
-              <button className="ts-quiz-next" style={{ marginTop: 24 }} onClick={retake}>Retake Quiz ↺</button>
+              <button className="ts-quiz-next" style={{ marginTop: 'var(--spacing-6)' }} onClick={retake}>
+                Retake quiz
+              </button>
             </div>
           )}
         </div>
