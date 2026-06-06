@@ -6,153 +6,179 @@ import {
   QuestionIcon, ArrowSquareOutIcon, CheckIcon, XIcon, ArticleIcon,
 } from '@phosphor-icons/react'
 
-const ACCENT = '#2dd4bf'
+// Resources is a guided curriculum → uses the structured-content signal (blue).
+const ACCENT = 'var(--signal-structured-500)'
+const ACCENT_ICON = '#3B7DD8' // literal mirror of --signal-structured-500 for icon color props
 const STORAGE_KEY = 'claude-resources-progress'
 
 const css = `
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
+.rs-root {
+  min-height: 100vh;
+  background: var(--surface-base);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+}
 
-.rs-root { min-height: 100vh; background: #050810; color: #e0e8f0; font-family: 'IBM Plex Mono', monospace; overflow-x: hidden; }
-
-.rs-hero { text-align: center; padding: 48px 24px 28px; position: relative; }
-.rs-hero::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 700px; height: 320px; background: radial-gradient(ellipse at 50% 0%, rgba(45,212,191,0.09) 0%, transparent 70%); pointer-events: none; }
-.rs-eyebrow { font-size: 16px; letter-spacing: 0.22em; color: ${ACCENT}; text-transform: uppercase; margin-bottom: 14px; position: relative; }
-.rs-title { font-family: 'IBM Plex Sans', sans-serif; font-size: clamp(28px, 5vw, 52px); font-weight: 800; letter-spacing: -0.02em; color: #fff; line-height: 1.05; margin-bottom: 12px; position: relative; }
+/* Obsidian + refracted-light hero */
+.rs-hero {
+  position: relative;
+  text-align: center;
+  padding: 64px 24px 44px;
+  background: var(--text-primary);
+  color: #fff;
+  overflow: hidden;
+}
+.rs-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-refracted-b);
+  opacity: 0.55;
+  pointer-events: none;
+}
+[data-theme="dark"] .rs-hero { background: var(--surface-1); color: var(--text-primary); }
+[data-theme="dark"] .rs-hero::before { opacity: 0.32; }
+.rs-eyebrow { position: relative; font-size: 13px; letter-spacing: 0.18em; color: rgba(255,255,255,0.78); text-transform: uppercase; margin-bottom: 14px; font-weight: 600; }
+[data-theme="dark"] .rs-eyebrow { color: var(--text-secondary); }
+.rs-title { position: relative; font-family: var(--font-display); font-size: clamp(28px, 5vw, 52px); font-weight: 800; letter-spacing: -0.02em; color: #fff; line-height: 1.05; margin-bottom: 12px; }
+[data-theme="dark"] .rs-title { color: var(--text-primary); }
 .rs-title span { color: ${ACCENT}; }
-.rs-subtitle { font-size: 16px; color: #3a7a72; max-width: 560px; margin: 0 auto 0; line-height: 1.8; position: relative; }
+.rs-subtitle { position: relative; font-size: 16px; color: rgba(255,255,255,0.78); max-width: 560px; margin: 0 auto; line-height: 1.7; }
+[data-theme="dark"] .rs-subtitle { color: var(--text-secondary); }
 
 .rs-panel { max-width: 920px; margin: 0 auto; padding: 32px 20px 80px; }
 
-.rs-section-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 8px; text-align: center; }
-.rs-section-sub { font-size: 16px; color: #3a7a72; line-height: 1.7; margin-bottom: 28px; text-align: center; }
+.rs-section-title { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; text-align: center; }
+.rs-section-sub { font-size: 16px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 28px; text-align: center; }
 
 /* Level selector */
 .rs-level-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
 @media (max-width: 980px) { .rs-level-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 480px) { .rs-level-grid { grid-template-columns: 1fr; } }
-.rs-level-card { background: rgba(45,212,191,0.03); border: 1px solid #11302c; border-radius: 14px; padding: 28px 22px; cursor: pointer; transition: all 0.2s; text-align: center; display: flex; flex-direction: column; align-items: center; }
-.rs-level-card:hover { border-color: ${ACCENT}; background: rgba(45,212,191,0.07); transform: translateY(-3px); box-shadow: 0 16px 44px rgba(0,0,0,0.4), 0 0 32px rgba(45,212,191,0.1); }
-.rs-level-icon { width: 60px; height: 60px; border-radius: 14px; display: flex; align-items: center; justify-content: center; background: rgba(45,212,191,0.1); border: 1px solid rgba(45,212,191,0.2); margin-bottom: 16px; }
-.rs-level-name { font-family: 'IBM Plex Sans', sans-serif; font-size: 19px; font-weight: 700; color: #fff; margin-bottom: 8px; }
-.rs-level-desc { font-size: 13px; color: #4a8a82; line-height: 1.6; margin-bottom: 14px; }
-.rs-level-meta { font-size: 12px; color: ${ACCENT}; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.06em; }
+.rs-level-card { background: var(--surface-1); border: 1px solid var(--border-default); border-radius: var(--radius-card); padding: 28px 22px; cursor: pointer; transition: all 0.2s; text-align: center; display: flex; flex-direction: column; align-items: center; }
+.rs-level-card:hover { border-color: ${ACCENT}; background: var(--surface-2); transform: translateY(-3px); box-shadow: var(--shadow-elevated); }
+.rs-level-icon { width: 60px; height: 60px; border-radius: var(--radius-card); display: flex; align-items: center; justify-content: center; background: var(--signal-structured-50); border: 1px solid var(--signal-structured-100); margin-bottom: 16px; }
+.rs-level-name { font-family: var(--font-display); font-size: 19px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+.rs-level-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 14px; }
+.rs-level-meta { font-size: 12px; color: ${ACCENT}; font-family: var(--font-mono); letter-spacing: 0.06em; font-weight: 600; }
 
 /* Track header */
-.rs-change-btn { background: transparent; border: 1px solid #1a3a36; color: #4a8a82; font-family: 'IBM Plex Mono', monospace; font-size: 13px; padding: 7px 14px; border-radius: 8px; cursor: pointer; transition: all 0.18s; letter-spacing: 0.06em; margin-bottom: 22px; }
+.rs-change-btn { background: transparent; border: 1px solid var(--border-default); color: var(--text-secondary); font-family: var(--font-mono); font-size: 13px; padding: 7px 14px; border-radius: var(--radius-chip); cursor: pointer; transition: all 0.18s; letter-spacing: 0.06em; margin-bottom: 22px; }
 .rs-change-btn:hover { border-color: ${ACCENT}; color: ${ACCENT}; }
 .rs-track-head { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; }
-.rs-track-icon { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(45,212,191,0.1); border: 1px solid rgba(45,212,191,0.2); flex-shrink: 0; }
-.rs-track-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 24px; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
-.rs-track-sub { font-size: 14px; color: #3a7a72; line-height: 1.6; margin: 8px 0 22px; }
-.rs-track-access { font-size: 14px; color: #5a9a92; line-height: 1.6; margin: -14px 0 22px; padding: 10px 14px; background: rgba(45,212,191,0.05); border: 1px solid rgba(45,212,191,0.15); border-radius: 8px; }
-.rs-track-access-link { color: ${ACCENT}; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; font-family: 'IBM Plex Mono', monospace; }
+.rs-track-icon { width: 46px; height: 46px; border-radius: var(--radius-card); display: flex; align-items: center; justify-content: center; background: var(--signal-structured-50); border: 1px solid var(--signal-structured-100); flex-shrink: 0; }
+.rs-track-title { font-family: var(--font-display); font-size: 24px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.02em; }
+.rs-track-sub { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin: 8px 0 22px; }
+.rs-track-access { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin: -14px 0 22px; padding: 10px 14px; background: var(--signal-structured-50); border: 1px solid var(--signal-structured-100); border-radius: var(--radius-chip); }
+.rs-track-access-link { color: ${ACCENT}; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-weight: 600; }
 .rs-track-access-link:hover { text-decoration: underline; }
 
 /* Progress */
 .rs-progress-wrap { margin-bottom: 22px; }
 .rs-progress-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-.rs-progress-label { font-size: 13px; color: ${ACCENT}; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.04em; }
-.rs-progress-reset { background: none; border: none; color: #3a7a72; font-family: 'IBM Plex Mono', monospace; font-size: 12px; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; padding: 0; transition: color 0.18s; }
-.rs-progress-reset:hover { color: #6aa39b; }
-.rs-progress-bar-bg { height: 6px; background: #11302c; border-radius: 3px; overflow: hidden; }
+.rs-progress-label { font-size: 13px; color: ${ACCENT}; font-family: var(--font-mono); letter-spacing: 0.04em; font-weight: 600; }
+.rs-progress-reset { background: none; border: none; color: var(--text-tertiary); font-family: var(--font-mono); font-size: 12px; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; padding: 0; transition: color 0.18s; }
+.rs-progress-reset:hover { color: var(--text-primary); }
+.rs-progress-bar-bg { height: 6px; background: var(--surface-2); border-radius: 3px; overflow: hidden; }
 .rs-progress-bar { height: 100%; background: ${ACCENT}; border-radius: 3px; transition: width 0.45s cubic-bezier(.4,0,.2,1); }
 
-/* Filter chips */
+/* Filter tabs (prism-tabs pattern) */
 .rs-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
-.rs-chip { background: transparent; border: 1px solid #11302c; color: #3a7a72; font-family: 'IBM Plex Mono', monospace; font-size: 13px; padding: 6px 14px; border-radius: 100px; cursor: pointer; transition: all 0.18s; }
+.rs-chip { background: transparent; border: 1px solid var(--border-default); color: var(--text-secondary); font-family: var(--font-mono); font-size: 13px; padding: 6px 14px; border-radius: var(--radius-chip); cursor: pointer; transition: all 0.18s; }
 .rs-chip:hover { border-color: ${ACCENT}; color: ${ACCENT}; }
-.rs-chip.active { background: rgba(45,212,191,0.1); border-color: ${ACCENT}; color: ${ACCENT}; }
+.rs-chip.active { background: var(--signal-structured-50); border-color: ${ACCENT}; color: ${ACCENT}; font-weight: 600; }
 
 /* Stepper */
 .rs-step { display: flex; align-items: stretch; gap: 16px; }
 .rs-step-rail { flex-shrink: 0; width: 36px; display: flex; flex-direction: column; align-items: center; }
-.rs-step-node { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600; flex-shrink: 0; }
-.rs-step-node.done { background: ${ACCENT}; border: 1px solid ${ACCENT}; color: #052; }
-.rs-step-node.current { background: rgba(45,212,191,0.08); border: 2px solid ${ACCENT}; color: ${ACCENT}; }
-.rs-step-node.upcoming { background: rgba(255,255,255,0.02); border: 1px solid #2a3a40; color: #4a6a66; }
-.rs-step-line { flex: 1; width: 2px; min-height: 18px; margin: 4px 0; border-radius: 2px; background: #11302c; }
+.rs-step-node { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 14px; font-weight: 600; flex-shrink: 0; }
+.rs-step-node.done { background: ${ACCENT}; border: 1px solid ${ACCENT}; color: #fff; }
+.rs-step-node.current { background: var(--signal-structured-50); border: 2px solid ${ACCENT}; color: ${ACCENT}; }
+.rs-step-node.upcoming { background: var(--surface-1); border: 1px solid var(--border-default); color: var(--text-tertiary); }
+.rs-step-line { flex: 1; width: 2px; min-height: 18px; margin: 4px 0; border-radius: 2px; background: var(--border-default); }
 .rs-step-line.done { background: ${ACCENT}; }
 .rs-step-body { flex: 1; padding-bottom: 14px; }
 
 /* Resource card */
-.rs-card { background: rgba(255,255,255,0.02); border: 1px solid #11302c; border-radius: 12px; overflow: hidden; transition: border-color 0.18s; }
-.rs-card:hover { border-color: rgba(45,212,191,0.4); }
-.rs-card.done { border-color: rgba(45,212,191,0.3); background: rgba(45,212,191,0.03); }
-.rs-start-tag { display: inline-block; font-size: 11px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; color: ${ACCENT}; background: rgba(45,212,191,0.1); border: 1px solid rgba(45,212,191,0.3); border-radius: 100px; padding: 2px 10px; margin-bottom: 8px; }
+.rs-card { background: var(--surface-1); border: 1px solid var(--border-default); border-radius: var(--radius-card); overflow: hidden; transition: border-color 0.18s; }
+.rs-card:hover { border-color: var(--signal-structured-300); }
+.rs-card.done { border-color: ${ACCENT}; background: var(--signal-structured-50); }
+.rs-start-tag { display: inline-block; font-size: 11px; font-family: var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: ${ACCENT}; background: var(--signal-structured-50); border: 1px solid var(--signal-structured-100); border-radius: var(--radius-chip); padding: 2px 10px; margin-bottom: 8px; font-weight: 600; }
 
 /* Preview headers */
-.rs-thumb { position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; background: #02100e; cursor: pointer; border: none; padding: 0; overflow: hidden; }
+.rs-thumb { position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; background: var(--text-primary); cursor: pointer; border: none; padding: 0; overflow: hidden; }
 .rs-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.3s, opacity 0.3s; opacity: 0.92; }
 .rs-thumb:hover img { transform: scale(1.04); opacity: 1; }
 .rs-thumb-play { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
-.rs-thumb-play-bg { width: 56px; height: 56px; border-radius: 50%; background: rgba(5,8,16,0.55); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
-.rs-thumb-duration { position: absolute; bottom: 8px; right: 8px; font-size: 12px; font-family: 'IBM Plex Mono', monospace; color: #fff; background: rgba(5,8,16,0.8); border-radius: 4px; padding: 2px 7px; }
+.rs-thumb-play-bg { width: 56px; height: 56px; border-radius: 50%; background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+.rs-thumb-duration { position: absolute; bottom: 8px; right: 8px; font-size: 12px; font-family: var(--font-mono); color: #fff; background: rgba(0,0,0,0.8); border-radius: 4px; padding: 2px 7px; }
 
-.rs-course-head { display: flex; align-items: center; gap: 14px; padding: 18px 20px; background: linear-gradient(135deg, rgba(45,212,191,0.1), rgba(45,212,191,0.02)); border-bottom: 1px solid #11302c; cursor: pointer; text-decoration: none; transition: background 0.18s; }
-.rs-course-head:hover { background: linear-gradient(135deg, rgba(45,212,191,0.16), rgba(45,212,191,0.04)); }
-.rs-course-head-icon { width: 46px; height: 46px; border-radius: 10px; background: rgba(45,212,191,0.1); border: 1px solid rgba(45,212,191,0.25); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.rs-course-head-provider { display: block; font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; font-weight: 700; color: #c0e8e2; }
-.rs-course-head-instructor { display: block; font-size: 12px; color: #4a8a82; font-family: 'IBM Plex Mono', monospace; margin-top: 2px; }
+.rs-course-head { display: flex; align-items: center; gap: 14px; padding: 18px 20px; background: var(--signal-structured-50); border-bottom: 1px solid var(--border-default); cursor: pointer; text-decoration: none; transition: background 0.18s; }
+.rs-course-head:hover { background: var(--signal-structured-100); }
+.rs-course-head-icon { width: 46px; height: 46px; border-radius: var(--radius-chip); background: var(--surface-base); border: 1px solid var(--signal-structured-100); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.rs-course-head-provider { display: block; font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--text-primary); }
+.rs-course-head-instructor { display: block; font-size: 12px; color: var(--text-secondary); font-family: var(--font-mono); margin-top: 2px; }
 
 /* Card body */
 .rs-card-body { padding: 16px 20px 18px; }
 .rs-badges { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
-.rs-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.06em; padding: 3px 9px; border-radius: 100px; border: 1px solid; }
-.rs-badge-type { color: #9fd8d0; border-color: #1f4a44; background: rgba(45,212,191,0.04); }
-.rs-badge-official { color: ${ACCENT}; border-color: rgba(45,212,191,0.4); background: rgba(45,212,191,0.08); }
-.rs-badge-community { color: #94a3b8; border-color: rgba(148,163,184,0.3); background: rgba(148,163,184,0.06); }
-.rs-res-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 5px; line-height: 1.4; }
-.rs-res-desc { font-size: 13px; color: #5a9a92; line-height: 1.6; margin-bottom: 14px; }
+.rs-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-family: var(--font-mono); letter-spacing: 0.06em; padding: 3px 9px; border-radius: var(--radius-chip); border: 1px solid; font-weight: 600; }
+.rs-badge-type { color: var(--text-secondary); border-color: var(--border-default); background: var(--surface-2); }
+.rs-badge-official { color: ${ACCENT}; border-color: var(--signal-structured-300); background: var(--signal-structured-50); }
+.rs-badge-community { color: var(--text-secondary); border-color: var(--border-default); background: var(--surface-2); }
+.rs-res-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 5px; line-height: 1.4; }
+.rs-res-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 14px; }
 .rs-card-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.rs-link { display: inline-flex; align-items: center; gap: 7px; background: rgba(45,212,191,0.1); border: 1px solid ${ACCENT}; color: ${ACCENT}; font-family: 'IBM Plex Mono', monospace; font-size: 13px; padding: 8px 16px; border-radius: 8px; text-decoration: none; transition: all 0.18s; letter-spacing: 0.04em; cursor: pointer; }
-.rs-link:hover { background: rgba(45,212,191,0.2); }
-.rs-complete-btn { display: inline-flex; align-items: center; gap: 7px; background: transparent; border: 1px solid #1f4a44; color: #5a9a92; font-family: 'IBM Plex Mono', monospace; font-size: 13px; padding: 8px 14px; border-radius: 8px; cursor: pointer; transition: all 0.18s; }
+.rs-link { display: inline-flex; align-items: center; gap: 7px; background: ${ACCENT}; border: 1px solid ${ACCENT}; color: #fff; font-family: var(--font-mono); font-size: 13px; padding: 8px 16px; border-radius: var(--radius-chip); text-decoration: none; transition: all 0.18s; letter-spacing: 0.04em; cursor: pointer; font-weight: 600; }
+.rs-link:hover { filter: brightness(1.1); }
+.rs-complete-btn { display: inline-flex; align-items: center; gap: 7px; background: transparent; border: 1px solid var(--border-default); color: var(--text-secondary); font-family: var(--font-mono); font-size: 13px; padding: 8px 14px; border-radius: var(--radius-chip); cursor: pointer; transition: all 0.18s; }
 .rs-complete-btn:hover { border-color: ${ACCENT}; color: ${ACCENT}; }
-.rs-complete-btn.done { background: rgba(45,212,191,0.12); border-color: ${ACCENT}; color: ${ACCENT}; }
+.rs-complete-btn.done { background: var(--signal-structured-50); border-color: ${ACCENT}; color: ${ACCENT}; }
 
 /* Lightbox */
-.rs-modal-overlay { position: fixed; inset: 0; background: rgba(2,4,8,0.86); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 24px; z-index: 1000; animation: rs-fade 0.18s ease; }
+.rs-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.86); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 24px; z-index: 1000; animation: rs-fade 0.18s ease; }
 @keyframes rs-fade { from { opacity: 0; } to { opacity: 1; } }
 .rs-modal { position: relative; width: 100%; max-width: 880px; }
-.rs-modal-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid #1f4a44; }
+.rs-modal-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: var(--radius-card); overflow: hidden; border: 1px solid var(--border-default); }
 .rs-modal-frame iframe { width: 100%; height: 100%; border: 0; }
-.rs-modal-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; color: #c0e8e2; margin-top: 12px; text-align: center; }
-.rs-modal-close { position: absolute; top: -14px; right: -14px; width: 36px; height: 36px; border-radius: 50%; background: #0a1820; border: 1px solid #1f4a44; color: ${ACCENT}; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.18s; }
-.rs-modal-close:hover { background: rgba(45,212,191,0.15); border-color: ${ACCENT}; }
+.rs-modal-title { font-family: var(--font-display); font-size: 15px; color: #fff; margin-top: 12px; text-align: center; }
+.rs-modal-close { position: absolute; top: -14px; right: -14px; width: 36px; height: 36px; border-radius: 50%; background: var(--surface-1); border: 1px solid var(--border-default); color: ${ACCENT}; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.18s; }
+.rs-modal-close:hover { background: var(--signal-structured-50); border-color: ${ACCENT}; }
 
 /* Quiz */
-.rs-quiz { max-width: 680px; margin: 56px auto 0; border-top: 1px solid #11302c; padding-top: 44px; }
+.rs-quiz { max-width: 680px; margin: 56px auto 0; border-top: 1px solid var(--border-default); padding-top: 44px; }
 .rs-quiz-head { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 6px; }
-.rs-quiz-head-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 20px; font-weight: 800; color: #fff; }
-.rs-quiz-sub { font-size: 14px; color: #3a7a72; text-align: center; margin-bottom: 28px; }
+.rs-quiz-head-title { font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--text-primary); }
+.rs-quiz-sub { font-size: 14px; color: var(--text-secondary); text-align: center; margin-bottom: 28px; }
 .rs-quiz-progress { display: flex; align-items: center; gap: 12px; margin-bottom: 26px; }
-.rs-quiz-progress-bar-bg { flex: 1; height: 4px; background: #11302c; border-radius: 2px; overflow: hidden; }
+.rs-quiz-progress-bar-bg { flex: 1; height: 4px; background: var(--surface-2); border-radius: 2px; overflow: hidden; }
 .rs-quiz-progress-bar { height: 100%; background: ${ACCENT}; border-radius: 2px; transition: width 0.4s; }
-.rs-quiz-progress-label { font-size: 13px; color: #3a7a72; font-family: 'IBM Plex Mono', monospace; white-space: nowrap; }
-.rs-quiz-q { font-family: 'IBM Plex Sans', sans-serif; font-size: 18px; font-weight: 700; color: #fff; line-height: 1.5; margin-bottom: 22px; }
+.rs-quiz-progress-label { font-size: 13px; color: var(--text-secondary); font-family: var(--font-mono); white-space: nowrap; }
+.rs-quiz-q { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--text-primary); line-height: 1.5; margin-bottom: 22px; }
 .rs-quiz-opts { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-.rs-quiz-opt { background: rgba(255,255,255,0.02); border: 1px solid #11302c; border-radius: 10px; padding: 14px 18px; cursor: pointer; transition: all 0.18s; text-align: left; font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; color: #a0b8b4; display: flex; align-items: flex-start; }
-.rs-quiz-opt:hover:not(:disabled) { border-color: ${ACCENT}; color: #c0e8e2; }
-.rs-quiz-opt.correct { border-color: #34d399; background: rgba(52,211,153,0.08); color: #34d399; }
-.rs-quiz-opt.wrong { border-color: #f87171; background: rgba(248,113,113,0.08); color: #f87171; }
+.rs-quiz-opt { background: var(--surface-1); border: 1px solid var(--border-default); border-radius: var(--radius-card); padding: 14px 18px; cursor: pointer; transition: all 0.18s; text-align: left; font-family: var(--font-body); font-size: 15px; color: var(--text-secondary); display: flex; align-items: flex-start; }
+.rs-quiz-opt:hover:not(:disabled) { border-color: ${ACCENT}; color: var(--text-primary); }
+.rs-quiz-opt.correct { border-color: var(--color-success); background: var(--color-success-bg); color: var(--color-success); }
+.rs-quiz-opt.wrong { border-color: var(--color-error); background: var(--color-error-bg); color: var(--color-error); }
 .rs-quiz-opt.neutral { opacity: 0.5; }
 .rs-quiz-opt:disabled { cursor: default; }
-.rs-quiz-explanation { background: rgba(45,212,191,0.05); border: 1px solid rgba(45,212,191,0.15); border-radius: 10px; padding: 16px 20px; font-size: 14px; color: #4a9a92; line-height: 1.7; margin-bottom: 20px; }
+.rs-quiz-explanation { background: var(--signal-structured-50); border: 1px solid var(--signal-structured-100); border-radius: var(--radius-card); padding: 16px 20px; font-size: 14px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 20px; }
 .rs-quiz-explanation strong { color: ${ACCENT}; }
-.rs-btn { background: rgba(45,212,191,0.1); border: 1px solid ${ACCENT}; color: ${ACCENT}; font-family: 'IBM Plex Mono', monospace; font-size: 14px; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: all 0.18s; letter-spacing: 0.06em; }
-.rs-btn:hover { background: rgba(45,212,191,0.18); }
+.rs-btn { background: var(--signal-onDemand-500); border: 1px solid var(--signal-onDemand-500); color: #fff; font-family: var(--font-mono); font-size: 14px; padding: 10px 20px; border-radius: var(--radius-chip); cursor: pointer; transition: all 0.18s; letter-spacing: 0.06em; font-weight: 600; }
+.rs-btn:hover { filter: brightness(1.08); }
 .rs-quiz-done { text-align: center; padding: 20px 0; }
-.rs-quiz-done-score { font-family: 'IBM Plex Sans', sans-serif; font-size: 56px; font-weight: 900; color: ${ACCENT}; line-height: 1; margin-bottom: 8px; }
-.rs-quiz-done-label { font-size: 16px; color: #3a7a72; margin-bottom: 28px; }
+.rs-quiz-done-score { font-family: var(--font-display); font-size: 56px; font-weight: 800; color: ${ACCENT}; line-height: 1; margin-bottom: 8px; }
+.rs-quiz-done-label { font-size: 16px; color: var(--text-secondary); margin-bottom: 28px; }
 
 /* Footer */
 .rs-footer { max-width: 920px; margin: 0 auto; padding: 0 20px 80px; }
-.rs-footer-label { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: #3a7a72; margin-bottom: 14px; text-align: center; }
+.rs-footer-label { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 14px; text-align: center; font-weight: 600; }
 .rs-footer-links { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 @media (max-width: 680px) { .rs-footer-links { grid-template-columns: 1fr; } }
-.rs-footer-link { display: flex; align-items: center; gap: 10px; background: rgba(45,212,191,0.03); border: 1px solid #11302c; border-radius: 10px; padding: 14px 18px; text-decoration: none; transition: all 0.18s; }
-.rs-footer-link:hover { border-color: rgba(45,212,191,0.4); background: rgba(45,212,191,0.06); }
-.rs-footer-link-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; font-weight: 700; color: #c0e8e2; }
+.rs-footer-link { display: flex; align-items: center; gap: 10px; background: var(--surface-1); border: 1px solid var(--border-default); border-radius: var(--radius-card); padding: 14px 18px; text-decoration: none; transition: all 0.18s; }
+.rs-footer-link:hover { border-color: ${ACCENT}; background: var(--surface-2); }
+.rs-footer-link-title { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--text-primary); }
 .rs-footer-link-arrow { margin-left: auto; color: ${ACCENT}; flex-shrink: 0; transition: transform 0.18s; }
 .rs-footer-link:hover .rs-footer-link-arrow { transform: translate(2px, -2px); }
 `
@@ -282,7 +308,7 @@ function TypeBadge({ type }) {
   const label = type === 'Video' ? 'Video' : type === 'Article' ? 'Article' : type === 'Reference' ? 'Reference' : 'Course'
   return (
     <span className="rs-badge rs-badge-type">
-      <Icon size={16} weight="duotone" color={ACCENT} />
+      <Icon size={16} weight="duotone" color={ACCENT_ICON} />
       {label}
     </span>
   )
@@ -292,7 +318,7 @@ function SourceBadge({ source }) {
   if (source === 'Official') {
     return (
       <span className="rs-badge rs-badge-official">
-        <SealCheckIcon size={16} weight="duotone" color={ACCENT} />
+        <SealCheckIcon size={16} weight="duotone" color={ACCENT_ICON} />
         Official
       </span>
     )
@@ -315,7 +341,7 @@ function ResourceCard({ res, isFirst, completed, onToggle, onPlay }) {
           <img src={`https://img.youtube.com/vi/${res.youtubeId}/hqdefault.jpg`} alt="" loading="lazy" />
           <span className="rs-thumb-play">
             <span className="rs-thumb-play-bg">
-              <PlayCircleIcon size={40} weight="fill" color={ACCENT} />
+              <PlayCircleIcon size={40} weight="fill" color={ACCENT_ICON} />
             </span>
           </span>
           {res.duration && <span className="rs-thumb-duration">{res.duration}</span>}
@@ -324,8 +350,8 @@ function ResourceCard({ res, isFirst, completed, onToggle, onPlay }) {
         <a className="rs-course-head" href={res.url} target="_blank" rel="noopener noreferrer">
           <span className="rs-course-head-icon">
             {res.type === 'Article'
-              ? <ArticleIcon size={30} weight="duotone" color={ACCENT} />
-              : <BookOpenIcon size={30} weight="duotone" color={ACCENT} />}
+              ? <ArticleIcon size={30} weight="duotone" color={ACCENT_ICON} />
+              : <BookOpenIcon size={30} weight="duotone" color={ACCENT_ICON} />}
           </span>
           <span>
             <span className="rs-course-head-provider">{res.provider}</span>
@@ -351,16 +377,16 @@ function ResourceCard({ res, isFirst, completed, onToggle, onPlay }) {
         <div className="rs-card-actions">
           {isVideo ? (
             <button className="rs-link" onClick={() => onPlay(res)}>
-              Watch <PlayCircleIcon size={15} weight="bold" color={ACCENT} />
+              Watch <PlayCircleIcon size={15} weight="bold" color={ACCENT_ICON} />
             </button>
           ) : (
             <a className="rs-link" href={res.url} target="_blank" rel="noopener noreferrer">
               {res.type === 'Reference' ? 'Read docs' : res.type === 'Article' ? 'Read article' : 'Open course'}
-              <ArrowSquareOutIcon size={15} weight="bold" color={ACCENT} />
+              <ArrowSquareOutIcon size={15} weight="bold" color={ACCENT_ICON} />
             </a>
           )}
           <button className={`rs-complete-btn${completed ? ' done' : ''}`} onClick={() => onToggle(res.id)}>
-            <CheckIcon size={15} weight="bold" color={completed ? ACCENT : '#5a9a92'} />
+            <CheckIcon size={15} weight="bold" color={completed ? ACCENT_ICON : 'currentColor'} />
             {completed ? 'Completed' : 'Mark complete'}
           </button>
         </div>
@@ -423,8 +449,8 @@ function TrackQuiz({ quiz, levelKey }) {
   return (
     <div className="rs-quiz">
       <div className="rs-quiz-head">
-        <QuestionIcon size={20} weight="duotone" color={ACCENT} />
-        <span className="rs-quiz-head-title">Knowledge Check</span>
+        <QuestionIcon size={20} weight="duotone" color={ACCENT_ICON} />
+        <span className="rs-quiz-head-title">Knowledge check</span>
       </div>
       <div className="rs-quiz-sub">{total} quick questions to test what you've learned.</div>
 
@@ -432,7 +458,7 @@ function TrackQuiz({ quiz, levelKey }) {
         <div className="rs-quiz-done">
           <div className="rs-quiz-done-score">{score}/{total}</div>
           <div className="rs-quiz-done-label">Questions answered correctly</div>
-          <button className="rs-btn" onClick={retake}>Retake Quiz</button>
+          <button className="rs-btn" onClick={retake}>Retake quiz</button>
         </div>
       ) : (
         <>
@@ -455,7 +481,7 @@ function TrackQuiz({ quiz, levelKey }) {
               }
               return (
                 <button key={i} className={cls} onClick={() => handleAnswer(i)} disabled={chosen !== null}>
-                  <span style={{ color: '#3a7a72', marginRight: 10, fontFamily: 'IBM Plex Mono', fontSize: 13 }}>{String.fromCharCode(65 + i)}.</span>
+                  <span style={{ color: 'var(--text-tertiary)', marginRight: 10, fontFamily: 'var(--font-mono)', fontSize: 13 }}>{String.fromCharCode(65 + i)}.</span>
                   {opt}
                 </button>
               )
@@ -469,7 +495,7 @@ function TrackQuiz({ quiz, levelKey }) {
                 {currentQ.explanation}
               </div>
               <button className="rs-btn" onClick={nextQ}>
-                {qNum + 1 >= total ? 'See Results' : 'Next Question →'}
+                {qNum + 1 >= total ? 'See results' : 'Next question →'}
               </button>
             </>
           )}
@@ -502,7 +528,7 @@ function TrackView({ levelKey, track, completedIds, onToggle, onReset, onPlay })
     <div>
       <div className="rs-track-head">
         <div className="rs-track-icon">
-          <track.Icon size={26} weight="duotone" color={ACCENT} />
+          <track.Icon size={26} weight="duotone" color={ACCENT_ICON} />
         </div>
         <div className="rs-track-title">{track.name} Track</div>
       </div>
@@ -547,7 +573,7 @@ function TrackView({ levelKey, track, completedIds, onToggle, onReset, onPlay })
           <div className="rs-step" key={r.id}>
             <div className="rs-step-rail">
               <div className={`rs-step-node ${nodeCls}`}>
-                {isDone ? <CheckIcon size={18} weight="bold" color="#052" /> : idx + 1}
+                {isDone ? <CheckIcon size={18} weight="bold" color="#fff" /> : idx + 1}
               </div>
               {!isLastVisible && <div className={`rs-step-line${isDone ? ' done' : ''}`} />}
             </div>
@@ -632,7 +658,7 @@ export default function Resources() {
                 return (
                   <div key={key} className="rs-level-card" onClick={() => pickLevel(key)}>
                     <div className="rs-level-icon">
-                      <Icon size={32} weight="duotone" color={ACCENT} />
+                      <Icon size={32} weight="duotone" color={ACCENT_ICON} />
                     </div>
                     <div className="rs-level-name">{t.name}</div>
                     <div className="rs-level-desc">{t.desc}</div>
