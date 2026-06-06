@@ -4,84 +4,207 @@ import { useApiKey } from '../hooks/useApiKey.js'
 import { useChat } from '../hooks/useChat.js'
 
 const css = `
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
+/* ── BoardBriefing rebound to Prism tokens.
+ *  Page identity gold (#c9a84c) dropped. Output cards map to feedback
+ *  palette: summary = blue, risks = error, recommendations = success,
+ *  financial = orange (cost / spend). ─────────────────────── */
 
-.bb-root { min-height: 100vh; background: #050810; color: #e0e8f0; font-family: 'IBM Plex Mono', monospace; overflow-x: hidden; }
+.bb-root { min-height: 100vh; background: var(--surface-base); color: var(--text-primary); overflow-x: hidden; }
 
-.bb-hero { text-align: center; padding: 48px 24px 28px; position: relative; }
-.bb-hero::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 700px; height: 320px; background: radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.12) 0%, transparent 70%); pointer-events: none; }
-.bb-eyebrow { font-size: 16px; letter-spacing: 0.22em; color: #c9a84c; text-transform: uppercase; margin-bottom: 14px; position: relative; }
-.bb-title { font-family: 'IBM Plex Sans', sans-serif; font-size: clamp(28px, 5vw, 52px); font-weight: 800; letter-spacing: -0.02em; color: #fff; line-height: 1.05; margin-bottom: 12px; position: relative; }
-.bb-title span { color: #c9a84c; }
-.bb-subtitle { font-size: 16px; color: #8a7a5a; max-width: 580px; margin: 0 auto 32px; line-height: 1.8; position: relative; }
+.bb-hero {
+  position: relative;
+  text-align: center;
+  padding: var(--spacing-7) var(--spacing-4) var(--spacing-6);
+  background: var(--text-primary);
+  color: var(--surface-base);
+  overflow: hidden;
+}
+:root[data-theme="dark"] .bb-hero {
+  background: var(--surface-base);
+  color: var(--text-primary);
+}
+.bb-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-refracted-b);
+  opacity: var(--refracted-opacity-standard);
+  pointer-events: none;
+}
+.bb-hero > * { position: relative; }
+.bb-eyebrow {
+  font: var(--text-weight-label) var(--text-size-caption)/var(--text-lh-caption) var(--font-primary);
+  letter-spacing: 0.08em;
+  color: var(--blue-300);
+  margin-bottom: var(--spacing-3);
+}
+.bb-title {
+  font: var(--text-weight-h1) var(--text-size-h1)/var(--text-lh-h1) var(--font-primary);
+  letter-spacing: var(--text-ls-h1);
+  margin-bottom: var(--spacing-3);
+}
+.bb-subtitle {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  max-width: 580px;
+  margin: 0 auto;
+  opacity: 0.85;
+}
 
-.bb-tabs { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; padding: 0 16px 32px; }
-.bb-tab { background: transparent; border: 1px solid #2a2418; color: #8a7a5a; font-family: 'IBM Plex Mono', monospace; font-size: 16px; letter-spacing: 0.1em; padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: all 0.18s; text-transform: uppercase; }
-.bb-tab:hover { border-color: #c9a84c; color: #c9a84c; }
-.bb-tab.active { background: rgba(201,168,76,0.1); border-color: #c9a84c; color: #c9a84c; }
+.bb-tabs-row {
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-5) var(--spacing-4) var(--spacing-6);
+  background: var(--surface-base);
+}
 
-.bb-panel { max-width: 920px; margin: 0 auto; padding: 0 20px 80px; }
-.bb-section-title { font-family: 'IBM Plex Sans', sans-serif; font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 8px; }
-.bb-section-sub { font-size: 16px; color: #8a7a5a; margin-bottom: 28px; line-height: 1.8; }
+.bb-panel { max-width: 920px; margin: 0 auto; padding: 0 var(--spacing-4) var(--spacing-7); }
+.bb-section-title {
+  font: var(--text-weight-h2) var(--text-size-h2)/var(--text-lh-h2) var(--font-primary);
+  letter-spacing: var(--text-ls-h2);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-2);
+}
+.bb-section-sub {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-6);
+  max-width: 720px;
+}
 
-.bb-card { background: #0c0a06; border: 1px solid #1f1a12; border-radius: 14px; padding: 24px; margin-bottom: 20px; }
-.bb-card h3 { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #c9a84c; margin: 0 0 12px; }
-.bb-card p { font-size: 16px; color: #b8a888; line-height: 1.7; margin: 0 0 10px; }
-.bb-card ul { margin: 0; padding-left: 20px; color: #b8a888; line-height: 1.8; font-size: 16px; }
-.bb-card li { margin-bottom: 6px; }
+.bb-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-e2);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-5);
+  margin-bottom: var(--spacing-4);
+}
+.bb-card h3 {
+  font: var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary);
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-2);
+}
+.bb-card p {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+  margin: 0 0 var(--spacing-2);
+}
+.bb-card ul {
+  margin: 0;
+  padding-left: var(--spacing-5);
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+}
+.bb-card li { margin-bottom: var(--spacing-1); }
 
 /* ── Form ── */
-.bb-form { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.bb-form { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-3); }
 .bb-field { display: flex; flex-direction: column; gap: 6px; }
 .bb-field.full { grid-column: 1 / -1; }
-.bb-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #8a7a5a; }
-.bb-input, .bb-select, .bb-textarea {
-  font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: #e0e8f0;
-  background: #050810; border: 1px solid #2a2418; border-radius: 8px;
-  padding: 10px 12px; outline: none; transition: border-color 0.18s; width: 100%; box-sizing: border-box;
+.bb-label {
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
 }
-.bb-input:focus, .bb-select:focus, .bb-textarea:focus { border-color: #c9a84c; }
+.bb-input, .bb-select, .bb-textarea {
+  font: var(--text-weight-body) var(--text-size-body)/1.4 var(--font-primary);
+  color: var(--text-primary);
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-2) var(--spacing-3);
+  outline: none;
+  transition: border-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
+  width: 100%;
+  box-sizing: border-box;
+}
+.bb-input:focus-visible, .bb-select:focus-visible, .bb-textarea:focus-visible {
+  border-color: var(--purple-500);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
 .bb-textarea { min-height: 80px; resize: vertical; line-height: 1.6; }
-.bb-select { appearance: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='%238a7a5a' d='M0 0l5 6 5-6z'/></svg>"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 32px; }
+.bb-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='%238A7E72' d='M0 0l5 6 5-6z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 32px;
+}
 
-.bb-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 18px; }
-.bb-btn { font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; padding: 10px 18px; border-radius: 8px; border: 1px solid #c9a84c; background: rgba(201,168,76,0.12); color: #c9a84c; cursor: pointer; transition: all 0.18s; }
-.bb-btn:hover:not(:disabled) { background: rgba(201,168,76,0.2); border-color: #e8c96e; color: #e8c96e; }
-.bb-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-.bb-btn.secondary { background: transparent; border-color: #2a2418; color: #8a7a5a; }
-.bb-btn.secondary:hover:not(:disabled) { border-color: #c9a84c; color: #c9a84c; }
+.bb-actions { display: flex; gap: var(--spacing-3); flex-wrap: wrap; align-items: center; margin-top: var(--spacing-4); }
+.bb-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  font: 600 var(--text-size-body)/1 var(--font-primary);
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--orange-500);
+  background: var(--orange-500);
+  color: #fff;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+}
+.bb-btn:hover:not(:disabled) { background: #D45C10; border-color: #D45C10; }
+.bb-btn:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.bb-btn:disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+.bb-btn.secondary {
+  background: transparent;
+  border-color: var(--border-default);
+  color: var(--text-primary);
+}
+.bb-btn.secondary:hover:not(:disabled) { background: var(--surface-2); border-color: var(--border-strong); }
 
-.bb-warn { margin-top: 14px; font-size: 13px; padding: 12px 14px; border-radius: 8px; background: rgba(248,113,113,0.06); border: 1px solid rgba(248,113,113,0.25); color: #f87171; line-height: 1.6; }
-.bb-warn a { color: #f87171; text-decoration: underline; }
-.bb-err { margin-top: 14px; font-size: 13px; padding: 12px 14px; border-radius: 8px; background: rgba(248,113,113,0.06); border: 1px solid rgba(248,113,113,0.25); color: #f87171; }
+.bb-warn, .bb-err {
+  margin-top: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  border-radius: var(--radius-md);
+  background: var(--surface-1);
+  border: 1px solid var(--color-error);
+  color: var(--color-error);
+  font: var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary);
+}
+.bb-warn a { color: var(--color-error); text-decoration: underline; }
 
 /* ── Output cards ── */
-.bb-output { margin-top: 28px; display: flex; flex-direction: column; gap: 14px; }
+.bb-output { margin-top: var(--spacing-7); display: flex; flex-direction: column; gap: var(--spacing-3); }
 .bb-out-card {
-  border-radius: 14px; padding: 22px 24px; border: 1px solid;
-  opacity: 0; transform: translateY(8px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-  background: #0c0a06;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-5);
+  border: 1px solid;
+  background: var(--surface-1);
+  box-shadow: var(--shadow-e2);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity var(--duration-deliberate) var(--ease-standard), transform var(--duration-deliberate) var(--ease-standard);
 }
 .bb-out-card.visible { opacity: 1; transform: translateY(0); }
-.bb-out-card h3 { font-family: 'IBM Plex Sans', sans-serif; font-size: 18px; font-weight: 700; margin: 0 0 12px; letter-spacing: -0.01em; }
-.bb-out-body { font-size: 16px; line-height: 1.75; color: #d8c8a8; white-space: pre-wrap; }
-.bb-out-card.gold   { border-color: rgba(201,168,76,0.4); background: linear-gradient(180deg, rgba(201,168,76,0.05), rgba(12,10,6,1) 80%); }
-.bb-out-card.gold h3   { color: #c9a84c; }
-.bb-out-card.rose   { border-color: rgba(240,128,128,0.4); background: linear-gradient(180deg, rgba(240,128,128,0.05), rgba(12,10,6,1) 80%); }
-.bb-out-card.rose h3   { color: #f08080; }
-.bb-out-card.rose .bb-out-body { color: #e6c0c0; }
-.bb-out-card.teal   { border-color: rgba(78,201,176,0.4); background: linear-gradient(180deg, rgba(78,201,176,0.05), rgba(12,10,6,1) 80%); }
-.bb-out-card.teal h3   { color: #4ec9b0; }
-.bb-out-card.teal .bb-out-body { color: #b8e0d4; }
+.bb-out-card h3 {
+  font: var(--text-weight-h3) var(--text-size-h3)/var(--text-lh-h3) var(--font-primary);
+  letter-spacing: var(--text-ls-h3);
+  margin: 0 0 var(--spacing-3);
+}
+.bb-out-body {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-primary);
+  white-space: pre-wrap;
+}
+.bb-out-card.gold   { border-color: var(--blue-500); }
+.bb-out-card.gold h3   { color: var(--blue-500); }
+.bb-out-card.rose   { border-color: var(--color-error); }
+.bb-out-card.rose h3   { color: var(--color-error); }
+.bb-out-card.teal   { border-color: var(--color-success); }
+.bb-out-card.teal h3   { color: var(--color-success); }
+.bb-out-card.financial { border-color: var(--orange-500); }
+.bb-out-card.financial h3 { color: var(--orange-500); }
 
 .bb-cursor { display: inline-block; width: 7px; height: 14px; background: currentColor; opacity: 0.7; margin-left: 2px; vertical-align: -2px; animation: bb-blink 1s infinite; }
 @keyframes bb-blink { 0%, 50% { opacity: 0.7; } 50.01%, 100% { opacity: 0; } }
 
-.bb-after-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+.bb-after-actions { display: flex; gap: var(--spacing-2); flex-wrap: wrap; margin-top: var(--spacing-2); }
 
 @media print {
-  .bb-tabs, .bb-form, .bb-actions, .bb-after-actions, .nav-bar, .bb-hero, .bb-warn, .bb-err { display: none !important; }
+  .bb-tabs-row, .bb-form, .bb-actions, .bb-after-actions, .nav-bar, .bb-hero, .bb-warn, .bb-err { display: none !important; }
   .bb-root, .bb-panel { background: #fff !important; color: #111 !important; padding: 0 !important; max-width: none !important; }
   .bb-out-card { opacity: 1 !important; transform: none !important; background: #fff !important; border-color: #ccc !important; page-break-inside: avoid; margin-bottom: 18px; box-shadow: none; }
   .bb-out-body { color: #222 !important; }
@@ -90,18 +213,64 @@ const css = `
 }
 
 /* ── Quiz ── */
-.bb-quiz-q { font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 16px; line-height: 1.4; }
-.bb-quiz-opts { display: flex; flex-direction: column; gap: 8px; }
-.bb-quiz-opt { background: #0c0a06; border: 1px solid #1f1a12; border-radius: 8px; padding: 12px 16px; font-size: 16px; color: #b8a888; cursor: pointer; text-align: left; font-family: 'IBM Plex Mono', monospace; transition: all 0.18s; }
-.bb-quiz-opt:hover:not(:disabled) { border-color: #c9a84c; color: #e0e8f0; }
-.bb-quiz-opt.correct { border-color: #c9a84c; background: rgba(201,168,76,0.1); color: #e8c96e; }
-.bb-quiz-opt.wrong   { border-color: #ef4444; background: rgba(239,68,68,0.06); color: #f87171; }
-.bb-quiz-exp { margin-top: 14px; padding: 12px; background: rgba(201,168,76,0.05); border: 1px solid rgba(201,168,76,0.18); border-radius: 8px; font-size: 16px; color: #b8a888; line-height: 1.7; }
-.bb-quiz-next { margin-top: 12px; background: rgba(201,168,76,0.1); border: 1px solid #c9a84c; color: #c9a84c; font-family: 'IBM Plex Mono', monospace; font-size: 14px; padding: 9px 18px; border-radius: 6px; cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.18s; }
-.bb-quiz-next:hover { background: rgba(201,168,76,0.2); }
-.bb-progress { background: #0c0a06; border-radius: 100px; height: 4px; margin-bottom: 20px; overflow: hidden; }
-.bb-progress-fill { height: 100%; background: linear-gradient(90deg, #c9a84c, #e8c96e); border-radius: 100px; transition: width 0.4s; }
-.bb-score-num { font-family: 'IBM Plex Sans', sans-serif; font-size: 64px; font-weight: 800; color: #c9a84c; text-align: center; }
+.bb-quiz-q {
+  font: var(--text-weight-h3) var(--text-size-h3)/var(--text-lh-h3) var(--font-primary);
+  letter-spacing: var(--text-ls-h3);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-4);
+}
+.bb-quiz-opts { display: flex; flex-direction: column; gap: var(--spacing-2); }
+.bb-quiz-opt {
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3) var(--spacing-4);
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+}
+.bb-quiz-opt:hover:not(:disabled) { background: var(--surface-2); border-color: var(--border-strong); }
+.bb-quiz-opt:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.bb-quiz-opt:disabled { cursor: default; }
+.bb-quiz-opt.correct { border-color: var(--color-success); }
+.bb-quiz-opt.wrong   { border-color: var(--color-error); }
+.bb-quiz-exp {
+  margin-top: var(--spacing-4);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+}
+.bb-quiz-next {
+  margin-top: var(--spacing-3);
+  background: var(--orange-500);
+  border: 1px solid var(--orange-500);
+  color: #fff;
+  font: 600 var(--text-size-body)/1 var(--font-primary);
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+}
+.bb-quiz-next:hover { background: #D45C10; border-color: #D45C10; }
+.bb-quiz-next:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.bb-progress { background: var(--surface-3); border-radius: 100px; height: 4px; margin-bottom: var(--spacing-5); overflow: hidden; }
+.bb-progress-fill {
+  height: 100%;
+  background: var(--text-primary);
+  border-radius: 100px;
+  transition: width var(--duration-standard) var(--ease-standard);
+}
+.bb-score-num {
+  font: var(--text-weight-h1) var(--text-size-h1)/1 var(--font-primary);
+  letter-spacing: var(--text-ls-h1);
+  color: var(--text-primary);
+  text-align: center;
+}
 
 @media (max-width: 640px) {
   .bb-form { grid-template-columns: 1fr; }
@@ -110,8 +279,8 @@ const css = `
 
 const TABS = [
   { id: 'overview', label: 'Overview' },
-  { id: 'generate', label: 'Generate Brief' },
-  { id: 'quality',  label: 'What Makes a Good Brief' },
+  { id: 'generate', label: 'Generate brief' },
+  { id: 'quality',  label: 'What makes a good brief' },
   { id: 'quiz',     label: 'Quiz' },
 ]
 
@@ -120,11 +289,16 @@ const SIZES = ['50–200', '200–1000', '1000–5000', '5000+']
 
 const SYSTEM_PROMPT = `You are a senior AI transformation advisor writing a comprehensive board-ready executive brief. Write with authority and specificity. Use the company name and their exact initiatives throughout. Each section should be substantial — 2-3 paragraphs, not bullet points. Include specific metrics, realistic timeframes, and dollar figures calibrated to the company size and industry. Call out risks by name and explain their business impact. Make recommendations actionable with clear owners and timelines. This brief should be detailed enough that a board member with no AI background understands exactly where the company stands, what's at risk, and what decisions they need to make. Format your response in exactly 4 sections with these exact headers: ## Q1 AI Transformation Summary, ## Key Risks Requiring Board Attention, ## Strategic Recommendations, ## Financial Outlook.`
 
+// Tone keys map to .bb-out-card variants:
+//   gold       → --blue-500 (structured summary)
+//   rose       → --color-error (risks)
+//   teal       → --color-success (recommendations)
+//   financial  → --orange-500 (cost / spend)
 const SECTION_DEFS = [
-  { key: 'summary',         match: 'q1 ai transformation summary',          label: 'Q1 AI Transformation Summary',     tone: 'gold' },
-  { key: 'risks',           match: 'key risks requiring board attention',   label: 'Key Risks Requiring Board Attention', tone: 'rose' },
-  { key: 'recommendations', match: 'strategic recommendations',             label: 'Strategic Recommendations',        tone: 'teal' },
-  { key: 'financial',       match: 'financial outlook',                     label: 'Financial Outlook',                tone: 'gold' },
+  { key: 'summary',         match: 'q1 ai transformation summary',          label: 'Q1 AI transformation summary',     tone: 'gold' },
+  { key: 'risks',           match: 'key risks requiring board attention',   label: 'Key risks requiring board attention', tone: 'rose' },
+  { key: 'recommendations', match: 'strategic recommendations',             label: 'Strategic recommendations',        tone: 'teal' },
+  { key: 'financial',       match: 'financial outlook',                     label: 'Financial outlook',                tone: 'financial' },
 ]
 
 function parseSections(text) {
@@ -235,20 +409,24 @@ export default function BoardBriefing() {
       <NavBar />
       <header className="bb-hero">
         <div className="bb-eyebrow">Executive AI</div>
-        <h1 className="bb-title">Board Briefing <span>Generator</span></h1>
+        <h1 className="bb-title">Board briefing generator</h1>
         <p className="bb-subtitle">Turn your AI initiative data into a board-ready executive brief in seconds.</p>
       </header>
 
-      <div className="bb-tabs">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            className={`bb-tab${tab === t.id ? ' active' : ''}`}
-            onClick={() => setTab(t.id)}
-          >
-            {t.label}
-          </button>
-        ))}
+      <div className="bb-tabs-row">
+        <div className="prism-tabs" role="tablist" aria-label="Sections">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              role="tab"
+              className="prism-tab"
+              aria-selected={tab === t.id}
+              onClick={() => setTab(t.id)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <main className="bb-panel">
@@ -271,7 +449,7 @@ export default function BoardBriefing() {
 function OverviewPanel() {
   return (
     <>
-      <h2 className="bb-section-title">What is an AI Board Brief?</h2>
+      <h2 className="bb-section-title">What is an AI board brief?</h2>
       <p className="bb-section-sub">A short, executive-grade document that translates your AI program into the language a board of directors uses: outcomes, risks, capital, and governance.</p>
 
       <div className="bb-card">
@@ -338,13 +516,13 @@ function GeneratePanel({ form, setForm, hasKey, chat }) {
 
   return (
     <>
-      <h2 className="bb-section-title">Generate Brief</h2>
+      <h2 className="bb-section-title">Generate brief</h2>
       <p className="bb-section-sub">Fill in your company details. The brief is generated by Claude and streamed live into the four board-ready sections below.</p>
 
       <div className="bb-card">
         <div className="bb-form">
           <div className="bb-field">
-            <label className="bb-label" htmlFor="bb-company">Company Name</label>
+            <label className="bb-label" htmlFor="bb-company">Company name</label>
             <input id="bb-company" className="bb-input" value={form.company} onChange={update('company')} placeholder="Acme Financial" />
           </div>
           <div className="bb-field">
@@ -355,29 +533,29 @@ function GeneratePanel({ form, setForm, hasKey, chat }) {
             </select>
           </div>
           <div className="bb-field">
-            <label className="bb-label" htmlFor="bb-size">Company Size</label>
+            <label className="bb-label" htmlFor="bb-size">Company size</label>
             <select id="bb-size" className="bb-select" value={form.size} onChange={update('size')}>
               <option value="">Select…</option>
               {SIZES.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
           <div className="bb-field">
-            <label className="bb-label" htmlFor="bb-budget">AI Budget Invested to Date <span style={{ textTransform: 'none', color: '#5a4f38' }}>(optional)</span></label>
+            <label className="bb-label" htmlFor="bb-budget">AI budget invested to date <span style={{ textTransform: 'none', color: 'var(--text-tertiary)' }}>(optional)</span></label>
             <input id="bb-budget" className="bb-input" value={form.budget} onChange={update('budget')} placeholder="$2.4M" />
           </div>
           <div className="bb-field full">
-            <label className="bb-label" htmlFor="bb-init">Current AI Initiatives</label>
+            <label className="bb-label" htmlFor="bb-init">Current AI initiatives</label>
             <textarea id="bb-init" className="bb-textarea" value={form.initiatives} onChange={update('initiatives')} placeholder="Customer-service copilot, document automation, internal RAG knowledge base…" />
           </div>
           <div className="bb-field full">
-            <label className="bb-label" htmlFor="bb-risk">Biggest AI Risk or Concern</label>
+            <label className="bb-label" htmlFor="bb-risk">Biggest AI risk or concern</label>
             <textarea id="bb-risk" className="bb-textarea" value={form.risk} onChange={update('risk')} placeholder="Regulatory exposure, hallucinations in customer-facing channels, data leakage…" />
           </div>
         </div>
 
         <div className="bb-actions">
           <button className="bb-btn" onClick={onGenerate} disabled={!canSubmit}>
-            {isStreaming ? 'Generating…' : 'Generate Board Brief'}
+            {isStreaming ? 'Generating…' : 'Generate board brief'}
           </button>
           {showOutput && !isStreaming && (
             <button className="bb-btn secondary" onClick={reset}>Reset</button>
@@ -429,7 +607,7 @@ function nextKeyAfter(key) {
 function QualityPanel() {
   return (
     <>
-      <h2 className="bb-section-title">What Makes a Good Brief</h2>
+      <h2 className="bb-section-title">What makes a good brief</h2>
       <p className="bb-section-sub">Executive communication is its own discipline. The same content can land as a clear strategic ask or a confusing technical update depending on framing.</p>
 
       <div className="bb-card">
@@ -486,10 +664,10 @@ function QuizPanel() {
   if (done) {
     return (
       <>
-        <h2 className="bb-section-title">Quiz Result</h2>
+        <h2 className="bb-section-title">Quiz result</h2>
         <div className="bb-card" style={{ textAlign: 'center' }}>
           <div className="bb-score-num">{score} / {total}</div>
-          <p style={{ marginTop: 14, color: '#b8a888' }}>
+          <p style={{ marginTop: 'var(--spacing-3)', color: 'var(--text-secondary)' }}>
             {score === total ? 'Board-ready.' : score >= total - 1 ? 'Strong understanding of executive AI communication.' : 'Worth a second pass — the framing principles compound.'}
           </p>
           <button className="bb-quiz-next" onClick={reset}>Restart</button>
@@ -500,14 +678,14 @@ function QuizPanel() {
 
   return (
     <>
-      <h2 className="bb-section-title">Test Your Understanding</h2>
+      <h2 className="bb-section-title">Test your understanding</h2>
       <p className="bb-section-sub">Five questions on AI governance and board communication.</p>
 
       <div className="bb-progress"><div className="bb-progress-fill" style={{ width: `${(idx / total) * 100}%` }} /></div>
 
       <div className="bb-card">
         <div className="bb-quiz-q">{idx + 1}. {q.q}</div>
-        <div className="bb-quiz-opts">
+        <div className="bb-quiz-opts" role="radiogroup">
           {q.opts.map((opt, i) => {
             const isCorrect = picked !== null && i === q.answer
             const isWrong = picked === i && i !== q.answer
@@ -517,6 +695,8 @@ function QuizPanel() {
                 className={`bb-quiz-opt${isCorrect ? ' correct' : ''}${isWrong ? ' wrong' : ''}`}
                 onClick={() => onPick(i)}
                 disabled={picked !== null}
+                role="radio"
+                aria-checked={picked === i}
               >
                 {opt}
               </button>
@@ -526,7 +706,7 @@ function QuizPanel() {
         {picked !== null && (
           <>
             <div className="bb-quiz-exp">{q.exp}</div>
-            <button className="bb-quiz-next" onClick={onNext}>{idx + 1 >= total ? 'See Result' : 'Next'}</button>
+            <button className="bb-quiz-next" onClick={onNext}>{idx + 1 >= total ? 'See result' : 'Next question'}</button>
           </>
         )}
       </div>
