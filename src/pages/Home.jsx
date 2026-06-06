@@ -336,6 +336,7 @@ const ICON_MAP = {
 // Category metadata — used by section headers and the view-mode toggle.
 const CATEGORIES = [
   { id: 'learning-resources', label: 'Learning Resources',        description: 'Where to start — curated courses and videos.' },
+  { id: 'hands-on-practice',  label: 'Hands-on Practice',          description: 'Apply AI to a real task and produce something usable.' },
   { id: 'agents',             label: 'Agents',                     description: 'Building systems that act.' },
   { id: 'generative-ai',      label: 'Generative AI',              description: 'How models produce output.' },
   { id: 'how-tech-works',     label: 'How the Technology Works',   description: 'The foundations under the hood.' },
@@ -343,8 +344,8 @@ const CATEGORIES = [
 
 // View-mode → category ordering.
 const MODE_ORDER = {
-  explore: ['learning-resources', 'agents', 'generative-ai', 'how-tech-works'],
-  path:    ['learning-resources', 'how-tech-works', 'generative-ai', 'agents'],
+  explore: ['learning-resources', 'hands-on-practice', 'agents', 'generative-ai', 'how-tech-works'],
+  path:    ['learning-resources', 'hands-on-practice', 'how-tech-works', 'generative-ai', 'agents'],
 }
 
 const VIEW_MODE_KEY = 'home-view-mode'
@@ -361,7 +362,7 @@ const VISUALIZATIONS = [
   { path: '/temperature-sampling', category: 'generative-ai',      tag: 'LLM fundamentals', title: 'Temperature and sampling',           desc: 'See how temperature, top-K, and top-P shape LLM output distributions — and why it matters for your use case.',                pills: ['Temperature', 'Top-K', 'Top-P nucleus', 'Comparison', 'Live sampler', 'Quiz'],               ready: true },
   { path: '/rag',                  category: 'generative-ai',      tag: 'LLM architecture', title: 'Retrieval-augmented generation',     desc: 'See how RAG pipelines retrieve, chunk, and inject knowledge into LLM prompts.',                                              pills: ['Pipeline', 'Chunking', 'Retrieval', 'Prompt assembly', 'RAG vs fine-tuning'],                ready: true },
   { path: '/agent-simulation',     category: 'agents',             tag: 'AI agents',        title: 'Agent simulation sandbox',           desc: 'Walk a real agent pipeline — inspect every node, explore risks, latency, and cost, then run the happy path step by step.',     pills: ['Agent workflows', 'Decision gates', 'Risk analysis', 'Latency and cost', 'Human-in-the-loop'], ready: true },
-  { path: '/board-briefing',       category: 'learning-resources', tag: 'Executive AI',     title: 'Board briefing generator',           desc: 'Generate a board-ready AI transformation brief from your company data.',                                                      pills: ['Brief generator', 'Risk analysis', 'Strategic recommendations'],                              ready: true },
+  { path: '/board-briefing',       category: 'hands-on-practice',  tag: 'Executive AI',     title: 'Board briefing generator',           desc: 'Generate a board-ready AI transformation brief from your company data.',                                                      pills: ['Brief generator', 'Risk analysis', 'Strategic recommendations'],                              ready: true },
   { path: '/neural-networks',      category: 'how-tech-works',     tag: 'Deep learning',    title: 'Neural networks',                    desc: 'Watch signals flow through a network, see activations, and understand how back-propagation trains weights.',                    pills: ['Overview', 'Forward pass', 'Activations', 'Backprop', 'Gradient descent'],                   ready: true },
   { path: '/vector-embeddings',    category: 'how-tech-works',     tag: 'Embeddings',       title: 'Vector embeddings',                  desc: 'Explore how words and concepts map to high-dimensional vectors, and why semantic similarity works.',                          pills: ['Word vectors', 'Cosine similarity', 'Semantic search', 'RAG', 'Quiz'],                       ready: true },
 ]
