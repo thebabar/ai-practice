@@ -1,0 +1,261 @@
+/*
+ * ═══════════════════════════════════════════════════════
+ *  PRISM · COMPONENTS v2.0
+ *  Built entirely on prism-tokens.css. Load order:
+ *    1) prism-tokens.css   (defines all --variables on :root)
+ *    2) prism-components.css  (this file)
+ *  Every value below references a token — no hardcoded hex/px
+ *  except the documented brand-kit constants (component
+ *  heights/widths, stroke widths) that have no token.
+ *  Page refs (pNN) trace to Prism · Brand Kit v2.0.
+ * ═══════════════════════════════════════════════════════
+ */
+
+/* ── Fonts · all three are Google Fonts (p22) ───────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=Lora:ital@1&display=swap');
+
+/* ── Base · page surface + body type (p17, p19, p23) ────── */
+body {
+  background: var(--surface-base);
+  color: var(--text-primary);
+  font-family: var(--font-primary);
+  font-size: var(--text-size-body);
+  font-weight: var(--text-weight-body);
+  line-height: var(--text-lh-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Type scale utilities (p23) · weight 500 never used ─── */
+.prism-h1 { font: var(--text-weight-h1) var(--text-size-h1)/var(--text-lh-h1) var(--font-primary); letter-spacing: var(--text-ls-h1); }
+.prism-h2 { font: var(--text-weight-h2) var(--text-size-h2)/var(--text-lh-h2) var(--font-primary); letter-spacing: var(--text-ls-h2); }
+.prism-h3 { font: var(--text-weight-h3) var(--text-size-h3)/var(--text-lh-h3) var(--font-primary); letter-spacing: var(--text-ls-h3); }
+.prism-body    { font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary); }
+.prism-label   { font: var(--text-weight-label) var(--text-size-label)/var(--text-lh-label) var(--font-primary); }
+.prism-caption { font: var(--text-weight-caption) var(--text-size-caption)/var(--text-lh-caption) var(--font-primary); color: var(--text-tertiary); }
+.prism-meta    { font: var(--text-weight-meta) var(--text-size-meta)/var(--text-lh-meta) var(--font-primary); color: var(--text-tertiary); }
+.prism-editorial { font-family: var(--font-editorial); font-style: italic; }
+
+/* ── Universal focus ring · always visible (p18) ────────── */
+.btn:focus-visible,
+.input__field:focus-visible,
+.nav__item:focus-visible,
+.badge--removable .badge__close:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════
+ * 1 · BUTTON (p32)
+ * Sizes XS/S/M/L/XL · variants default/orange/blue/purple/gradient
+ * States default/hover/pressed/focused/disabled/loading
+ * ═══════════════════════════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-1);                 /* icon-to-text */
+  font-family: var(--font-primary);
+  font-weight: 600;                       /* CTA = Inter 600 (p24) */
+  line-height: 1;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);        /* small sizes drop to sm below */
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--duration-fast) var(--ease-standard),
+              border-color var(--duration-fast) var(--ease-standard),
+              color var(--duration-fast) var(--ease-standard),
+              box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+/* Sizes — heights are brand-kit constants; padding via spacing tokens */
+.btn--xs { height: 24px; padding: 0 var(--spacing-2); font-size: var(--text-size-caption); border-radius: var(--radius-sm); }
+.btn--sm { height: 28px; padding: 0 var(--spacing-3); font-size: var(--text-size-caption); border-radius: var(--radius-sm); }
+.btn--md { height: 40px; padding: var(--spacing-2) var(--spacing-3); font-size: var(--text-size-body); }  /* default 40px */
+.btn--lg { height: 48px; padding: 0 var(--spacing-4); font-size: var(--text-size-body); }
+.btn--xl { height: 56px; padding: 0 var(--spacing-5); font-size: var(--text-size-h3); }
+
+/* Default variant — neutral ghost */
+.btn--default { background: transparent; border-color: var(--border-default); color: var(--text-primary); }
+.btn--default:hover { background: var(--surface-2); border-color: var(--border-strong); }
+.btn--default:active { background: var(--surface-3); }
+
+/* Solid signal variants — 500 fill, hover darkens (matches gradient −6% rule, p29) */
+.btn--orange { background: var(--orange-500); color: #fff; }
+.btn--orange:hover  { background: #D45C10; }   /* orange-500 darkened ~6% */
+.btn--orange:active { background: #BD5210; }
+
+.btn--blue { background: var(--blue-500); color: #fff; }
+.btn--blue:hover  { background: #2B6DCC; }
+.btn--blue:active { background: #265FB3; }
+
+.btn--purple { background: var(--purple-500); color: #fff; }
+.btn--purple:hover  { background: #6C28E0; }
+.btn--purple:active { background: #5E22C4; }
+
+/* Gradient CTAs — L & XL only (p29). Apply with a size class of lg/xl. */
+.btn--gradient-orange { background: var(--gradient-btn-orange); color: #fff; border-color: transparent; }
+.btn--gradient-blue   { background: var(--gradient-btn-blue);   color: #fff; border-color: transparent; }
+.btn--gradient-purple { background: var(--gradient-btn-purple); color: #fff; border-color: transparent; }
+
+/* Disabled + loading (all variants) */
+.btn:disabled,
+.btn.is-disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+.btn.is-loading { color: transparent; pointer-events: none; position: relative; }
+.btn.is-loading::after {
+  content: ""; position: absolute; width: 1em; height: 1em;
+  border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%;
+  color: #fff; /* spinner colour inherits from fill text; override on ghost */
+  animation: prism-spin var(--duration-max) var(--ease-linear) infinite;
+}
+.btn--default.is-loading::after { color: var(--text-primary); }
+@keyframes prism-spin { to { transform: rotate(360deg); } }
+
+/* ═══════════════════════════════════════════════════════
+ * 2 · INPUT (p33) · label mandatory · sizes S/M/L · 8 states
+ * ═══════════════════════════════════════════════════════ */
+.input { display: flex; flex-direction: column; gap: var(--spacing-1); }
+.input__label {                                   /* mandatory, never placeholder-only */
+  font: var(--text-weight-label) var(--text-size-label)/var(--text-lh-label) var(--font-primary);
+  color: var(--text-primary);
+}
+.input__control { display: flex; align-items: center; gap: var(--spacing-2);
+  background: var(--surface-1); border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm); padding: 0 var(--spacing-3);
+  transition: border-color var(--duration-fast) var(--ease-standard),
+              box-shadow var(--duration-fast) var(--ease-standard);
+}
+.input__field { flex: 1; border: 0; outline: 0; background: transparent;
+  font: var(--text-weight-body) var(--text-size-body)/1 var(--font-primary);
+  color: var(--text-primary); height: 100%;
+}
+.input__field::placeholder { color: var(--text-tertiary); }
+.input__affix { color: var(--text-tertiary); display: inline-flex; width: 16px; height: 16px; } /* prefix/suffix icon */
+.input__helper { font: var(--text-weight-caption) var(--text-size-caption)/var(--text-lh-caption) var(--font-primary); color: var(--text-tertiary); }
+
+/* Sizes (heights) */
+.input--sm .input__control { height: 32px; }
+.input--md .input__control { height: 40px; }      /* default */
+.input--lg .input__control { height: 48px; }
+
+/* States */
+.input__control:hover { border-color: var(--border-strong); }            /* border strengthens */
+.input__field:focus-visible ~ .input__control,
+.input--focused .input__control,
+.input__control:focus-within {
+  border-color: var(--purple-500);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);                          /* purple focus ring 3px */
+}
+.input--success .input__control { border-color: var(--color-success); }
+.input--success .input__helper  { color: var(--color-success); }
+.input--error   .input__control { border-color: var(--color-error); }
+.input--error   .input__helper  { color: var(--color-error); }            /* error text replaces helper */
+.input--warning .input__control { border-color: var(--color-warning); }
+.input--warning .input__helper  { color: var(--color-warning); }
+.input--disabled .input__control { background: var(--surface-3); opacity: 0.55; pointer-events: none; }
+
+/* ═══════════════════════════════════════════════════════
+ * 3 · CARD (p34) · 6 patterns · 3 padding tiers
+ * ═══════════════════════════════════════════════════════ */
+.card { border-radius: var(--radius-md); padding: var(--spacing-4); }     /* standard padding */
+.card--compact  { padding: var(--spacing-2); }
+.card--spacious { padding: var(--spacing-5); }
+
+.card--default { background: var(--surface-1); border: 1px solid var(--border-default); box-shadow: var(--shadow-e2); }
+
+/* Signal-tinted — tint MUST match the layer (p34) */
+.card--orange { background: var(--orange-50);  border: 1px solid var(--orange-100); }
+.card--blue   { background: var(--blue-50);    border: 1px solid var(--blue-100); }
+.card--purple { background: var(--purple-50);  border: 1px solid var(--purple-100); }
+
+/* Hero — image + dark overlay + title */
+.card--hero { position: relative; color: #fff; overflow: hidden; background: var(--text-primary); }
+.card--hero::before { content: ""; position: absolute; inset: 0; background: var(--gradient-overlay-course-title); }
+.card--hero > * { position: relative; }
+
+/* Frosted glass — premium & AI Coach only */
+.card--frosted {
+  background: var(--frosted-glass-bg);
+  border: 1px solid var(--frosted-glass-border);
+  backdrop-filter: var(--frosted-glass-blur);
+  -webkit-backdrop-filter: var(--frosted-glass-blur);
+}
+
+/* ═══════════════════════════════════════════════════════
+ * 4 · MODAL (p35) · sizes S/M/L · focus trap handled in JS
+ * ═══════════════════════════════════════════════════════ */
+.modal__backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: grid; place-items: center;
+  animation: prism-fade var(--duration-deliberate) var(--ease-enter); }
+.modal { background: var(--surface-1); border-radius: var(--radius-md); box-shadow: var(--shadow-e2);
+  width: 100%; max-height: 90vh; display: flex; flex-direction: column; }
+.modal--sm { max-width: 400px; }    /* alerts */
+.modal--md { max-width: 600px; }    /* default */
+.modal--lg { max-width: 800px; }    /* forms */
+.modal__header { display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-4); }
+.modal__title  { font: var(--text-weight-h2) var(--text-size-h2)/var(--text-lh-h2) var(--font-primary); letter-spacing: var(--text-ls-h2); }
+.modal__close  { background: none; border: 0; cursor: pointer; color: var(--text-secondary); width: 24px; height: 24px; }
+.modal__content { padding: 0 var(--spacing-4); overflow-y: auto; }        /* scrollable past max-height */
+.modal__footer  { display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-4); }
+/* NOTE: focus trap (Tab loops inside) + Esc-to-close are non-negotiable (p35) — implement in JS. */
+@keyframes prism-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* ═══════════════════════════════════════════════════════
+ * 5 · NAVIGATION (p36) · 250px desktop / 64px icon-only mobile
+ * ═══════════════════════════════════════════════════════ */
+.nav { width: 250px; display: flex; flex-direction: column; gap: var(--spacing-1);
+  padding: var(--spacing-4); background: var(--surface-base); }
+.nav__item { display: flex; align-items: center; gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3); border-radius: var(--radius-md);
+  color: var(--text-primary); background: transparent; text-decoration: none;
+  font: var(--text-weight-label) var(--text-size-label)/1 var(--font-primary);
+  transition: background-color var(--duration-fast) var(--ease-standard); }
+.nav__item:hover { background: var(--surface-2); }
+.nav__item[aria-current="page"],
+.nav__item.is-active { background: var(--text-primary); color: var(--surface-base); }  /* obsidian fill, warm-white text */
+
+@media (max-width: 768px) {
+  .nav { width: 64px; padding: var(--spacing-2); }
+  .nav__item { justify-content: center; padding: var(--spacing-2); }
+  .nav__item .nav__label { display: none; }                                /* icon-only */
+}
+
+/* ═══════════════════════════════════════════════════════
+ * 6 · BADGE (p37) · sizes SM/MD · signal + status variants
+ * Always paired with text; never icon-only without aria-label.
+ * ═══════════════════════════════════════════════════════ */
+.badge { display: inline-flex; align-items: center; gap: var(--spacing-1);
+  border-radius: var(--radius-sm); border: 1px solid var(--border-default);
+  background: var(--surface-1); color: var(--text-primary);
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  padding: 0 var(--spacing-2); }
+.badge--sm { height: 24px; }
+.badge--md { height: 32px; padding: 0 var(--spacing-3); }
+
+/* Signal variants — 50 fill + 500 border (p37) */
+.badge--ondemand   { background: var(--orange-50); border-color: var(--orange-500); color: var(--orange-500); }
+.badge--structured { background: var(--blue-50);   border-color: var(--blue-500);   color: var(--blue-500); }
+.badge--aicoach    { background: var(--purple-50); border-color: var(--purple-500); color: var(--purple-500); }
+
+/* Status variants — feedback palette (p37) */
+.badge--complete { background: var(--surface-1); border-color: var(--color-success); color: var(--color-success); }
+.badge--failed   { background: var(--surface-1); border-color: var(--color-error);   color: var(--color-error); }
+.badge--expiring { background: var(--surface-1); border-color: var(--color-warning); color: var(--color-warning); }
+.badge--beta     { background: var(--surface-1); border-color: var(--color-info);    color: var(--color-info); }
+
+.badge__close { background: none; border: 0; cursor: pointer; color: inherit; width: 14px; height: 14px; line-height: 1; }
+
+/* ── Icon convention (p41) · Phosphor, outlined, 1.5px, 24px ── */
+.prism-icon { width: 24px; height: 24px; stroke-width: 1.5; color: var(--text-primary); }
+.prism-icon--ondemand   { color: var(--orange-500); }
+.prism-icon--structured { color: var(--blue-500); }
+.prism-icon--aicoach    { color: var(--purple-500); }
+
+/* ═══════════════════════════════════════════════════════
+ * MOTION GUARDRAIL (p30) · respect reduced-motion
+ * ═══════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

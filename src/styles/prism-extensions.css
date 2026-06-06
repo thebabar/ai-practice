@@ -1,0 +1,14 @@
+/*
+ * ═══════════════════════════════════════════════════════
+ *  PRISM · EXTENSIONS
+ *  Sanctioned departures from Prism (§2 of visual-ai-themes.md).
+ *  Loads AFTER prism-tokens.css and prism-components.css so the
+ *  Prism files stay pristine and all deviations live in one place.
+ *
+ *  This file is a scaffold. The three planned deviations land
+ *  here in later phases:
+ *    1) IBM Plex Mono utility class — code / tokens / numeric only.
+ *    2) Range slider — tokens-driven; fill = semantic signal.
+ *    3) Tab bar — ghost-button row; active = obsidian fill.
+ * ═══════════════════════════════════════════════════════
+ */

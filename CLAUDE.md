@@ -1,5 +1,8 @@
 # AI Visual Lab — Claude Code Context
 
+> Design system rules live in `visual-ai-themes.md` — read it before any styling work.
+> Token + component reference: `prism-design-system.md` and `src/styles/prism-tokens.css`.
+
 ## What This Project Is
 A collection of interactive AI learning visualizations built with React + Vite,
 deployed on Vercel at https://aibitbybot.vercel.app

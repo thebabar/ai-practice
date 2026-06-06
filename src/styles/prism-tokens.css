@@ -1,0 +1,313 @@
+/*
+ * ═══════════════════════════════════════════════════════
+ *  PRISM · DESIGN TOKENS v2.0
+ *  Generated from Prism Brand Kit PDF
+ *  Each token is annotated with its source page
+ * ═══════════════════════════════════════════════════════
+ */
+
+:root {
+
+  /* ─────────────────────────────────────────
+   * PRIMARY COLOURS
+   * Source: Page 15 · Colour | Primary
+   * ───────────────────────────────────────── */
+
+  --color-warm-white: #F7F4F1;        /* Warm White · RGB 247, 244, 241 · Pantone Warm Gray 1 C */
+  --color-obsidian:   #1A1714;        /* Obsidian   · RGB 26, 23, 20    · Pantone Black 7 C      */
+
+  /* Semantic aliases */
+  --surface-base:     #F7F4F1;        /* Page background only · warm white */
+  --text-primary:     #1A1714;        /* Obsidian · headings, body        */
+
+
+  /* ─────────────────────────────────────────
+   * SIGNAL COLOURS — ORANGE
+   * Source: Page 16 · Colour | Signal
+   * Role: On-demand · primary CTA
+   * ───────────────────────────────────────── */
+
+  --orange-500: #E8641A;              /* Primary action / CTA             */
+  --orange-300: #F5B896;              /* Hover state                      */
+  --orange-100: #FAD9BD;              /* Callout fills                    */
+  --orange-50:  #FDF1E8;              /* Soft backgrounds                 */
+
+
+  /* ─────────────────────────────────────────
+   * SIGNAL COLOURS — BLUE
+   * Source: Page 16 · Colour | Signal
+   * Role: Structured · secondary CTA
+   * ───────────────────────────────────────── */
+
+  --blue-500: #3B7DD8;                /* Primary action / CTA             */
+  --blue-300: #8BB8E8;                /* Hover state                      */
+  --blue-100: #C5DAF6;                /* Callout fills                    */
+  --blue-50:  #EBF2FC;                /* Soft backgrounds                 */
+
+
+  /* ─────────────────────────────────────────
+   * SIGNAL COLOURS — PURPLE
+   * Source: Page 16 · Colour | Signal
+   * Role: AI Coach · special emphasis only
+   * ───────────────────────────────────────── */
+
+  --purple-500: #7C3AED;              /* Primary action / CTA             */
+  --purple-300: #C4A7F5;              /* Hover state                      */
+  --purple-100: #DFC9FB;              /* Callout fills                    */
+  --purple-50:  #F3EBFE;              /* Soft backgrounds                 */
+
+
+  /* ─────────────────────────────────────────
+   * SURFACES (Neutral Scale)
+   * Source: Page 17 · Colour | Surfaces, Text & Borders
+   * Surfaces elevate: Base → 01 → 02 → 03
+   * ───────────────────────────────────────── */
+
+  --surface-1: #FFFFFF;               /* Elevation 01 · default card bg   */
+  --surface-2: #FDFBF8;               /* Elevation 02 · hover fill        */
+  --surface-3: #F2EDE6;               /* Elevation 03 · strongest surface */
+
+
+  /* ─────────────────────────────────────────
+   * TEXT COLOURS
+   * Source: Page 17 · Colour | Surfaces, Text & Borders
+   * ───────────────────────────────────────── */
+
+  --text-secondary: #564C44;          /* Subheadings, supporting text     */
+  --text-tertiary:  #8A7E72;          /* Captions, meta, placeholder      */
+
+
+  /* ─────────────────────────────────────────
+   * BORDER COLOURS
+   * Source: Page 17 · Colour | Surfaces, Text & Borders
+   * ───────────────────────────────────────── */
+
+  --border-default: #D1C7B8;          /* Default card/input border        */
+  --border-strong:  #A89E92;          /* Hover border, strong dividers    */
+
+
+  /* ─────────────────────────────────────────
+   * FEEDBACK COLOURS (System States)
+   * Source: Page 18 · Colour | Feedback
+   * Use: Validation, alerts, status only
+   * Always pair with an icon. Never decorative.
+   * ───────────────────────────────────────── */
+
+  --color-success: #65E99E;           /* Completion, validation pass, "saved"         */
+  --color-error:   #E16B6B;           /* Failed action, validation fail, blocked      */
+  --color-warning: #FEBC5E;           /* Caution, attention needed, session expiring  */
+  --color-info:    #5697F0;           /* Neutral information, system message          */
+
+  /* Focus ring — always visible on interactive elements */
+  --color-focus-ring: rgba(124, 58, 237, 0.30); /* Purple · 3px outline, 2px offset  */
+
+
+  /* ─────────────────────────────────────────
+   * GRADIENT — CARD BACKGROUNDS (Pastel Ramp)
+   * Source: Page 29 · System | Gradients
+   * Direction: top-to-bottom, 180°
+   * ───────────────────────────────────────── */
+
+  /* Orange · On-demand cards */
+  --gradient-card-orange: linear-gradient(180deg, #FDF1E8 0%, #FAD9BD 100%);
+  /* orange-50 → orange-100 */
+
+  /* Blue · Structured cards */
+  --gradient-card-blue: linear-gradient(180deg, #EBF2FC 0%, #C5DAF6 100%);
+  /* blue-50 → blue-100 */
+
+  /* Purple · AI Coach cards */
+  --gradient-card-purple: linear-gradient(180deg, #F3EBFE 0%, #DFC9FB 100%);
+  /* purple-50 → purple-100 */
+
+
+  /* ─────────────────────────────────────────
+   * GRADIENT — BUTTON (Signal CTAs · L & XL only)
+   * Source: Page 29 · System | Gradients
+   * Button gradients darken the action by 6%
+   * ───────────────────────────────────────── */
+
+  /* Orange CTA — "Generate course" */
+  --gradient-btn-orange: linear-gradient(180deg, #F07330 0%, #D45C10 100%);
+
+  /* Blue CTA — "Continue learning" */
+  --gradient-btn-blue: linear-gradient(180deg, #5090E8 0%, #2B6DCC 100%);
+
+  /* Purple CTA — "Ask Prism" */
+  --gradient-btn-purple: linear-gradient(180deg, #9060F0 0%, #6C28E0 100%);
+
+
+  /* ─────────────────────────────────────────
+   * GRADIENT — IMAGE OVERLAY
+   * Source: Page 29 · System | Gradients
+   * Dark transparent only. Never coloured.
+   * ───────────────────────────────────────── */
+
+  --gradient-overlay-course-title: linear-gradient(180deg, rgba(0,0,0,0.00) 0%, rgba(0,0,0,0.40) 100%);
+  /* Course title overlay — hero cards with imagery */
+
+
+  /* ─────────────────────────────────────────
+   * FROSTED GLASS
+   * Source: Page 29 · System | Gradients
+   * Premium & AI Coach surfaces only
+   * ───────────────────────────────────────── */
+
+  --frosted-glass-bg:     rgba(255, 255, 255, 0.15);
+  --frosted-glass-border: rgba(255, 255, 255, 0.30);
+  --frosted-glass-blur:   blur(10px);             /* backdrop-filter value */
+  --frosted-glass-opacity: 0.95;
+
+
+  /* ─────────────────────────────────────────
+   * GRADIENT — REFRACTED LIGHT (Brand Motif)
+   * Source: Pages 39–40 · Application | Refracted Light
+   * Three soft radial layers: purple → orange → orange/blue
+   * Direction: Never reversed. Never on product UI.
+   * Never over photography.
+   * ───────────────────────────────────────── */
+
+  /* Variation A (Page 39) — Red/Purple + Orange + Orange */
+  --refracted-layer-01-a: #B83232;    /* Layer 01 · Red/Purple radial     */
+  --refracted-layer-02-a: #CB754F;    /* Layer 02 · Orange radial         */
+  --refracted-layer-03-a: #D76F3F;    /* Layer 03 · Orange radial         */
+
+  /* Variation B (Page 40) — Orange + Orange + Blue */
+  --refracted-layer-01-b: #E8641A;    /* Layer 01 · Orange radial         */
+  --refracted-layer-02-b: #D76F3F;    /* Layer 02 · Orange radial         */
+  --refracted-layer-03-b: #75ABF5;    /* Layer 03 · Blue radial           */
+
+  /* Opacity ramp for refracted light layers */
+  --refracted-opacity-standard: 0.60; /* Standard · 55–65%                */
+  --refracted-opacity-whisper:  0.16; /* Whisper  · 14–18%                */
+  --refracted-opacity-intense:  0.88; /* Intense  · 85–92%                */
+
+  /* Full CSS radial gradient — Variation A (dark pages/covers) */
+  --gradient-refracted-a:
+    radial-gradient(ellipse 60% 80% at 90% 10%, rgba(203, 100, 30, 0.75) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 70% at 80% 60%, rgba(184, 50, 50, 0.55) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 90% at 100% 80%, rgba(215, 111, 63, 0.60) 0%, transparent 60%);
+
+  /* Full CSS radial gradient — Variation B (blue-orange blend) */
+  --gradient-refracted-b:
+    radial-gradient(ellipse 60% 80% at 20% 80%, rgba(232, 100, 26, 0.80) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 70% at 70% 20%, rgba(117, 171, 245, 0.65) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 60% at 50% 50%, rgba(215, 111, 63, 0.50) 0%, transparent 50%);
+
+
+  /* ─────────────────────────────────────────
+   * TYPOGRAPHY
+   * Source: Page 22 · Typography | Specimen
+   *         Page 23 · Typography | Type Scale
+   * ───────────────────────────────────────── */
+
+  /* Font families */
+  --font-primary:   'Inter', sans-serif;           /* UI & Headlines · weights 300/400/600/700/800 */
+  --font-secondary: 'IBM Plex Sans', sans-serif;   /* Body & UI · weights 400/500/600              */
+  --font-editorial: 'Lora', serif;                 /* Editorial only · 400, italic                 */
+
+  /* Type scale — size */
+  --text-size-h1:      32px;
+  --text-size-h2:      24px;
+  --text-size-h3:      18px;
+  --text-size-body:    14px;
+  --text-size-label:   14px;
+  --text-size-caption: 12px;
+  --text-size-meta:    11px;
+
+  /* Type scale — weight */
+  --text-weight-h1:      800;
+  --text-weight-h2:      800;
+  --text-weight-h3:      600;
+  --text-weight-body:    400;
+  --text-weight-label:   600;
+  --text-weight-caption: 400;
+  --text-weight-meta:    400;
+
+  /* Type scale — line height */
+  --text-lh-h1:      110%;
+  --text-lh-h2:      110%;
+  --text-lh-h3:      110%;
+  --text-lh-body:    160%;
+  --text-lh-label:   135%;
+  --text-lh-caption: 135%;
+  --text-lh-meta:    140%;
+
+  /* Type scale — letter spacing */
+  --text-ls-h1:      -0.025em;
+  --text-ls-h2:      -0.020em;
+  --text-ls-h3:      -0.015em;
+  --text-ls-body:     0;
+  --text-ls-label:    0;
+  --text-ls-caption:  0;
+  --text-ls-meta:     0;
+
+
+  /* ─────────────────────────────────────────
+   * SPACING SCALE
+   * Source: Page 27 · System | Spacing
+   * Seven tokens only. No hardcoded px values.
+   * ───────────────────────────────────────── */
+
+  --spacing-1: 4px;    /* Icon-to-text gap                     */
+  --spacing-2: 8px;    /* Base unit · button vertical padding  */
+  --spacing-3: 12px;   /* Form field padding                   */
+  --spacing-4: 16px;   /* Card padding (default)               */
+  --spacing-5: 24px;   /* Form group gaps                      */
+  --spacing-6: 32px;   /* Section breaks                       */
+  --spacing-7: 48px;   /* Page & layout margins                */
+
+  /* Compound spacing references */
+  /* Button Medium height  = spacing-3 H + spacing-2 V = 40px  */
+  /* Card padding          = spacing-4 all sides       = 16px  */
+  /* Form group gap        = spacing-5 between         = 24px  */
+
+
+  /* ─────────────────────────────────────────
+   * BORDER RADIUS
+   * Source: Page 28 · System | Radius & Shadow
+   * Two tokens only. No radius-lg.
+   * ───────────────────────────────────────── */
+
+  --radius-sm: 4px;    /* Inputs · small buttons · badges      */
+  --radius-md: 8px;    /* Cards · modals · large buttons       */
+
+
+  /* ─────────────────────────────────────────
+   * SHADOWS / ELEVATION
+   * Source: Page 28 · System | Radius & Shadow
+   * Two levels only. No E3.
+   * ───────────────────────────────────────── */
+
+  --shadow-e1: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.10);
+  /* E1 Subtle  · Hover lift on interactive elements */
+
+  --shadow-e2: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
+  /* E2 Medium  · Cards & modals at rest             */
+
+
+  /* ─────────────────────────────────────────
+   * MOTION — EASING CURVES
+   * Source: Page 30 · System | Motion
+   * ───────────────────────────────────────── */
+
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);  /* Default transition           */
+  --ease-enter:    cubic-bezier(0.0, 0, 0.2, 1);  /* Elements entering the screen */
+  --ease-exit:     cubic-bezier(0.4, 0, 1.0, 1);  /* Elements leaving the screen  */
+  --ease-linear:   linear;                         /* Progress bars, loaders       */
+
+
+  /* ─────────────────────────────────────────
+   * MOTION — DURATION SCALE
+   * Source: Page 30 · System | Motion
+   * Never exceed 500ms. Default is 200ms.
+   * ───────────────────────────────────────── */
+
+  --duration-micro:      80ms;   /* Icon · badge                 */
+  --duration-fast:      120ms;   /* Hover · toggle               */
+  --duration-standard:  200ms;   /* Default                      */
+  --duration-deliberate: 280ms;  /* Modal · sheet                */
+  --duration-expressive: 380ms;  /* Achievement                  */
+  --duration-max:        500ms;  /* Hard ceiling — never exceed  */
+
+}
