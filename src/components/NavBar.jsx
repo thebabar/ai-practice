@@ -1,10 +1,36 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { SignedIn, SignedOut, UserButton } from '@clerk/clerk-react'
+import { SunIcon, MoonIcon } from '@phosphor-icons/react'
 import { useApiKey } from '../hooks/useApiKey.js'
 import ApiKeyModal from './ApiKeyModal.jsx'
 
 const CLERK_ENABLED = Boolean(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY)
+const THEME_STORAGE_KEY = 'ai-visual-lab-theme'
+
+function resolveInitialTheme() {
+  if (typeof window === 'undefined') return 'light'
+  try {
+    const stored = localStorage.getItem(THEME_STORAGE_KEY)
+    if (stored === 'light' || stored === 'dark') return stored
+  } catch { /* ignore */ }
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+}
+
+function useTheme() {
+  const [theme, setTheme] = useState(() => {
+    const initial = resolveInitialTheme()
+    if (typeof document !== 'undefined') document.documentElement.dataset.theme = initial
+    return initial
+  })
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    try { localStorage.setItem(THEME_STORAGE_KEY, theme) } catch { /* ignore */ }
+  }, [theme])
+
+  return [theme, () => setTheme(t => (t === 'dark' ? 'light' : 'dark'))]
+}
 
 function KeyIcon() {
   return (
@@ -116,6 +142,22 @@ const navStyle = `
     background: #34d399;
     box-shadow: 0 0 0 2px #050810, 0 0 6px rgba(52,211,153,0.6);
   }
+
+  .nav-themebtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid #1e3048;
+    border-radius: 6px;
+    color: #7a9bbf;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .nav-themebtn:hover { border-color: #94a3b8; color: #e2e8f0; }
 `
 
 export default function NavBar({ title }) {
@@ -124,6 +166,7 @@ export default function NavBar({ title }) {
   const isGlossary = location.pathname === '/glossary'
   const { hasKey } = useApiKey()
   const [keyModalOpen, setKeyModalOpen] = useState(false)
+  const [theme, toggleTheme] = useTheme()
 
   return (
     <>
@@ -150,6 +193,17 @@ export default function NavBar({ title }) {
               </SignedIn>
             </>
           )}
+          <button
+            type="button"
+            className="nav-themebtn"
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+            title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+          >
+            {theme === 'dark'
+              ? <SunIcon size={16} weight="duotone" />
+              : <MoonIcon size={16} weight="duotone" />}
+          </button>
           <button
             type="button"
             className="nav-keybtn"

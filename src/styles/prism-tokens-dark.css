@@ -1,0 +1,60 @@
+/*
+ * ═══════════════════════════════════════════════════════
+ *  PRISM · TOKENS · DARK MODE LAYER
+ *  Activated by document.documentElement.dataset.theme = 'dark'.
+ *
+ *  Overrides only the MODE-DEPENDENT tokens per §3A.1:
+ *    surfaces · text · borders · signal soft-bg / callout-fill.
+ *  Shared tokens (type, spacing, radius, shadow, motion, focus,
+ *  signal-500 hexes) stay on :root and apply to both modes.
+ *
+ *  See visual-ai-themes.md §3A for the full rationale.
+ * ═══════════════════════════════════════════════════════
+ */
+
+:root[data-theme="dark"] {
+
+  /* ── Surfaces · obsidian + charcoal lift ramp ─────────── */
+  --surface-base: #1A1714;
+  --surface-1:    #221E1A;
+  --surface-2:    #2B2622;
+  --surface-3:    #353029;
+
+  /* ── Text · warm-white → muted warm grays ─────────────── */
+  --text-primary:   #F7F4F1;
+  --text-secondary: #C7BDB2;
+  --text-tertiary:  #9C9085;
+
+  /* ── Borders · darker so they read against surfaces ───── */
+  --border-default: #3A332D;
+  --border-strong:  #4D453D;
+
+  /* ── Signal soft-bg / callout-fill ─────────────────────
+   * The pale 50/100 tints don't read on dark. Replace with
+   * low-opacity overlays of the 500 (§3A.2).
+   */
+  --orange-50:  rgba(232, 100, 26, 0.12);
+  --orange-100: rgba(232, 100, 26, 0.20);
+  --blue-50:    rgba(59, 125, 216, 0.12);
+  --blue-100:   rgba(59, 125, 216, 0.20);
+  --purple-50:  rgba(124, 58, 237, 0.12);
+  --purple-100: rgba(124, 58, 237, 0.20);
+
+  /* Card gradients re-derive from the inverted 50/100 */
+  --gradient-card-orange: linear-gradient(180deg, rgba(232,100,26,0.12) 0%, rgba(232,100,26,0.20) 100%);
+  --gradient-card-blue:   linear-gradient(180deg, rgba(59,125,216,0.12) 0%, rgba(59,125,216,0.20) 100%);
+  --gradient-card-purple: linear-gradient(180deg, rgba(124,58,237,0.12) 0%, rgba(124,58,237,0.20) 100%);
+}
+
+/*
+ * Component-author guidance (not a token override):
+ *   - For accent TEXT or BORDERS on dark, prefer the lighter
+ *     300 tints (--blue-300, --orange-300, --purple-300) when
+ *     contrast against obsidian is borderline.
+ *   - Solid button fills stay on the 500s — full saturation reads.
+ *   - Refracted light + frosted glass already assume dark. In a
+ *     dark hero, skip the obsidian block and lay
+ *     --gradient-refracted-a/b directly on --surface-base.
+ *   - Feedback colours (success/error/warning/info) are bright
+ *     enough to hold on dark — verify per-screen, don't assume.
+ */

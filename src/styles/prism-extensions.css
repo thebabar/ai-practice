@@ -4,11 +4,132 @@
  *  Sanctioned departures from Prism (§2 of visual-ai-themes.md).
  *  Loads AFTER prism-tokens.css and prism-components.css so the
  *  Prism files stay pristine and all deviations live in one place.
- *
- *  This file is a scaffold. The three planned deviations land
- *  here in later phases:
- *    1) IBM Plex Mono utility class — code / tokens / numeric only.
- *    2) Range slider — tokens-driven; fill = semantic signal.
- *    3) Tab bar — ghost-button row; active = obsidian fill.
  * ═══════════════════════════════════════════════════════
  */
+
+/* ── §2.1 IBM Plex Mono — code / tokens / numeric ONLY ───────
+ * Prism ships no mono. The lab needs one for tokenizer cells,
+ * vectors, cost displays. Never for body or headings.
+ */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+.prism-mono {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── §2.2 Range slider — Prism has no slider primitive ────────
+ * Track: --border-default · Fill: semantic signal · Thumb: --surface-1
+ * with --shadow-e1 lift · Focus ring: --color-focus-ring.
+ * Defaults to blue (structured). Add --orange / --purple variant
+ * classes to retint per the page's semantic meaning.
+ */
+.prism-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 24px;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+}
+.prism-slider:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.prism-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  background: var(--border-default);
+  border-radius: 2px;
+}
+.prism-slider::-moz-range-track {
+  height: 4px;
+  background: var(--border-default);
+  border-radius: 2px;
+}
+/* Firefox shows fill via ::-moz-range-progress. WebKit has no
+ * equivalent — pages that need a visible fill should layer a
+ * linear-gradient on the track from a JS-managed CSS variable. */
+.prism-slider::-moz-range-progress {
+  height: 4px;
+  background: var(--blue-500);
+  border-radius: 2px;
+}
+
+.prism-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--surface-1);
+  border: 2px solid var(--blue-500);
+  box-shadow: var(--shadow-e1);
+  margin-top: -6px;
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+.prism-slider::-webkit-slider-thumb:hover { transform: scale(1.1); }
+
+.prism-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--surface-1);
+  border: 2px solid var(--blue-500);
+  box-shadow: var(--shadow-e1);
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+.prism-slider::-moz-range-thumb:hover { transform: scale(1.1); }
+
+.prism-slider:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.prism-slider--orange::-webkit-slider-thumb { border-color: var(--orange-500); }
+.prism-slider--orange::-moz-range-thumb     { border-color: var(--orange-500); }
+.prism-slider--orange::-moz-range-progress  { background:   var(--orange-500); }
+.prism-slider--purple::-webkit-slider-thumb { border-color: var(--purple-500); }
+.prism-slider--purple::-moz-range-thumb     { border-color: var(--purple-500); }
+.prism-slider--purple::-moz-range-progress  { background:   var(--purple-500); }
+
+/* ── §2.3 Tab bar — Prism has nav but no tabs ────────────────
+ * Row of ghost buttons. Active tab = obsidian fill + warm-white
+ * text (mirrors .nav__item.is-active). Sentence case — no UPPER.
+ */
+.prism-tabs {
+  display: inline-flex;
+  gap: var(--spacing-1);
+  padding: var(--spacing-1);
+  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+}
+
+.prism-tab {
+  height: 32px;
+  padding: 0 var(--spacing-3);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font: var(--text-weight-label) var(--text-size-label)/1 var(--font-primary);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color var(--duration-fast) var(--ease-standard),
+              color var(--duration-fast) var(--ease-standard);
+}
+.prism-tab:hover { background: var(--surface-2); }
+.prism-tab[aria-selected="true"],
+.prism-tab.is-active {
+  background: var(--text-primary);
+  color: var(--surface-base);
+}
+.prism-tab:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
