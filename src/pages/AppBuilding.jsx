@@ -1702,7 +1702,7 @@ const DEMO_BY_ID = {
    the page. */
 function Module3DiagramA() {
   return (
-    <figure style={{ width: '100%', margin: 'var(--spacing-5) 0' }}>
+    <figure style={{ width: '100%', maxWidth: '680px', margin: 'var(--spacing-5) auto' }}>
       <svg viewBox="0 0 680 448" role="img" width="100%"
            aria-label="Anatomy of a screen: a Page contains Sections, which contain Components">
         <rect className="dg-page" x="40" y="44" width="600" height="356" rx="16" />
@@ -1743,7 +1743,7 @@ function Module3DiagramA() {
 
 function Module3DiagramB() {
   return (
-    <figure style={{ width: '100%', margin: 'var(--spacing-5) 0' }}>
+    <figure style={{ width: '100%', maxWidth: '680px', margin: 'var(--spacing-5) auto' }}>
       <svg viewBox="0 0 680 232" role="img" width="100%"
            aria-label="Every app is three boxes: Input, then Logic, then Output">
         <defs>
