@@ -4,7 +4,7 @@ import {
   GraduationCapIcon, ChartScatterIcon, ThermometerSimpleIcon, LinkedinLogoIcon,
   HashIcon, RobotIcon, BrainIcon, PuzzlePieceIcon, PaletteIcon,
   BooksIcon, FlowArrowIcon, LightningIcon, PresentationChartIcon,
-  GraphIcon, BookOpenIcon, ArrowRightIcon, ShieldCheckIcon,
+  GraphIcon, BookOpenIcon, ArrowRightIcon, ShieldCheckIcon, RocketLaunchIcon,
 } from '@phosphor-icons/react'
 import NavBar from '../components/NavBar.jsx'
 
@@ -325,6 +325,7 @@ const ICON_MAP = {
   'vector-embeddings':    ChartScatterIcon,
   'glossary':             BookOpenIcon,
   'ai-risk-governance':   ShieldCheckIcon,
+  'app-building':         RocketLaunchIcon,
 }
 
 // Category metadata — used by section headers and the view-mode toggle.
@@ -341,6 +342,7 @@ const CATEGORY_FILTER_KEY = 'home-category-filter'
 // Card data — no per-card palette. Differentiation is icon + tag.
 const VISUALIZATIONS = [
   { path: '/learn-claude',         category: 'learning-resources', tag: 'Learn Claude',     title: 'Claude learning resources',          desc: 'Curated official and community resources for learning Claude — a guided path for your level.',                                pills: ['Beginner', 'Intermediate', 'Developer'],                                                ready: true },
+  { path: '/app-building',         category: 'learning-resources', tag: 'Learn app building', title: 'AI app and web building',          desc: 'From idea to live URL — learn to specify software, then build, connect, and ship it without writing the code yourself.',     pills: ['7 modules', '18 lessons', '4.5 hrs', 'No coding required'],                                ready: true },
   { path: '/intro-llms',           category: 'generative-ai',      tag: 'Foundations',      title: 'Introduction to LLMs',               desc: 'Understand how large language models work — from next-token prediction to emergent abilities.',                              pills: ['What is an LLM?', 'How LLMs learn', 'Tokens and context', 'Prompts and responses', 'Limitations'], ready: true },
   { path: '/types-of-llms',        category: 'generative-ai',      tag: 'LLM landscape',    title: 'Types of LLMs',                      desc: 'Compare encoder, decoder, and encoder-decoder architectures, and understand when to use GPT, BERT, T5, and multimodal models.', pills: ['Decoder-only', 'Encoder-only', 'Encoder-decoder', 'Multimodal', 'Model selection'],          ready: true },
   { path: '/image-generation',     category: 'generative-ai',      tag: 'Generative AI',    title: 'Image generation',                   desc: 'See how diffusion models turn text prompts into images — from noise to pixels, CFG scale, samplers, and prompt craft.',          pills: ['Diffusion process', 'Prompt craft', 'CFG scale', 'Samplers', 'Quiz'],                       ready: true },
