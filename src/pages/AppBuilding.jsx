@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useMemo, useState } from 'react'
 import NavBar from '../components/NavBar.jsx'
+import PromptSnippet from '../components/PromptSnippet.jsx'
 import {
   SunIcon, MoonIcon, CheckIcon, XIcon, ArrowRightIcon,
   SparkleIcon, CompassIcon, BrainIcon, WrenchIcon,
@@ -610,6 +611,29 @@ const css = `
   margin: 0 0 var(--spacing-3);
 }
 .ab-footer-meta { color: var(--text-tertiary); font: 400 var(--text-size-caption)/1.4 'Inter', sans-serif; }
+
+/* PromptSnippet — worked-example card used in Module 2. Reads from the
+   page's Prism vars so it flips with the light/dark toggle. */
+.ps-card   { background: var(--surface-3, #F2EDE6); border: 1px solid var(--border-default, #D1C7B8);
+             border-radius: var(--radius-md, 8px); padding: var(--spacing-4, 16px) var(--spacing-5, 24px);
+             margin: var(--spacing-5, 24px) 0; }
+.ps-head   { display: flex; align-items: flex-start; justify-content: space-between;
+             gap: var(--spacing-3, 12px); margin-bottom: var(--spacing-4, 16px); }
+.ps-tag    { display: block; font: 600 11px 'Inter', sans-serif; letter-spacing: .08em;
+             text-transform: uppercase; color: var(--orange-500, #E8641A); }
+.ps-title  { margin: 2px 0 0; font: 700 16px 'Inter', sans-serif; color: var(--text-primary, #1A1714); }
+.ps-copy   { flex: none; font: 600 13px 'Inter', sans-serif; color: var(--text-primary, #1A1714);
+             background: var(--surface-1, #FFFFFF); border: 1px solid var(--border-default, #D1C7B8);
+             border-radius: var(--radius-sm, 4px); padding: 6px 12px; cursor: pointer;
+             transition: border-color .12s, background-color .12s, color .12s; }
+.ps-copy:hover        { border-color: var(--border-strong, #A89E92); background: var(--surface-2, #FDFBF8); }
+.ps-copy:focus-visible{ outline: 3px solid var(--color-focus-ring, rgba(124,58,237,.30)); outline-offset: 2px; }
+.ps-copy.is-copied    { color: var(--color-success, #65E99E); border-color: var(--color-success, #65E99E); }
+.ps-fields { margin: 0; display: flex; flex-direction: column; gap: var(--spacing-3, 12px); }
+.ps-row    { display: grid; grid-template-columns: 64px 1fr; gap: var(--spacing-3, 12px); align-items: baseline; }
+.ps-label  { font: 600 12px 'Inter', sans-serif; letter-spacing: .04em; text-transform: uppercase;
+             color: var(--text-tertiary, #8A7E72); }
+.ps-body   { margin: 0; font: 400 14px/1.55 'IBM Plex Sans', sans-serif; color: var(--text-primary, #1A1714); }
 
 /* Inline-SVG diagram primitives (Module 3) — inherit from page tokens so
    they flip cleanly when the page theme toggles. */
@@ -1697,6 +1721,38 @@ const DEMO_BY_ID = {
   m7: Demo07,
 }
 
+/* Module 2 worked examples — read-only PromptSnippet cards rendered after
+   the 2.2 framework lesson. */
+function Module2WorkedExamples() {
+  return (
+    <div className="ab-block" style={{ margin: 'var(--spacing-5) 0 0' }}>
+      <h3 className="ab-block-title">Worked examples</h3>
+      <PromptSnippet
+        tag="Product Prompt"
+        title="Trip expense splitter"
+        fields={[
+          { label: 'WHO',   body: 'Friends on a shared trip. Anyone can add an expense; one person settles up at the end.' },
+          { label: 'IN',    body: 'Expense entries — who paid, the amount, the currency, what it was for, and who it covers.' },
+          { label: 'OUT',   body: 'A live “who owes whom” summary, per-person totals, and a single end-of-trip settlement.' },
+          { label: 'RULES', body: 'Split each expense evenly across the people it covers. Update every balance on each new entry. The settlement minimizes the number of transfers needed to square up.' },
+          { label: 'EDGE',  body: 'Mixed currencies → convert to one base currency. Someone leaves mid-trip → freeze their balance. Duplicate entry → warn but allow. Zero or negative amount → block.' },
+        ]}
+      />
+      <PromptSnippet
+        tag="Product Prompt"
+        title="Client intake tool"
+        fields={[
+          { label: 'WHO',   body: 'Agency project managers onboarding a new client.' },
+          { label: 'IN',    body: 'Company name, primary contact, budget tier, and project scope (choose one or more).' },
+          { label: 'OUT',   body: 'A saved client record, plus a summary card on the team dashboard.' },
+          { label: 'RULES', body: 'Set the budget tier automatically from the budget range. Require company and contact before saving. Generate a URL slug from the company name.' },
+          { label: 'EDGE',  body: 'Duplicate company name → warn but allow. No scope selected → block submit.' },
+        ]}
+      />
+    </div>
+  )
+}
+
 /* Module 3 inline-SVG diagrams. They read fills/strokes from .ab-page CSS
    variables (.dg-* classes) so a theme toggle flips them with the rest of
    the page. */
@@ -1811,6 +1867,7 @@ function ModulePanel({ module: mod, onBack, completed, onToggleComplete, nextMod
                 <p className="ab-block-lead" style={{ margin: '0 0 var(--spacing-2)' }}>{s.lead}</p>
                 <p className="ab-body" style={{ color: 'var(--text-secondary)', margin: 0 }}>{s.body}</p>
               </div>
+              {mod.id === 'm2' && idx === 1 && <Module2WorkedExamples />}
               {mod.id === 'm3' && idx === 0 && <Module3DiagramA />}
               {mod.id === 'm3' && idx === 1 && <Module3DiagramB />}
             </Fragment>
