@@ -576,15 +576,26 @@ const css = `
 .ab-btn--orange:hover { filter: brightness(1.06); }
 .ab-btn--sm { height: 32px; padding: 0 var(--spacing-3); font-size: var(--text-size-caption); }
 
-/* Complete-toggle */
+/* Complete-toggle + next-module CTA row */
 .ab-complete {
-  display: flex; align-items: center; gap: var(--spacing-3);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--spacing-4); flex-wrap: wrap;
   padding: var(--spacing-3) var(--spacing-4);
   background: var(--surface-2);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
 }
+.ab-complete-toggle { display: flex; align-items: center; gap: var(--spacing-3); }
 .ab-complete-label { font: 600 var(--text-size-label)/1 'Inter', sans-serif; color: var(--text-primary); }
+.ab-next-cta {
+  display: inline-flex; flex-direction: column; align-items: flex-end;
+  gap: var(--spacing-1);
+}
+.ab-next-cta-meta {
+  font: 600 var(--text-size-meta)/1 'Inter', sans-serif;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-tertiary);
+}
 
 /* Footer */
 .ab-footer {
@@ -1674,7 +1685,7 @@ const DEMO_BY_ID = {
   m7: Demo07,
 }
 
-function ModulePanel({ module: mod, onBack, completed, onToggleComplete }) {
+function ModulePanel({ module: mod, onBack, completed, onToggleComplete, nextModule, onGoToModule }) {
   const DemoComponent = DEMO_BY_ID[mod.id]
   return (
     <div className="ab-panel">
@@ -1730,18 +1741,39 @@ function ModulePanel({ module: mod, onBack, completed, onToggleComplete }) {
         <Quiz quiz={mod.quiz} />
       </div>
 
-      {/* Complete toggle */}
+      {/* Complete toggle + next-module CTA */}
       <div className="ab-complete">
-        <input
-          id={`complete-${mod.id}`}
-          type="checkbox"
-          checked={completed}
-          onChange={() => onToggleComplete(mod.id)}
-          style={{ width: 18, height: 18, accentColor: 'var(--orange-500)' }}
-        />
-        <label htmlFor={`complete-${mod.id}`} className="ab-complete-label">
-          {completed ? 'Module marked complete' : 'Mark module complete'}
-        </label>
+        <div className="ab-complete-toggle">
+          <input
+            id={`complete-${mod.id}`}
+            type="checkbox"
+            checked={completed}
+            onChange={() => onToggleComplete(mod.id)}
+            style={{ width: 18, height: 18, accentColor: 'var(--orange-500)' }}
+          />
+          <label htmlFor={`complete-${mod.id}`} className="ab-complete-label">
+            {completed ? 'Module marked complete' : 'Mark module complete'}
+          </label>
+        </div>
+        {nextModule ? (
+          <div className="ab-next-cta">
+            <span className="ab-next-cta-meta">Up next · Module {nextModule.num}</span>
+            <button
+              type="button"
+              className="ab-btn ab-btn--orange"
+              onClick={() => onGoToModule(nextModule.id)}
+            >
+              {nextModule.title} <ArrowRightIcon size={16} weight="bold" />
+            </button>
+          </div>
+        ) : (
+          <div className="ab-next-cta">
+            <span className="ab-next-cta-meta">You finished the last module</span>
+            <button type="button" className="ab-btn ab-btn--ghost" onClick={onBack}>
+              Back to all modules <ArrowRightIcon size={16} weight="bold" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -1847,6 +1879,11 @@ export default function AppBuilding() {
             onBack={() => setActiveModuleId(null)}
             completed={completed.includes(activeModule.id)}
             onToggleComplete={toggleComplete}
+            nextModule={MODULES[MODULES.findIndex(m => m.id === activeModule.id) + 1] || null}
+            onGoToModule={(id) => {
+              setActiveModuleId(id)
+              if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
+            }}
           />
         )}
       </div>
