@@ -1,173 +1,190 @@
 # AI Visual Lab — Claude Code Context
 
-> Design system rules live in `visual-ai-themes.md` — read it before any styling work.
-> Token + component reference: `prism-design-system.md` and `src/styles/prism-tokens.css`.
+> **Styling is governed by the Prism design system. Read these before any styling work:**
+> - `prism-design-system.md` — the rules (what colour goes where, component states, what's forbidden).
+> - `visual-ai-themes.md` — the migration plan: §2 sanctioned Prism deviations, §3A dark-mode rationale, §10 voice, §12 guardrails.
+> - `src/styles/prism-tokens.css` — light tokens (source of truth). `prism-tokens-dark.css` — dark overrides.
+> - `src/styles/prism-components.css` / `prism-extensions.css` — ready-made classes; use these instead of restating styles per page.
+>
+> **Never hardcode hex or px — reference the tokens.**
 
-## What This Project Is
-A collection of interactive AI learning visualizations built with React + Vite,
-deployed on Vercel at https://aibitbybot.vercel.app
-GitHub repo: https://github.com/thebabar/ai-practice
+## What this project is
+A collection of interactive AI learning visualizations built with React + Vite.
+- **Live:** https://aibitbybot.vercel.app
+- **Repo:** https://github.com/thebabar/ai-practice
 
 ---
 
 ## Commands
 ```bash
-npm install       # install dependencies
-npm run dev       # start local dev server at http://localhost:5173
-npm run build     # production build (runs before Vercel deploy)
-npm run preview   # preview production build locally
+npm install     # install dependencies
+npm run dev     # local dev server → http://localhost:5173
+npm run build   # production build (runs before every Vercel deploy)
+npm run preview # preview the production build locally
 ```
+There is **no test runner, linter, or Storybook** — these four scripts are the whole toolchain.
+Node version is not pinned; use an active LTS.
 
 ## Deploy
 ```bash
-git add .
-git commit -m "your message"
-git push origin main
-# Vercel auto-deploys within ~60 seconds of push
+git add . && git commit -m "your message" && git push origin main
+# Vercel auto-deploys within ~60s of a push to main
 ```
 
 ---
 
-## Project Structure
+## Project structure
 ```
 ai-practice/
-├── CLAUDE.md                          ← you are here
-├── index.html                         ← HTML shell, do not modify
-├── package.json                       ← dependencies: react, react-dom, react-router-dom, vite
-├── vite.config.js                     ← Vite + React plugin config, do not modify
-├── public/
-│   └── favicon.svg                    ← site favicon
+├── CLAUDE.md                      ← you are here
+├── index.html                     ← HTML shell · do not modify
+├── package.json
+├── vite.config.js                 ← Vite + React plugin · do not modify
+├── api/                            ← Vercel serverless functions (auth + chat)
+│   ├── chat-pro.js                 ← project-key chat endpoint
+│   ├── chat-user.js                ← bring-your-own-key chat endpoint
+│   ├── verify-key.js               ← API-key validation
+│   └── _lib/anthropic-stream.js    ← shared streaming helper
 └── src/
-    ├── main.jsx                       ← React entry point, do not modify
-    ├── index.css                      ← global reset only, do not modify
-    ├── App.jsx                        ← React Router — add new routes here
+    ├── main.jsx                   ← React entry point + loads Prism CSS + mounts analytics · do not modify
+    ├── index.css                  ← global reset only · do not modify
+    ├── App.jsx                    ← React Router — add new routes here
+    ├── styles/
+    │   ├── prism-tokens.css        ← light theme tokens (source of truth)
+    │   ├── prism-tokens-dark.css   ← dark overrides · :root[data-theme="dark"]
+    │   ├── prism-components.css     ← .btn .card .badge .input .nav .modal .prism-h1/h2/h3 .prism-body/label/caption/meta
+    │   └── prism-extensions.css     ← sanctioned departures: .prism-mono (IBM Plex Mono), .prism-slider, .prism-tabs/.prism-tab
+    ├── hooks/                      ← useApiKey, useAuth, useChat
     ├── components/
-    │   └── NavBar.jsx                 ← shared nav bar used by all pages
-    └── pages/
-        ├── Home.jsx                   ← landing page with all visualization cards
-        ├── TokenOptimization.jsx      ← Visualization 1: Token Optimization
-        ├── AgentsTools.jsx            ← Visualization 2: Agents, Tools & Context
-        ├── VectorEmbeddings.jsx       ← Visualization 3: Vector Embeddings
-        └── TemperatureSampling.jsx    ← Visualization 4: Temperature & Sampling
+    │   ├── NavBar.jsx              ← shared nav · owns the GLOBAL theme toggle (see Theming)
+    │   ├── ApiKeyModal.jsx          ← BYO-key entry modal
+    │   └── PromptSnippet.jsx        ← copyable prompt block
+    └── pages/                      ← one file per visualization
 ```
+The `pages/` directory grows often. **Don't trust a hardcoded list — run `git ls-files src/pages`
+for the current set** (~22 files today: ~20 visualizations + the two Clerk auth pages).
 
 ---
 
-## How to Add a New Visualization (3 steps)
+## Routes (`src/App.jsx`)
 
-### Step 1 — Create the page file
-Create `src/pages/YourTopic.jsx`. Copy the structure from an existing page like
-`AgentsTools.jsx`. Key things every page needs:
-- `import NavBar from '../components/NavBar.jsx'` at the top
-- `<NavBar />` as first element inside the root div
-- Same font imports (IBM Plex Sans + IBM Plex Mono)
-- Tab-based navigation using the same `.ts-tab` / `.ag-tab` pattern
-- A quiz section as the last tab
+Most routes are a plain `path` → `Component` mapping you can read straight from `App.jsx`.
+Only the rows below carry a rule the file won't make obvious:
 
-### Step 2 — Register the route
-In `src/App.jsx`, add:
-```jsx
-import YourTopic from './pages/YourTopic.jsx'
-// inside <Routes>:
-<Route path="/your-topic" element={<YourTopic />} />
-```
+| Path | Component | Why it's noted |
+|------|-----------|----------------|
+| `/learn-claude` | `Resources` | path ≠ component name |
+| `/use-case-builder` | `UseCaseBuilderGate` | path ≠ component name; this is the **one page that gates on Clerk** |
+| `/use-case-builder/verify` | `UseCaseBuilderVerify` | paired verify step |
+| `/sign-in/*`, `/sign-up/*` | `SignInPage`, `SignUpPage` | **only mounted when `VITE_CLERK_PUBLISHABLE_KEY` is set** |
 
-### Step 3 — Add card to home page
-In `src/pages/Home.jsx`, find the `VISUALIZATIONS` array and either:
-- Change an existing card from `ready: false` to `ready: true`
-- Or add a new entry with `ready: true`
+**Clerk wrapping:** when `VITE_CLERK_PUBLISHABLE_KEY` is set, all routes are wrapped in
+`<ClerkProvider>` (router push/replace plumbed through `useNavigate`). When the env var is absent,
+Clerk is skipped entirely and every non-auth route still works (one `console.info` on boot).
 
-Card fields required: `path`, `icon` (null for SVG icons), `tag`, `title`, `desc`, `pills`, `accent`, `accentDim`, `iconBg`, `glow`, `glowColor`, `ready`
+**Auth tiers:** Default = **Tier 1** — no LLM, no API key, no Clerk gating (runs under plain `npm run dev`).
+Only `/use-case-builder` opts into Clerk. Build new pages as Tier 1 unless a spec explicitly says otherwise
+(recent pages like `/ai-risk-governance` and `/app-building` are deliberately Tier 1).
 
 ---
 
-## Design System
+## Dependencies (and which page needs them)
+| Package | Used by |
+|---------|---------|
+| `react`, `react-dom`, `react-router-dom` | everything |
+| `@phosphor-icons/react` (v2) | **all icons** — see Icons below |
+| `recharts` | chart-driven pages (Temperature & Sampling, Board Briefing, etc.) |
+| `@xyflow/react` | Workflow Canvas (node graph) |
+| `@clerk/clerk-react`, `@clerk/backend` | auth + the use-case-builder gate (optional at runtime) |
+| `@vercel/analytics` | mounted app-wide from `src/main.jsx` |
 
-### Fonts
-- **Headings / titles:** `IBM Plex Sans` (700–800 weight)
-- **Body / UI / labels:** `IBM Plex Sans` (400–500 weight)
-- **Code / tokens / monospace elements:** `IBM Plex Mono` (400–500 weight)
-- **Base font size:** 16px (never go below 12px for any visible text)
-- Google Fonts import URL:
-  `https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap`
-
-### Colors (dark theme, background #050810)
-Each visualization has a unique accent color:
-- Token Optimization: `#38bdf8` (blue)
-- Agents & Tools: `#34d399` (green)
-- Vector Embeddings: `#f97316` (orange)
-- Temperature & Sampling: `#ec4899` (pink)
-- Neural Networks (upcoming): `#818cf8` (purple)
-
-### Card Icons
-- Token Optimization and Agents use custom inline SVG components (`TokenIcon`, `AgentLoopIcon`)
-  defined directly in `Home.jsx` — not emojis
-- New visualizations should also use custom SVGs for distinctiveness
-- Icon size in card: 28–32px within a 52×52px container
-
-### Layout rules
-- Max content width: 920px (panels), 1100px (home grid)
-- All pages: dark background `#050810`, no light mode
-- Cards: `background: #0a080e` or similar dark surface, border `1px solid`
-- Border radius: 14px for cards, 8px for inputs/buttons, 6px for tags
+Clerk is a hard dependency but **optional at runtime** (env-var gated). Don't assume it's active.
 
 ---
 
-## Visualization Structure Pattern
-Every page follows this consistent pattern:
+## Theming — TWO independent systems (read this before touching theme code)
 
+Both write a `data-theme` attribute and both default to **light** — but on **different elements**,
+with **separate storage keys**, and they do **not** share state. A DOM like
+`<html data-theme="light"> … <div class="ab-page" data-theme="dark">` is valid and intentional.
+
+### System 1 — Global theme · the DEFAULT for every page
+- Lives in `src/components/NavBar.jsx` (`useTheme()` → `[theme, toggle]`; sun/moon button).
+- Storage key `ai-visual-lab-theme`; writes `document.documentElement.dataset.theme` (`<html data-theme="…">`).
+- Activates `:root[data-theme="dark"]` in `prism-tokens-dark.css`, swapping surfaces/text/borders/signal-fills document-wide.
+- **Every new page should ride this** — draw from Prism tokens and the global toggle handles dark mode for free. Do nothing extra.
+
+### System 2 — Page-scoped theme · the EXCEPTION (only `/app-building`)
+- Lives inside `src/pages/AppBuilding.jsx`. Storage key `app-building-theme`; sets `data-theme` on the page's own `<div class="ab-page">`, **not** the document root.
+- A `.ab-page[data-theme="dark"]` block in that page's inline `<style>` overrides the same token names, scoped to the wrapper (custom properties inherit down the cascade).
+- **Exists only because that page's spec needs theme isolation below the NavBar.** Do **not** copy this into new pages unless a spec explicitly calls for chrome-isolated theming — reach for System 1 instead.
+
+**NavBar is not Prism-migrated.** It keeps its own hardcoded inline `<style>` with IBM Plex dark colours and stays dark in **both** themes. A new light-mode page will sit under a dark nav bar — that's expected, not a bug. Don't assume the NavBar adapts to your page background.
+
+Neither system reads `prefers-color-scheme` (the old OS-preference branch was removed). The two selectors never collide because each overrides only its own scope.
+
+---
+
+## Icons — Phosphor, not custom SVG
+Use `@phosphor-icons/react` v2: `Icon`-suffixed names (e.g. `RocketLaunchIcon`), `duotone` weight by default.
+If a name doesn't resolve, fall back to the nearest existing Phosphor name — **never leave a broken import.**
+> The old `TokenIcon` / `AgentLoopIcon` inline-SVG convention was retired in the Prism migration. Don't reintroduce it.
+
+---
+
+## Visualization page pattern
+Every page follows the same shape:
 ```
-Hero section (title + subtitle)
+Hero (title + subtitle)
 Tab bar (5–6 tabs)
-  Tab 1: Core concept explanation + interactive demo
-  Tab 2: Deep dive / visual explorer
-  Tab 3: Comparative / interactive tool
-  Tab 4: Real-world application
-  Tab 5: (optional) Advanced topic
-  Last tab: Quiz (always 4 questions with explanations)
+  Tab 1: core concept + interactive demo
+  Tab 2: deep dive / visual explorer
+  Tab 3: comparative or interactive tool
+  Tab 4: real-world application
+  Tab 5: (optional) advanced topic
+  Last tab: a knowledge check
 ```
+Every visualization ends with a knowledge check; **question count varies** (often 4, but e.g. AI Risk & Governance has 5,
+and App Building runs a 4-question quiz per module rather than one trailing tab).
+Pull type and components from the Prism CSS (don't restate font stacks per page). Voice follows Prism:
+sentence case, second person, outcome-first, no exclamation marks, no "click here."
 
 ---
 
-## Live Visualizations
-| # | Title | Path | Accent |
-|---|-------|------|--------|
-| 1 | Token Optimization | `/token-optimization` | `#38bdf8` |
-| 2 | Agents, Tools & Context | `/agents-tools` | `#34d399` |
-| 3 | Vector Embeddings | `/vector-embeddings` | `#f97316` |
-| 4 | Temperature & Sampling | `/temperature-sampling` | `#ec4899` |
+## Add a new visualization
+1. Create `src/pages/YourTopic.jsx` (default export `YourTopic`). Copy structure from a recent page; import and render `<NavBar />` as the first element.
+2. Register the route in `src/App.jsx`: `<Route path="/your-topic" element={<YourTopic />} />`.
+3. Add a card in `src/pages/Home.jsx` — find the `VISUALIZATIONS` array and add an entry with this exact shape:
+   ```js
+   { path, category, tag, title, desc, pills, ready }
+   ```
+   - `category` must be one of: `learning-resources` | `hands-on-practice` | `agents` | `generative-ai` | `how-tech-works`.
+     Home groups by category and filters via a chip row — **a card with a missing/invalid category renders in no section.**
+   - The `ICON_MAP` key is the `path` with the leading `/` stripped; point it at a Phosphor icon.
+   - There is **no `accent` field** anymore — it was retired in the Prism migration. Don't add one.
+4. `npm run build` to verify no errors.
+5. `git add . && git commit -m "add [topic] visualization" && git push origin main`.
 
-## Planned (Coming Soon cards on Home page)
-- Neural Networks (`#818cf8`)
-
----
-
-## Common Tasks for Claude Code
-
-### Add a new visualization from a .jsx file I provide
-1. Copy the file to `src/pages/`
-2. Add the import and route to `src/App.jsx`
-3. Update the matching card in `src/pages/Home.jsx` — set `ready: true`, update `path` and `pills`
-4. Run `npm run build` to verify no errors
-5. `git add . && git commit -m "add [topic] visualization" && git push origin main`
-
-### Update fonts or sizing across all pages
-Edit each file in `src/pages/` plus `src/components/NavBar.jsx`.
-The font import `@import url(...)` is inside the CSS template literal at the top of each file.
-
-### Fix a build error
-Run `npm run build` and read the error. Most common issues:
-- JSX inside module-level objects (must be inside component functions)
-- Missing imports
-- Mismatched variable names between VISUALIZATIONS array and render code
-
-### Check what's live
-Visit https://aibitbybot.vercel.app or check
-https://vercel.com for deployment status.
+**Most common build errors:** JSX inside a module-level object (move it into the component), a missing import, or a name mismatch between the `VISUALIZATIONS` array and the render code.
 
 ---
 
-## Git Credentials
-Remote: `https://github.com/thebabar/ai-practice.git`
-Auth: Personal access token (fine-grained, Contents read/write)
-If push fails with auth error: `git remote set-url origin https://thebabar:TOKEN@github.com/thebabar/ai-practice.git`
+## Known localStorage keys
+| Key | Owner / purpose |
+|-----|-----------------|
+| `ai-visual-lab-theme` | global theme (NavBar) |
+| `app-building-theme` | page theme (AppBuilding only) |
+| `app-building-progress` | App Building module complete-toggles |
+| `home-category-filter` | Home chip-filter selection |
+| `claude-resources-progress` | Resources (learn-claude) track progress |
+
+---
+
+## Git
+Remote: `https://github.com/thebabar/ai-practice.git` · Auth: fine-grained PAT (Contents read/write).
+On auth failure: `git remote set-url origin https://thebabar:TOKEN@github.com/thebabar/ai-practice.git`
+(this writes the token into `.git/config` in plaintext — fine for solo use, just be aware).
+
+Commits here are authored under **this repo's local git config**, which differs from the Prism project's
+identity. If you co-edit both repos in one session, check `git config user.email` before committing so
+commits don't land under the wrong author.
