@@ -335,7 +335,7 @@ const ICON_MAP = {
 
 // Category metadata — used by section headers and the view-mode toggle.
 const CATEGORIES = [
-  { id: 'learning-resources', label: 'Learning Resources',        description: 'Where to start — curated courses and videos.' },
+  { id: 'learning-resources', label: 'Learning Resources',        description: 'Tutorials and guides on popular tools. Includes curated courses and videos among other resources.' },
   { id: 'hands-on-practice',  label: 'Hands-on Practice',          description: 'Apply AI to a real task and produce something usable.' },
   { id: 'agents',             label: 'Agents',                     description: 'Building systems that act.' },
   { id: 'generative-ai',      label: 'Generative AI',              description: 'How models produce output.' },
