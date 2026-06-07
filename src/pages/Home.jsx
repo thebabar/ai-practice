@@ -253,48 +253,41 @@ const css = `
 }
 .gl-utility-link:hover .gl-utility-arrow { transform: translateX(3px); }
 
-/* View-mode toggle — segmented control, on-theme */
-.view-toggle-wrap {
+/* Category filter chips */
+.cat-filter-wrap {
   max-width: 1100px;
   margin: 0 auto;
   padding: var(--spacing-3) var(--spacing-4) var(--spacing-5);
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--spacing-2);
+  justify-content: center;
 }
-.view-toggle {
+.cat-filter {
   display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+  justify-content: center;
+}
+.cat-filter-chip {
+  height: 32px;
+  padding: 0 var(--spacing-3);
+  display: inline-flex;
+  align-items: center;
   background: var(--surface-1);
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  padding: 4px;
-  gap: 2px;
-}
-.view-toggle-btn {
-  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
-  letter-spacing: 0.04em;
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  padding: var(--spacing-2) var(--spacing-4);
   border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
   cursor: pointer;
   transition: background-color var(--duration-fast) var(--ease-standard),
-              color var(--duration-fast) var(--ease-standard),
-              box-shadow var(--duration-fast) var(--ease-standard);
+              border-color var(--duration-fast) var(--ease-standard),
+              color var(--duration-fast) var(--ease-standard);
 }
-.view-toggle-btn:hover { color: var(--text-primary); }
-.view-toggle-btn:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
-.view-toggle-btn.active {
-  background: var(--surface-2);
-  color: var(--text-primary);
-  box-shadow: inset 0 0 0 1px var(--orange-300);
-}
-.view-toggle-helper {
-  font: var(--text-weight-body) var(--text-size-caption)/1.4 var(--font-primary);
-  color: var(--text-tertiary);
-  text-align: center;
+.cat-filter-chip:hover { background: var(--surface-2); border-color: var(--border-strong); }
+.cat-filter-chip:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.cat-filter-chip[aria-pressed="true"] {
+  background: var(--text-primary);
+  color: var(--surface-base);
+  border-color: var(--text-primary);
 }
 
 /* Category section */
@@ -343,13 +336,7 @@ const CATEGORIES = [
   { id: 'how-tech-works',     label: 'How the Technology Works',   description: 'The foundations under the hood.' },
 ]
 
-// View-mode → category ordering.
-const MODE_ORDER = {
-  explore: ['learning-resources', 'hands-on-practice', 'agents', 'generative-ai', 'how-tech-works'],
-  path:    ['learning-resources', 'hands-on-practice', 'how-tech-works', 'generative-ai', 'agents'],
-}
-
-const VIEW_MODE_KEY = 'home-view-mode'
+const CATEGORY_FILTER_KEY = 'home-category-filter'
 
 // Card data — no per-card palette. Differentiation is icon + tag.
 const VISUALIZATIONS = [
@@ -369,21 +356,24 @@ const VISUALIZATIONS = [
   { path: '/vector-embeddings',    category: 'how-tech-works',     tag: 'Embeddings',       title: 'Vector embeddings',                  desc: 'Explore how words and concepts map to high-dimensional vectors, and why semantic similarity works.',                          pills: ['Word vectors', 'Cosine similarity', 'Semantic search', 'RAG', 'Quiz'],                       ready: true },
 ]
 
-function resolveInitialViewMode() {
-  if (typeof window === 'undefined') return 'explore'
+function resolveInitialFilter() {
+  if (typeof window === 'undefined') return null
   try {
-    const stored = localStorage.getItem(VIEW_MODE_KEY)
-    if (stored === 'explore' || stored === 'path') return stored
+    const stored = localStorage.getItem(CATEGORY_FILTER_KEY)
+    if (stored && CATEGORIES.some(c => c.id === stored)) return stored
   } catch { /* ignore */ }
-  return 'explore'
+  return null
 }
 
 export default function Home() {
-  const [viewMode, setViewMode] = useState(resolveInitialViewMode)
+  const [activeFilter, setActiveFilter] = useState(resolveInitialFilter)
 
   useEffect(() => {
-    try { localStorage.setItem(VIEW_MODE_KEY, viewMode) } catch { /* ignore */ }
-  }, [viewMode])
+    try {
+      if (activeFilter) localStorage.setItem(CATEGORY_FILTER_KEY, activeFilter)
+      else localStorage.removeItem(CATEGORY_FILTER_KEY)
+    } catch { /* ignore */ }
+  }, [activeFilter])
 
   // Group cards by category, ready before coming-soon within each category.
   const cardsByCategory = CATEGORIES.reduce((acc, c) => {
@@ -394,9 +384,9 @@ export default function Home() {
     return acc
   }, {})
 
-  const orderedCategories = MODE_ORDER[viewMode]
-    .map(id => CATEGORIES.find(c => c.id === id))
-    .filter(Boolean)
+  const visibleCategories = activeFilter
+    ? CATEGORIES.filter(c => c.id === activeFilter)
+    : CATEGORIES
 
   return (
     <div className="home">
@@ -434,33 +424,31 @@ export default function Home() {
         </Link>
       </div>
 
-      <div className="view-toggle-wrap">
-        <div className="view-toggle" role="tablist" aria-label="Browsing mode">
+      <div className="cat-filter-wrap">
+        <div className="cat-filter" role="group" aria-label="Filter by category">
           <button
             type="button"
-            role="tab"
-            aria-selected={viewMode === 'explore'}
-            className={`view-toggle-btn${viewMode === 'explore' ? ' active' : ''}`}
-            onClick={() => setViewMode('explore')}
+            className="cat-filter-chip"
+            aria-pressed={activeFilter === null}
+            onClick={() => setActiveFilter(null)}
           >
-            Explore
+            All
           </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={viewMode === 'path'}
-            className={`view-toggle-btn${viewMode === 'path' ? ' active' : ''}`}
-            onClick={() => setViewMode('path')}
-          >
-            Learning path
-          </button>
-        </div>
-        <div className="view-toggle-helper">
-          Explore = what people want today · Learning path = foundations first.
+          {CATEGORIES.map(cat => (
+            <button
+              key={cat.id}
+              type="button"
+              className="cat-filter-chip"
+              aria-pressed={activeFilter === cat.id}
+              onClick={() => setActiveFilter(prev => (prev === cat.id ? null : cat.id))}
+            >
+              {cat.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {orderedCategories.map(cat => {
+      {visibleCategories.map(cat => {
         const cards = cardsByCategory[cat.id] || []
         if (cards.length === 0) return null
         return (
