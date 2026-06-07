@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import NavBar from '../components/NavBar.jsx'
 import {
   SunIcon, MoonIcon, CheckIcon, XIcon, ArrowRightIcon,
@@ -610,6 +610,18 @@ const css = `
   margin: 0 0 var(--spacing-3);
 }
 .ab-footer-meta { color: var(--text-tertiary); font: 400 var(--text-size-caption)/1.4 'Inter', sans-serif; }
+
+/* Inline-SVG diagram primitives (Module 3) — inherit from page tokens so
+   they flip cleanly when the page theme toggles. */
+.dg-page    { fill: var(--surface-3, #F2EDE6); stroke: var(--border-default, #D1C7B8); stroke-width: 1; }
+.dg-sec     { fill: var(--surface-2, #FDFBF8); stroke: var(--border-default, #D1C7B8); stroke-width: 1; }
+.dg-comp    { fill: var(--surface-1, #FFFFFF); stroke: var(--border-default, #D1C7B8); stroke-width: 1; }
+.dg-h       { font: 700 15px 'Inter', sans-serif; fill: var(--text-primary, #1A1714); }
+.dg-lbl     { font: 600 13px 'Inter', sans-serif; fill: var(--text-primary, #1A1714); }
+.dg-sub     { font: 400 12px 'Inter', sans-serif; fill: var(--text-tertiary, #8A7E72); }
+.dg-foot    { font: 400 12px 'Inter', sans-serif; fill: var(--text-tertiary, #8A7E72); }
+.dg-divider { stroke: var(--border-default, #D1C7B8); stroke-width: 1; opacity: .7; }
+.dg-arrow   { stroke: #3B7DD8; stroke-width: 1.5; fill: none; }
 
 /* Motion guardrail */
 @media (prefers-reduced-motion: reduce) {
@@ -1685,6 +1697,92 @@ const DEMO_BY_ID = {
   m7: Demo07,
 }
 
+/* Module 3 inline-SVG diagrams. They read fills/strokes from .ab-page CSS
+   variables (.dg-* classes) so a theme toggle flips them with the rest of
+   the page. */
+function Module3DiagramA() {
+  return (
+    <figure style={{ width: '100%', margin: 'var(--spacing-5) 0' }}>
+      <svg viewBox="0 0 680 448" role="img" width="100%"
+           aria-label="Anatomy of a screen: a Page contains Sections, which contain Components">
+        <rect className="dg-page" x="40" y="44" width="600" height="356" rx="16" />
+        <text className="dg-h" x="60" y="74">Page</text>
+        <text className="dg-sub" x="106" y="74">a whole screen at one URL</text>
+
+        <rect className="dg-sec" x="60" y="104" width="132" height="280" rx="12" />
+        <text className="dg-lbl" x="126" y="126" textAnchor="middle">Section</text>
+        <text className="dg-sub" x="126" y="144" textAnchor="middle">sidebar</text>
+        <rect className="dg-comp" x="76" y="168" width="100" height="22" rx="6" />
+        <rect className="dg-comp" x="76" y="200" width="100" height="22" rx="6" />
+        <rect className="dg-comp" x="76" y="232" width="100" height="22" rx="6" />
+
+        <rect className="dg-sec" x="208" y="104" width="412" height="280" rx="12" />
+        <text className="dg-lbl" x="414" y="126" textAnchor="middle">Section</text>
+        <text className="dg-sub" x="414" y="144" textAnchor="middle">main</text>
+
+        <rect className="dg-comp" x="224" y="166" width="116" height="58" rx="8" />
+        <text className="dg-lbl" x="282" y="190" textAnchor="middle" dominantBaseline="central">Component</text>
+        <text className="dg-sub" x="282" y="208" textAnchor="middle" dominantBaseline="central">KPI card</text>
+        <rect className="dg-comp" x="356" y="166" width="116" height="58" rx="8" />
+        <text className="dg-sub" x="414" y="195" textAnchor="middle" dominantBaseline="central">KPI card</text>
+        <rect className="dg-comp" x="488" y="166" width="116" height="58" rx="8" />
+        <text className="dg-sub" x="546" y="195" textAnchor="middle" dominantBaseline="central">KPI card</text>
+
+        <rect className="dg-comp" x="224" y="242" width="380" height="120" rx="8" />
+        <text className="dg-lbl" x="414" y="268" textAnchor="middle">Component</text>
+        <text className="dg-sub" x="414" y="286" textAnchor="middle">data table</text>
+        <line className="dg-divider" x1="244" y1="312" x2="584" y2="312" />
+        <line className="dg-divider" x1="244" y1="332" x2="584" y2="332" />
+        <line className="dg-divider" x1="244" y1="352" x2="584" y2="352" />
+
+        <text className="dg-foot" x="340" y="426" textAnchor="middle">Name the right noun — page, section, or component — and the builder targets the right thing.</text>
+      </svg>
+    </figure>
+  )
+}
+
+function Module3DiagramB() {
+  return (
+    <figure style={{ width: '100%', margin: 'var(--spacing-5) 0' }}>
+      <svg viewBox="0 0 680 232" role="img" width="100%"
+           aria-label="Every app is three boxes: Input, then Logic, then Output">
+        <defs>
+          <marker id="ab-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </marker>
+        </defs>
+
+        <rect className="dg-comp" x="48" y="40" width="168" height="64" rx="8" />
+        <text className="dg-lbl" x="132" y="66" textAnchor="middle" dominantBaseline="central">Input</text>
+        <text className="dg-sub" x="132" y="86" textAnchor="middle" dominantBaseline="central">form, click, upload</text>
+
+        <rect className="dg-comp" x="256" y="40" width="168" height="64" rx="8" />
+        <text className="dg-lbl" x="340" y="66" textAnchor="middle" dominantBaseline="central">Logic</text>
+        <text className="dg-sub" x="340" y="86" textAnchor="middle" dominantBaseline="central">apply the rules</text>
+
+        <rect className="dg-comp" x="464" y="40" width="168" height="64" rx="8" />
+        <text className="dg-lbl" x="548" y="66" textAnchor="middle" dominantBaseline="central">Output</text>
+        <text className="dg-sub" x="548" y="86" textAnchor="middle" dominantBaseline="central">the result appears</text>
+
+        <line className="dg-arrow" x1="216" y1="72" x2="252" y2="72" markerEnd="url(#ab-arrow)" />
+        <line className="dg-arrow" x1="424" y1="72" x2="460" y2="72" markerEnd="url(#ab-arrow)" />
+
+        <text className="dg-foot" x="48" y="150">Example — a tip calculator</text>
+
+        <rect className="dg-comp" x="67" y="162" width="130" height="30" rx="6" />
+        <text className="dg-sub" x="132" y="177" textAnchor="middle" dominantBaseline="central">subtotal, tip %</text>
+        <rect className="dg-comp" x="275" y="162" width="130" height="30" rx="6" />
+        <text className="dg-sub" x="340" y="177" textAnchor="middle" dominantBaseline="central">× multiply</text>
+        <rect className="dg-comp" x="483" y="162" width="130" height="30" rx="6" />
+        <text className="dg-sub" x="548" y="177" textAnchor="middle" dominantBaseline="central">amount to add</text>
+
+        <line className="dg-arrow" x1="197" y1="177" x2="271" y2="177" markerEnd="url(#ab-arrow)" />
+        <line className="dg-arrow" x1="405" y1="177" x2="479" y2="177" markerEnd="url(#ab-arrow)" />
+      </svg>
+    </figure>
+  )
+}
+
 function ModulePanel({ module: mod, onBack, completed, onToggleComplete, nextModule, onGoToModule }) {
   const DemoComponent = DEMO_BY_ID[mod.id]
   return (
@@ -1707,11 +1805,15 @@ function ModulePanel({ module: mod, onBack, completed, onToggleComplete, nextMod
         <h3 className="ab-block-title">What this module teaches</h3>
         <div className="ab-card-stack">
           {mod.sections.map((s, idx) => (
-            <div key={idx} className="ab-card">
-              <h4 className="ab-h3" style={{ marginBottom: 'var(--spacing-1)' }}>{s.title}</h4>
-              <p className="ab-block-lead" style={{ margin: '0 0 var(--spacing-2)' }}>{s.lead}</p>
-              <p className="ab-body" style={{ color: 'var(--text-secondary)', margin: 0 }}>{s.body}</p>
-            </div>
+            <Fragment key={idx}>
+              <div className="ab-card">
+                <h4 className="ab-h3" style={{ marginBottom: 'var(--spacing-1)' }}>{s.title}</h4>
+                <p className="ab-block-lead" style={{ margin: '0 0 var(--spacing-2)' }}>{s.lead}</p>
+                <p className="ab-body" style={{ color: 'var(--text-secondary)', margin: 0 }}>{s.body}</p>
+              </div>
+              {mod.id === 'm3' && idx === 0 && <Module3DiagramA />}
+              {mod.id === 'm3' && idx === 1 && <Module3DiagramB />}
+            </Fragment>
           ))}
         </div>
       </div>
