@@ -4,8 +4,13 @@
 > `CLAUDE.md`: *"Design system rules live in `visual-ai-themes.md` — read it before any styling work."*
 >
 > This plan applies Prism's **visual language** (tokens, type, spacing, components, voice) to the
-> existing React + Vite learning lab. It does **not** apply Prism's **brand identity** — the lab keeps
-> its own name and stays a separate product, so **no Prism logo** goes anywhere.
+> existing React + Vite learning lab.
+>
+> **Brand identity update (2026-06-08):** The lab now sits inside the Prism family. The **Prism
+> faceted-diamond mark** (icon only, no wordmark) is shown in the NavBar — see
+> `src/components/NavBar.jsx` `PrismMark`. The lab keeps its own name (`AI Visual Lab`) throughout the
+> rest of the UI; the Prism **wordmark and full lockup are still not used.** Earlier versions of this
+> plan forbade the Prism logo entirely — that constraint is lifted, but only for the icon-only mark.
 
 ---
 
@@ -45,7 +50,8 @@ to reverse:
 Apply: color tokens, the 80/15/5 ratio, type scale, spacing/radius/shadow/motion, component patterns,
 iconography, and voice.
 
-Don't apply: Prism logo/lockup rules (not this product), and don't invent components Prism doesn't
+Apply: the Prism **icon-only mark** in the NavBar (see header note · 2026-06-08). Don't apply the
+Prism wordmark or full lockup — the lab still carries its own name. Don't invent components Prism doesn't
 have without documenting them as deviations (§3).
 
 When a Prism rule and an existing lab habit conflict, **the rule wins** unless it's listed in §3.
@@ -285,6 +291,6 @@ Technical pass:
 - [ ] Focus ring (3px purple, 2px offset) visible on every interactive element.
 - [ ] `prefers-reduced-motion` respected; no animation over 500ms; no decorative idle motion.
 - [ ] Sentence case, no exclamation marks, outcome-led copy.
-- [ ] No Prism logo present (this is a separate product).
+- [ ] Prism icon-only mark in NavBar; Prism wordmark or full lockup NOT used.
 - [ ] **If both themes ship:** run this whole checklist in light *and* dark; only neutrals/fills should
       differ between them; all signal and feedback colors pass contrast on dark surfaces.

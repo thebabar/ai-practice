@@ -43,6 +43,28 @@ function KeyIcon() {
   )
 }
 
+/* Prism faceted-diamond mark (icon only — no wordmark).
+ * fill="currentColor" so it follows the NavBar text color.
+ * Source: PrismAI/Marketing26/Prism Logo - Icon Black.svg
+ * Minimum size 20px per Prism brand kit §6. */
+function PrismMark({ size = 20 }) {
+  return (
+    <svg
+      width={Math.round((size * 227) / 263)}
+      height={size}
+      viewBox="0 0 227 263"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path
+        d="M113.502 0C136.263 13.142 200.248 52.4526 226 67.5215V194.73C190.401 216.006 152.074 239.749 113.537 262C97.2243 252.581 7.63449 199.172 0 194.623V67.5752C25.6709 52.2003 88.7545 14.289 113.502 0ZM29.5791 181.939C24.3153 184.979 11.0048 192.643 10.8438 193.125C20.4711 198.684 100.304 246.955 110.048 252.581V229.943C97.0792 222.455 48.9508 193.124 29.5791 181.939ZM196.636 181.939C174.669 194.623 128.529 223.147 116.758 229.943V252.581C137.356 240.238 192.943 206.057 215.156 193.231C207.649 188.897 203.829 186.093 196.636 181.939ZM113.504 188.897L113.675 188.794H113.33L113.504 188.897ZM63.8809 159.302L111.05 187.434V132.745L64.1328 105.979L63.8809 159.302ZM6.87109 75.0137C6.87112 98.806 7.4082 160.618 7.4082 187.345C13.4114 183.355 19.8468 179.914 26.0352 176.213L26.3037 86.3057C20.4912 82.9009 13.1084 78.615 6.87109 75.0137ZM199.696 86.4131V175.945C202.324 177.494 215.908 185.201 219.344 187.185C219.344 165.526 219.362 99.8447 219.29 74.9072L199.696 86.4131ZM117.05 132.697V186.762L162.655 159.302C162.655 141.707 162.075 128.784 162.017 106.479L117.05 132.697ZM113.484 73.3555C102.463 79.7189 79.5617 93.2767 67.0879 100.757L114.009 127.524L159.176 101.189C144.348 92.4696 125.233 80.139 113.484 73.3555ZM116.937 32.0938C143.683 48.1451 170.042 64.4542 196.743 80.5801C203.113 76.7699 209.45 72.8928 215.908 69.2344C181.641 49.4489 132.689 18.2313 116.937 9.13574V32.0938ZM110.11 9.13574C106.437 11.2567 43.9355 50.2938 10.5752 69.5557C15.0218 72.1231 28.1097 79.5344 29.3643 80.2588C35.8996 76.4853 99.2302 38.3758 110.11 32.0938V9.13574Z"
+        fill="currentColor"
+      />
+    </svg>
+  )
+}
+
 const navStyle = `
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
@@ -208,7 +230,8 @@ export default function NavBar({ title }) {
       <style>{navStyle}</style>
       <nav className="nav-bar">
         <Link to="/" className="nav-logo">
-          🧪 <span>AI</span><span className="nav-logo-suffix"> Visual Lab</span>
+          <PrismMark size={20} />
+          <span>AI</span><span className="nav-logo-suffix"> Visual Lab</span>
         </Link>
         <div className="nav-right">
           <Link to="/glossary" className={`nav-glossary${isGlossary ? ' active' : ''}`}>Glossary</Link>
