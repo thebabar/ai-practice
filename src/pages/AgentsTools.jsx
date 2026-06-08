@@ -561,6 +561,114 @@ const css = `
 .ag-diff-badge.easy   { color: var(--color-success); border-color: var(--color-success); }
 .ag-diff-badge.medium { color: var(--color-warning); border-color: var(--color-warning); }
 .ag-diff-badge.hard   { color: var(--color-info);    border-color: var(--color-info); }
+
+/* Courses tab — Resource-card pattern */
+.ag-course-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-e2);
+}
+.ag-course-head {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4) var(--spacing-5);
+  background: var(--blue-50);
+  border-bottom: 1px solid var(--border-default);
+  text-decoration: none;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+.ag-course-head:hover { background: var(--blue-100); }
+.ag-course-head:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.ag-course-head-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: var(--radius-md);
+  background: var(--surface-1);
+  border: 1px solid var(--blue-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--blue-500);
+}
+.ag-course-provider {
+  display: block;
+  font: var(--text-weight-h3) var(--text-size-h3)/1 var(--font-primary);
+  color: var(--text-primary);
+}
+.ag-course-instructor {
+  display: block;
+  font: var(--text-weight-caption) var(--text-size-caption)/1 var(--font-primary);
+  color: var(--text-secondary);
+  margin-top: var(--spacing-1);
+}
+.ag-course-body { padding: var(--spacing-4) var(--spacing-5) var(--spacing-5); }
+.ag-course-badges {
+  display: flex;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--spacing-3);
+}
+.ag-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
+  letter-spacing: 0.04em;
+  padding: 3px var(--spacing-2);
+  border-radius: var(--radius-sm);
+  border: 1px solid;
+}
+.ag-badge--type {
+  color: var(--blue-500);
+  border-color: var(--blue-300);
+  background: var(--blue-50);
+}
+.ag-badge--community {
+  color: var(--text-secondary);
+  border-color: var(--border-default);
+  background: var(--surface-2);
+}
+.ag-course-title {
+  font: var(--text-weight-h3) var(--text-size-h3)/var(--text-lh-h3) var(--font-primary);
+  letter-spacing: var(--text-ls-h3);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-2);
+}
+.ag-course-desc {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-4);
+}
+.ag-course-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  background: var(--blue-500);
+  border: 1px solid var(--blue-500);
+  color: #fff;
+  font: 600 var(--text-size-body)/1 var(--font-primary);
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+.ag-course-link:hover { background: #2B6DCC; }
+.ag-course-link:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.ag-course-footnote {
+  margin-top: var(--spacing-4);
+  font: var(--text-weight-caption) var(--text-size-caption)/var(--text-lh-caption) var(--font-primary);
+  color: var(--text-tertiary);
+}
+.ag-course-inlinelink {
+  color: var(--blue-500);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.ag-course-inlinelink:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; border-radius: var(--radius-sm); }
 `
 
 // ── AGENT LOOP STEPS ──────────────────────────────────────────────────────────
@@ -781,7 +889,7 @@ function pickQuestion(targetDiff, usedIds, quiz) {
 // ══════════════════════════════════════════════════════════════════════════════
 export default function AgentsTools() {
   const [tab, setTab] = useState(0)
-  const TABS = ['Agent loop', 'Tool calling', 'ReAct pattern', 'Context layers', 'Multi-agent', 'Quiz']
+  const TABS = ['Agent loop', 'Tool calling', 'ReAct pattern', 'Context layers', 'Multi-agent', 'Courses', 'Quiz']
 
   // loop
   const [loopStep, setLoopStep] = useState(0)
@@ -1225,8 +1333,59 @@ export default function AgentsTools() {
         </div>
       )}
 
-      {/* ── Tab 5: Quiz ── */}
+      {/* ── Tab 5: Courses ── */}
       {tab === 5 && (
+        <div className="ag-panel">
+          <div className="ag-section-title">Courses</div>
+          <p className="ag-section-sub">Outside coursework that goes deeper on building agents. Same card format as the Learn Claude resources page.</p>
+
+          <div className="ag-course-card">
+            <a
+              className="ag-course-head"
+              href="https://learn.deeplearning.ai/courses/agentic-ai"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span className="ag-course-head-icon">
+                <ScrollIcon size={26} weight="duotone" />
+              </span>
+              <span>
+                <span className="ag-course-provider">DeepLearning.AI</span>
+                <span className="ag-course-instructor">Andrew Ng · ~8h</span>
+              </span>
+            </a>
+            <div className="ag-course-body">
+              <div className="ag-course-badges">
+                <span className="ag-badge ag-badge--type">
+                  <ScrollIcon size={14} weight="duotone" />
+                  Course
+                </span>
+                <span className="ag-badge ag-badge--community">
+                  Community
+                </span>
+              </div>
+              <div className="ag-course-title">Agentic AI</div>
+              <div className="ag-course-desc">Build agentic systems with evals and design patterns. Covers AI broadly, not just Claude.</div>
+              <a
+                className="ag-course-link"
+                href="https://learn.deeplearning.ai/courses/agentic-ai"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open course
+                <ArrowRightIcon size={14} weight="bold" />
+              </a>
+            </div>
+          </div>
+
+          <p className="ag-course-footnote">
+            This course also appears under the Developer track on <a href="/learn-claude" className="ag-course-inlinelink">Learn Claude</a> — surfaced here because it's specifically about agents.
+          </p>
+        </div>
+      )}
+
+      {/* ── Tab 6: Quiz ── */}
+      {tab === 6 && (
         <div className="ag-panel">
           <div className="ag-section-title">Quick quiz</div>
           <p className="ag-section-sub">Six questions to check what stuck. The next question is picked from a harder or easier pool based on how you do.</p>
