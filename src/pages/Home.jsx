@@ -5,7 +5,7 @@ import {
   HashIcon, RobotIcon, BrainIcon, PuzzlePieceIcon, PaletteIcon,
   BooksIcon, FlowArrowIcon, LightningIcon, PresentationChartIcon,
   GraphIcon, BookOpenIcon, ArrowRightIcon, ShieldCheckIcon, RocketLaunchIcon,
-  TerminalWindowIcon,
+  TerminalWindowIcon, ChartLineUpIcon,
 } from '@phosphor-icons/react'
 import NavBar from '../components/NavBar.jsx'
 
@@ -328,12 +328,13 @@ const ICON_MAP = {
   'ai-risk-governance':   ShieldCheckIcon,
   'app-building':         RocketLaunchIcon,
   'build-with-claude-code': TerminalWindowIcon,
+  'ai-roi':                 ChartLineUpIcon,
 }
 
 // Category metadata — used by section headers and the view-mode toggle.
 const CATEGORIES = [
   { id: 'learning-resources', label: 'Learning Resources',        description: 'Tutorials and guides on popular tools. Includes curated courses and videos among other resources.' },
-  { id: 'hands-on-practice',  label: 'Hands-on Practice',          description: 'Apply AI to a real task and produce something usable.' },
+  { id: 'hands-on-practice',  label: 'AI for Business',            description: 'Put AI to work on real business decisions — build the case, weigh the risk, make the call.' },
   { id: 'agents',             label: 'Agents',                     description: 'Building systems that act.' },
   { id: 'generative-ai',      label: 'Generative AI',              description: 'How models produce output.' },
   { id: 'how-tech-works',     label: 'How the Technology Works',   description: 'The foundations under the hood.' },
@@ -356,6 +357,7 @@ const VISUALIZATIONS = [
   { path: '/rag',                  category: 'generative-ai',      tag: 'LLM architecture', title: 'Retrieval-augmented generation',     desc: 'See how RAG pipelines retrieve, chunk, and inject knowledge into LLM prompts.',                                              pills: ['Pipeline', 'Chunking', 'Retrieval', 'Prompt assembly', 'RAG vs fine-tuning'],                ready: true },
   { path: '/agent-simulation',     category: 'agents',             tag: 'AI agents',        title: 'Agent simulation sandbox',           desc: 'Walk a real agent pipeline — inspect every node, explore risks, latency, and cost, then run the happy path step by step.',     pills: ['Agent workflows', 'Decision gates', 'Risk analysis', 'Latency and cost', 'Human-in-the-loop'], ready: true },
   { path: '/board-briefing',       category: 'hands-on-practice',  tag: 'Executive AI',     title: 'Board briefing generator',           desc: 'Generate a board-ready AI transformation brief from your company data.',                                                      pills: ['Brief generator', 'Risk analysis', 'Strategic recommendations'],                              ready: true },
+  { path: '/ai-roi',               category: 'hands-on-practice',  tag: 'Executive AI',     title: 'AI ROI calculator',                  desc: 'Model the dollars-and-cents case for AI — token costs, hours saved, payback — and see what a naive ROI estimate leaves out.',  pills: ['ROI model', 'Token economics', 'Payback', 'Considerations'],                                ready: true, accent: '#fbbf24' },
   { path: '/ai-risk-governance',   category: 'hands-on-practice',  tag: 'Executive AI',     title: 'AI risk and governance',             desc: 'Classify a use case, score its risk, and decide whether to ship it — the work that happens before the board ever sees a brief.', pills: ['Classify', 'Score', 'Controls'],                                                            ready: true },
   { path: '/neural-networks',      category: 'how-tech-works',     tag: 'Deep learning',    title: 'Neural networks',                    desc: 'Watch signals flow through a network, see activations, and understand how back-propagation trains weights.',                    pills: ['Overview', 'Forward pass', 'Activations', 'Backprop', 'Gradient descent'],                   ready: true },
   { path: '/vector-embeddings',    category: 'how-tech-works',     tag: 'Embeddings',       title: 'Vector embeddings',                  desc: 'Explore how words and concepts map to high-dimensional vectors, and why semantic similarity works.',                          pills: ['Word vectors', 'Cosine similarity', 'Semantic search', 'RAG', 'Quiz'],                       ready: true },
@@ -469,7 +471,7 @@ export default function Home() {
                   return (
                     <Link key={v.title} to={v.path} className="viz-card">
                       <div className="card-icon-wrap">
-                        {Icon ? <Icon size={28} weight="duotone" /> : null}
+                        {Icon ? <Icon size={28} weight="duotone" color={v.accent || undefined} /> : null}
                       </div>
                       <div className="card-tag">{v.tag}</div>
                       <div className="card-title">{v.title}</div>
