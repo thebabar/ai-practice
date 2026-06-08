@@ -1343,7 +1343,7 @@ export default function AgentsTools() {
       {tab === 5 && (
         <div className="ag-panel">
           <div className="ag-section-title">Resources</div>
-          <p className="ag-section-sub">Outside coursework that goes deeper on building agents. Same card format as the Learn Claude resources page.</p>
+          <p className="ag-section-sub">Hand-picked guides and coursework that goes deeper on building agents.</p>
 
           <div className="ag-course-card">
             <a
