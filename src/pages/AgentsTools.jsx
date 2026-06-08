@@ -837,6 +837,12 @@ const QUIZ = [
     opts: ['In-context memory (the conversation history)', 'External memory (a database or vector store written and read by the agent)', 'Temperature-based memory', 'Token cache memory'],
     correct: 1, explanation: 'In-context memory is lost when the conversation ends. External memory (a database, vector store, or file system) lets agents write facts during one session and retrieve them in future sessions. This is the foundation of "personalized" or "stateful" agents.',
   },
+  {
+    id: 12, difficulty: 'medium',
+    q: 'What are "evals" in the context of agentic systems, and why do they matter?',
+    opts: ['Real-time monitoring dashboards for production traffic', 'Programmatic test cases that score an agent\'s outputs against known-good answers — used to iterate on prompts, tools, and architecture without guessing', 'A subscription tier that gives the agent more compute', 'A way to log token usage per request'],
+    correct: 1, explanation: 'Evals are scored test cases — input + expected behavior + a grader. Without them, every change to a prompt or tool is a vibe check. With them, you can compare versions, catch regressions, and decide what shipped a real improvement. Evals are the unit tests of agent engineering, and the single biggest predictor of teams that ship reliable agents vs teams that keep tweaking.',
+  },
   // hard
   {
     id: 8, difficulty: 'hard',
@@ -865,7 +871,7 @@ const QUIZ = [
 ]
 
 const DIFFICULTY_ORDER = ['easy', 'medium', 'hard']
-const SESSION_SIZE = 6
+const SESSION_SIZE = 7
 
 function bumpDifficulty(current, correct) {
   const idx = DIFFICULTY_ORDER.indexOf(current)
@@ -889,7 +895,7 @@ function pickQuestion(targetDiff, usedIds, quiz) {
 // ══════════════════════════════════════════════════════════════════════════════
 export default function AgentsTools() {
   const [tab, setTab] = useState(0)
-  const TABS = ['Agent loop', 'Tool calling', 'ReAct pattern', 'Context layers', 'Multi-agent', 'Courses', 'Quiz']
+  const TABS = ['Agent loop', 'Tool calling', 'ReAct pattern', 'Context layers', 'Multi-agent', 'Resources', 'Quiz']
 
   // loop
   const [loopStep, setLoopStep] = useState(0)
@@ -1333,10 +1339,10 @@ export default function AgentsTools() {
         </div>
       )}
 
-      {/* ── Tab 5: Courses ── */}
+      {/* ── Tab 5: Resources ── */}
       {tab === 5 && (
         <div className="ag-panel">
-          <div className="ag-section-title">Courses</div>
+          <div className="ag-section-title">Resources</div>
           <p className="ag-section-sub">Outside coursework that goes deeper on building agents. Same card format as the Learn Claude resources page.</p>
 
           <div className="ag-course-card">
@@ -1388,7 +1394,7 @@ export default function AgentsTools() {
       {tab === 6 && (
         <div className="ag-panel">
           <div className="ag-section-title">Quick quiz</div>
-          <p className="ag-section-sub">Six questions to check what stuck. The next question is picked from a harder or easier pool based on how you do.</p>
+          <p className="ag-section-sub">Seven questions to check what stuck. The next question is picked from a harder or easier pool based on how you do.</p>
           {!done ? (
             <div className="ag-card">
               {currentQ && (
