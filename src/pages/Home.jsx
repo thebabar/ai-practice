@@ -146,7 +146,7 @@ const css = `
   width: 52px;
   height: 52px;
   border-radius: var(--radius-md);
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   background: var(--surface-2);
