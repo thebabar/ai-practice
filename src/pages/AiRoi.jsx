@@ -8,13 +8,15 @@ import {
 } from '@phosphor-icons/react'
 
 /* ────────────────────────────────────────────────────────────
- * AI ROI calculator — legacy dark theme (#050810, IBM Plex,
- * amber accent #fbbf24). Live-computed; inputs persist to
- * localStorage. No LLM call, no network — Tier 1.
+ * AI ROI calculator — Prism-native; rides the global NavBar
+ * theme (System 1). Structured-blue signal as the page accent
+ * (analytical calculator), feedback palette for positive/negative
+ * net results. Live-computed; inputs persist to localStorage.
+ * Tier 1 — no LLM, no network.
  * ────────────────────────────────────────────────────────── */
 
 const STORAGE_KEY = 'ai-roi-inputs'
-const ACCENT = '#fbbf24'
+const ACCENT = 'var(--blue-500)'
 
 const MODEL_OPTIONS = [
   { id: 'opus',   label: 'Opus 4.8',   input: 5, output: 25 },
@@ -44,150 +46,198 @@ const DEFAULTS = {
 }
 
 const css = `
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
+.roi-root {
+  min-height: 100vh;
+  background: var(--surface-base);
+  color: var(--text-primary);
+  font-family: var(--font-primary);
+  overflow-x: hidden;
+}
 
-.roi-root { min-height: 100vh; background: #050810; color: #e0e8f0; font-family: 'IBM Plex Sans', sans-serif; overflow-x: hidden; }
-
-/* Hero */
-.roi-hero { text-align: center; padding: 48px 24px 28px; position: relative; }
+/* Hero — neutral with a subtle structured-blue glow */
+.roi-hero { text-align: center; padding: var(--spacing-7) var(--spacing-5) var(--spacing-6); position: relative; }
 .roi-hero::before {
   content: '';
   position: absolute;
   top: 0; left: 50%;
   transform: translateX(-50%);
   width: 720px; height: 320px;
-  background: radial-gradient(ellipse at 50% 0%, rgba(251,191,36,0.10) 0%, transparent 70%);
+  background: radial-gradient(ellipse at 50% 0%, var(--blue-50) 0%, transparent 70%);
   pointer-events: none;
 }
-.roi-eyebrow { position: relative; font-size: 13px; letter-spacing: 0.22em; color: ${ACCENT}; text-transform: uppercase; margin-bottom: 14px; font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
-.roi-title { position: relative; font-size: clamp(28px, 5vw, 52px); font-weight: 800; letter-spacing: -0.02em; color: #fff; line-height: 1.05; margin: 0 0 12px; }
-.roi-subtitle { position: relative; font-size: 16px; color: #94a3b8; max-width: 620px; margin: 0 auto; line-height: 1.7; }
+.roi-eyebrow {
+  position: relative;
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
+  letter-spacing: 0.14em;
+  color: ${ACCENT};
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-3);
+}
+.roi-title {
+  position: relative;
+  font: var(--text-weight-h1) clamp(28px, 5vw, 52px)/1.05 var(--font-primary);
+  letter-spacing: var(--text-ls-h1);
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-3);
+}
+.roi-subtitle {
+  position: relative;
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+  max-width: 620px;
+  margin: 0 auto;
+}
 
 /* Tabs */
-.roi-tabs { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; padding: 24px 16px 32px; }
+.roi-tabs {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+  padding: var(--spacing-5) var(--spacing-4) var(--spacing-6);
+}
 .roi-tab {
   background: transparent;
-  border: 1px solid #1e2a3e;
-  color: #94a3b8;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 13px;
-  letter-spacing: 0.06em;
-  padding: 9px 18px;
-  border-radius: 6px;
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  letter-spacing: 0.04em;
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.18s;
+  transition: background-color var(--duration-fast) var(--ease-standard),
+              border-color var(--duration-fast) var(--ease-standard),
+              color var(--duration-fast) var(--ease-standard);
 }
-.roi-tab:hover { border-color: ${ACCENT}; color: ${ACCENT}; }
+.roi-tab:hover { background: var(--surface-2); border-color: var(--border-strong); color: var(--text-primary); }
+.roi-tab:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
 .roi-tab[aria-selected="true"] {
-  background: rgba(251,191,36,0.12);
+  background: var(--blue-50);
   border-color: ${ACCENT};
   color: ${ACCENT};
-  font-weight: 600;
 }
 
 /* Shell + section headings */
-.roi-shell { max-width: 1100px; margin: 0 auto; padding: 0 24px 80px; }
-.roi-section-title { font-size: 20px; font-weight: 700; color: #fff; margin: 0 0 6px; }
-.roi-section-sub { font-size: 14px; color: #94a3b8; line-height: 1.6; margin: 0 0 24px; max-width: 720px; }
+.roi-shell { max-width: 1100px; margin: 0 auto; padding: 0 var(--spacing-5) var(--spacing-7); }
+.roi-section-title {
+  font: var(--text-weight-h3) var(--text-size-h3)/var(--text-lh-h3) var(--font-primary);
+  letter-spacing: var(--text-ls-h3);
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-1);
+}
+.roi-section-sub {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+  margin: 0 0 var(--spacing-5);
+  max-width: 720px;
+}
 .roi-eyebrow-sm {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.14em;
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: ${ACCENT};
-  font-weight: 600;
-  margin-bottom: 10px;
+  margin-bottom: var(--spacing-2);
 }
 
 /* Card */
 .roi-card {
-  background: #0a0e18;
-  border: 1px solid #1e2a3e;
-  border-radius: 12px;
-  padding: 22px 24px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-5);
+  box-shadow: var(--shadow-e2);
 }
-.roi-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.roi-grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.roi-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-4); }
+.roi-grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--spacing-3); }
 @media (max-width: 760px) { .roi-grid-2 { grid-template-columns: 1fr; } }
 
 /* Fields */
-.roi-fieldset { display: flex; flex-direction: column; gap: 14px; }
-.roi-field { display: flex; flex-direction: column; gap: 6px; }
-.roi-field-label { font-size: 13px; font-weight: 600; color: #e0e8f0; }
-.roi-field-helper { font-size: 12px; color: #6a7e98; line-height: 1.5; }
+.roi-fieldset { display: flex; flex-direction: column; gap: var(--spacing-3); }
+.roi-field { display: flex; flex-direction: column; gap: var(--spacing-1); }
+.roi-field-label {
+  font: var(--text-weight-label) var(--text-size-label)/1 var(--font-primary);
+  color: var(--text-primary);
+}
+.roi-field-helper {
+  font: var(--text-weight-caption) var(--text-size-caption)/var(--text-lh-caption) var(--font-primary);
+  color: var(--text-tertiary);
+}
 .roi-input {
   width: 100%;
   box-sizing: border-box;
-  background: #050810;
-  border: 1px solid #1e2a3e;
-  border-radius: 6px;
-  color: #e0e8f0;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 14px;
-  padding: 9px 12px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-size-body);
+  padding: var(--spacing-2) var(--spacing-3);
   outline: none;
-  transition: border-color 0.16s;
+  transition: border-color var(--duration-fast) var(--ease-standard),
+              box-shadow var(--duration-fast) var(--ease-standard);
 }
-.roi-input:focus { border-color: ${ACCENT}; box-shadow: 0 0 0 3px rgba(251,191,36,0.20); }
+.roi-input:focus { border-color: var(--purple-500); box-shadow: 0 0 0 3px var(--color-focus-ring); }
 .roi-select {
   width: 100%;
   box-sizing: border-box;
-  background: #050810;
-  border: 1px solid #1e2a3e;
-  border-radius: 6px;
-  color: #e0e8f0;
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 14px;
-  padding: 9px 12px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font: var(--text-weight-body) var(--text-size-body)/1 var(--font-primary);
+  padding: var(--spacing-2) var(--spacing-3);
   cursor: pointer;
   outline: none;
 }
-.roi-select:focus { border-color: ${ACCENT}; }
+.roi-select:focus { border-color: var(--purple-500); box-shadow: 0 0 0 3px var(--color-focus-ring); }
 
 /* Toggle */
 .roi-toggle {
   display: inline-flex;
   gap: 4px;
   padding: 4px;
-  background: #050810;
-  border: 1px solid #1e2a3e;
-  border-radius: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
 }
 .roi-toggle-btn {
   background: transparent;
   border: none;
-  color: #94a3b8;
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 7px 14px;
-  border-radius: 5px;
+  color: var(--text-secondary);
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.16s;
+  transition: background-color var(--duration-fast) var(--ease-standard),
+              color var(--duration-fast) var(--ease-standard);
 }
+.roi-toggle-btn:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
 .roi-toggle-btn[aria-pressed="true"] {
-  background: rgba(251,191,36,0.16);
+  background: var(--surface-1);
   color: ${ACCENT};
+  box-shadow: var(--shadow-e1);
 }
 
 /* Checkbox row */
 .roi-check {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-2);
   cursor: pointer;
-  font-size: 13px;
-  color: #e0e8f0;
+  font: var(--text-weight-body) var(--text-size-body)/1 var(--font-primary);
+  color: var(--text-primary);
 }
-.roi-check input { accent-color: ${ACCENT}; width: 14px; height: 14px; }
-.roi-check-row { display: flex; gap: 18px; flex-wrap: wrap; }
+.roi-check input { accent-color: var(--blue-500); width: 14px; height: 14px; }
+.roi-check-row { display: flex; gap: var(--spacing-4); flex-wrap: wrap; }
 
-/* Slider */
-.roi-slider-wrap { display: flex; flex-direction: column; gap: 6px; }
+/* Slider — restyled to match Prism slider primitive */
+.roi-slider-wrap { display: flex; flex-direction: column; gap: var(--spacing-1); }
 .roi-slider-top { display: flex; justify-content: space-between; align-items: baseline; }
 .roi-slider-val {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 14px;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-size-body);
   color: ${ACCENT};
   font-weight: 600;
 }
@@ -195,283 +245,318 @@ const css = `
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 4px;
-  background: #1e2a3e;
-  border-radius: 2px;
+  height: 24px;
+  background: transparent;
   cursor: pointer;
-  outline: none;
   padding: 0;
-  margin: 6px 0;
+  margin: 0;
+}
+.roi-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  background: var(--border-default);
+  border-radius: 2px;
+}
+.roi-slider::-moz-range-track {
+  height: 4px;
+  background: var(--border-default);
+  border-radius: 2px;
 }
 .roi-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  appearance: none;
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: ${ACCENT};
-  border: 0;
+  background: var(--surface-1);
+  border: 2px solid var(--blue-500);
+  box-shadow: var(--shadow-e1);
+  margin-top: -6px;
   cursor: pointer;
 }
 .roi-slider::-moz-range-thumb {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: ${ACCENT};
-  border: 0;
+  background: var(--surface-1);
+  border: 2px solid var(--blue-500);
+  box-shadow: var(--shadow-e1);
   cursor: pointer;
 }
-.roi-slider:focus-visible { outline: 3px solid rgba(251,191,36,0.40); outline-offset: 4px; border-radius: 4px; }
+.roi-slider:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
 
 /* Cost-mode block */
-.roi-mode-block { display: flex; flex-direction: column; gap: 12px; }
+.roi-mode-block { display: flex; flex-direction: column; gap: var(--spacing-3); }
 
 /* Pricing table */
-.roi-price-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.roi-price-table { width: 100%; border-collapse: collapse; }
 .roi-price-table th, .roi-price-table td {
   text-align: left;
-  padding: 9px 10px;
-  border-bottom: 1px solid #1e2a3e;
+  padding: var(--spacing-2) var(--spacing-3);
+  border-bottom: 1px solid var(--border-default);
 }
 .roi-price-table th {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #6a7e98;
-  font-weight: 600;
+  color: var(--text-tertiary);
 }
-.roi-price-table td:first-child { color: #e0e8f0; font-weight: 600; }
+.roi-price-table td {
+  font: var(--text-weight-body) var(--text-size-body)/1.4 var(--font-primary);
+  color: var(--text-primary);
+}
+.roi-price-table td:first-child { font-weight: var(--text-weight-label); }
 .roi-price-table tr:last-child td { border-bottom: 0; }
 .roi-price-input {
   width: 80px;
-  background: #050810;
-  border: 1px solid #1e2a3e;
-  border-radius: 4px;
-  color: #e0e8f0;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 13px;
-  padding: 4px 8px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-size-body);
+  padding: var(--spacing-1) var(--spacing-2);
   outline: none;
 }
-.roi-price-input:focus { border-color: ${ACCENT}; }
+.roi-price-input:focus { border-color: var(--purple-500); box-shadow: 0 0 0 3px var(--color-focus-ring); }
 
 /* Results panel (Tab 1) */
-.roi-results { display: flex; flex-direction: column; gap: 18px; }
+.roi-results { display: flex; flex-direction: column; gap: var(--spacing-4); }
 .roi-result-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
+  gap: var(--spacing-3);
 }
 .roi-result-box {
-  background: #050810;
-  border: 1px solid #1e2a3e;
-  border-radius: 8px;
-  padding: 12px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-3) var(--spacing-4);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--spacing-1);
 }
 .roi-result-label {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.1em;
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #6a7e98;
-  font-weight: 600;
+  color: var(--text-tertiary);
 }
 .roi-result-val {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 20px;
-  color: #fff;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-size-h3);
+  color: var(--text-primary);
   font-weight: 600;
 }
-.roi-result-box--net { border-color: ${ACCENT}; }
-.roi-result-box--net .roi-result-val { color: ${ACCENT}; }
-.roi-result-box--neg { border-color: #f87171; }
-.roi-result-box--neg .roi-result-val { color: #f87171; }
+.roi-result-box--net { border-color: var(--color-success); }
+.roi-result-box--net .roi-result-val { color: var(--color-success); }
+.roi-result-box--neg { border-color: var(--color-error); }
+.roi-result-box--neg .roi-result-val { color: var(--color-error); }
 
 /* Value vs cost bar */
 .roi-vsbar {
-  background: #050810;
-  border: 1px solid #1e2a3e;
-  border-radius: 8px;
-  padding: 14px 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-3) var(--spacing-4);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--spacing-2);
 }
 .roi-vsbar-title {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.1em;
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #6a7e98;
-  font-weight: 600;
+  color: var(--text-tertiary);
 }
-.roi-vsbar-row { display: flex; align-items: center; gap: 10px; }
-.roi-vsbar-key { width: 96px; font-size: 12px; color: #94a3b8; }
-.roi-vsbar-track { flex: 1; height: 10px; background: #1e2a3e; border-radius: 5px; overflow: hidden; }
-.roi-vsbar-fill { height: 100%; border-radius: 5px; transition: width 0.3s; }
-.roi-vsbar-fill--val { background: #34d399; }
+.roi-vsbar-row { display: flex; align-items: center; gap: var(--spacing-2); }
+.roi-vsbar-key {
+  width: 96px;
+  font: var(--text-weight-body) var(--text-size-caption)/1 var(--font-primary);
+  color: var(--text-secondary);
+}
+.roi-vsbar-track {
+  flex: 1;
+  height: var(--spacing-2);
+  background: var(--surface-3);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.roi-vsbar-fill {
+  height: 100%;
+  border-radius: var(--radius-sm);
+  transition: width var(--duration-standard) var(--ease-standard);
+}
+.roi-vsbar-fill--val { background: var(--color-success); }
 .roi-vsbar-fill--cost { background: ${ACCENT}; }
 .roi-vsbar-amt {
   width: 110px;
   text-align: right;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 13px;
-  color: #e0e8f0;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-size-body);
+  color: var(--text-primary);
 }
 
 /* Reset link */
 .roi-reset {
   background: transparent;
   border: 0;
-  color: #6a7e98;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 12px;
-  letter-spacing: 0.04em;
+  color: var(--text-tertiary);
+  font: var(--text-weight-caption) var(--text-size-caption)/1 var(--font-primary);
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 3px;
   padding: 0;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--spacing-1);
 }
 .roi-reset:hover { color: ${ACCENT}; }
+.roi-reset:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
 
 /* Tab 2 — token primer */
-.roi-primer { display: flex; flex-direction: column; gap: 14px; }
+.roi-primer { display: flex; flex-direction: column; gap: var(--spacing-3); }
 .roi-primer-row {
   display: grid;
   grid-template-columns: 80px 1fr;
-  gap: 14px;
+  gap: var(--spacing-3);
   align-items: start;
 }
 .roi-primer-tag {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
   letter-spacing: 0.08em;
   color: ${ACCENT};
-  font-weight: 600;
   padding-top: 2px;
 }
-.roi-primer-body { font-size: 14px; color: #c0d0e0; line-height: 1.6; }
+.roi-primer-body {
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
+}
 
 /* Tab 3 — considerations */
-.roi-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.roi-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: var(--spacing-2); }
 .roi-list li {
   display: grid;
   grid-template-columns: 18px 1fr;
-  gap: 8px;
-  font-size: 14px;
-  color: #c0d0e0;
-  line-height: 1.5;
+  gap: var(--spacing-2);
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
+  color: var(--text-secondary);
 }
 .roi-list li::before {
   content: '';
   width: 6px; height: 6px;
-  margin-top: 8px;
+  margin-top: 9px;
   border-radius: 50%;
   background: ${ACCENT};
 }
-.roi-list--green li::before { background: #34d399; }
+.roi-list--green li::before { background: var(--color-success); }
+.roi-list strong { color: var(--text-primary); font-weight: var(--text-weight-label); }
 .roi-honest {
-  background: rgba(251,191,36,0.08);
-  border: 1px solid rgba(251,191,36,0.32);
-  border-radius: 6px;
-  padding: 11px 14px;
-  font-size: 13px;
-  color: #e0e8f0;
+  background: var(--blue-50);
+  border: 1px solid var(--blue-100);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-3) var(--spacing-4);
+  font: var(--text-weight-body) var(--text-size-body)/var(--text-lh-body) var(--font-primary);
   font-style: italic;
-  margin-bottom: 18px;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-5);
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: var(--spacing-2);
 }
-.roi-honest-icon { color: ${ACCENT}; flex-shrink: 0; margin-top: 1px; }
+.roi-honest-icon { color: ${ACCENT}; flex-shrink: 0; margin-top: 2px; }
 
 /* Cross-link */
 .roi-crosslink {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 12px;
-  letter-spacing: 0.04em;
+  gap: var(--spacing-1);
+  font: var(--text-weight-label) var(--text-size-caption)/1 var(--font-primary);
   color: ${ACCENT};
   text-decoration: none;
-  margin-top: 8px;
+  margin-top: var(--spacing-2);
 }
 .roi-crosslink:hover { text-decoration: underline; text-underline-offset: 3px; }
+.roi-crosslink:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
 
 /* Tab 4 — summary */
 .roi-summary-card {
-  background: #0a0e18;
+  background: var(--surface-1);
   border: 1px solid ${ACCENT};
-  border-radius: 12px;
-  padding: 24px 26px;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-5);
+  box-shadow: var(--shadow-e2);
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: var(--spacing-3);
 }
 .roi-summary-text {
-  font-size: 16px;
-  color: #e0e8f0;
-  line-height: 1.7;
+  font: var(--text-weight-body) var(--text-size-body)/1.7 var(--font-primary);
+  color: var(--text-primary);
   margin: 0;
 }
 .roi-summary-text strong {
   color: ${ACCENT};
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
   font-weight: 600;
 }
 .roi-not-captured {
-  background: #050810;
-  border: 1px solid #1e2a3e;
-  border-radius: 8px;
-  padding: 14px 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-3) var(--spacing-4);
 }
 .roi-not-captured-title {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.1em;
+  font: var(--text-weight-label) var(--text-size-meta)/1 var(--font-primary);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #6a7e98;
-  font-weight: 600;
-  margin-bottom: 8px;
+  color: var(--text-tertiary);
+  margin-bottom: var(--spacing-2);
 }
 .roi-copy-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: ${ACCENT};
-  border: 1px solid ${ACCENT};
-  color: #050810;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  padding: 9px 16px;
-  border-radius: 6px;
+  gap: var(--spacing-1);
+  background: var(--blue-500);
+  border: 1px solid var(--blue-500);
+  color: #fff;
+  font: 600 var(--text-size-body)/1 var(--font-primary);
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: filter 0.16s;
+  transition: background-color var(--duration-fast) var(--ease-standard);
   align-self: flex-start;
 }
-.roi-copy-btn:hover { filter: brightness(1.05); }
-.roi-copy-btn:focus-visible { outline: 3px solid rgba(251,191,36,0.40); outline-offset: 2px; }
-.roi-copy-btn--copied { background: #34d399; border-color: #34d399; color: #02110a; }
+.roi-copy-btn:hover { background: #2B6DCC; }
+.roi-copy-btn:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.roi-copy-btn--copied { background: var(--color-success); border-color: var(--color-success); color: #fff; }
 
 /* Block helpers */
-.roi-block { display: flex; flex-direction: column; gap: 16px; }
-.roi-divider { height: 1px; background: #1e2a3e; margin: 4px 0; }
+.roi-block { display: flex; flex-direction: column; gap: var(--spacing-5); }
+.roi-divider { height: 1px; background: var(--border-default); margin: var(--spacing-1) 0; }
 .roi-cost-readouts {
-  display: flex; gap: 18px; flex-wrap: wrap;
-  margin-top: 6px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 13px;
-  color: #c0d0e0;
+  display: flex;
+  gap: var(--spacing-4);
+  flex-wrap: wrap;
+  margin-top: var(--spacing-1);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-size-body);
+  color: var(--text-secondary);
 }
 .roi-cost-readouts strong { color: ${ACCENT}; font-weight: 600; }
 `
@@ -869,10 +954,10 @@ export default function AiRoi() {
                 </tbody>
               </table>
 
-              <div className="roi-divider" style={{ margin: '16px 0' }} />
+              <div className="roi-divider" style={{ margin: 'var(--spacing-4) 0' }} />
 
               <div className="roi-eyebrow-sm">Live readouts</div>
-              <p className="roi-section-sub" style={{ marginBottom: 10 }}>
+              <p className="roi-section-sub" style={{ marginBottom: 'var(--spacing-2)' }}>
                 Based on Tab 1 — {fmtInt(inputs.inTokens)} input tokens, {fmtInt(inputs.outTokens)} output tokens per task on <strong style={{ color: ACCENT }}>{modelLabel}</strong>
                 {inputs.caching && <> · caching on</>}
                 {inputs.batch && <> · batch on</>}.
@@ -911,7 +996,7 @@ export default function AiRoi() {
                   <li><strong>Change management.</strong> Roles shift, workflows rewrite, training repeats. People time, not just compute.</li>
                 </ul>
 
-                <div className="roi-divider" style={{ margin: '16px 0' }} />
+                <div className="roi-divider" style={{ margin: 'var(--spacing-4) 0' }} />
 
                 <Slider
                   label="Review / editing overhead"
