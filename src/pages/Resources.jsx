@@ -481,7 +481,7 @@ function TrackQuiz({ quiz, levelKey }) {
               }
               return (
                 <button key={i} className={cls} onClick={() => handleAnswer(i)} disabled={chosen !== null}>
-                  <span style={{ color: 'var(--text-tertiary)', marginRight: 10, fontFamily: ''IBM Plex Mono', ui-monospace, monospace', fontSize: 13 }}>{String.fromCharCode(65 + i)}.</span>
+                  <span style={{ color: 'var(--text-tertiary)', marginRight: 10, fontFamily: "'IBM Plex Mono', ui-monospace, monospace", fontSize: 13 }}>{String.fromCharCode(65 + i)}.</span>
                   {opt}
                 </button>
               )
