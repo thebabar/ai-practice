@@ -17,6 +17,7 @@ import BoardBriefing from './pages/BoardBriefing.jsx'
 import Resources from './pages/Resources.jsx'
 import AIRiskGovernance from './pages/AIRiskGovernance.jsx'
 import AppBuilding from './pages/AppBuilding.jsx'
+import BuildWithClaudeCode from './pages/BuildWithClaudeCode.jsx'
 import UseCaseBuilderGate from './pages/UseCaseBuilderGate.jsx'
 import UseCaseBuilderVerify from './pages/UseCaseBuilderVerify.jsx'
 import SignInPage from './pages/SignInPage.jsx'
@@ -44,6 +45,7 @@ function AppRoutes() {
       <Route path="/learn-claude" element={<Resources />} />
       <Route path="/ai-risk-governance" element={<AIRiskGovernance />} />
       <Route path="/app-building" element={<AppBuilding />} />
+      <Route path="/build-with-claude-code" element={<BuildWithClaudeCode />} />
       <Route path="/use-case-builder" element={<UseCaseBuilderGate />} />
       <Route path="/use-case-builder/verify" element={<UseCaseBuilderVerify />} />
       {CLERK_PUBLISHABLE_KEY && (
