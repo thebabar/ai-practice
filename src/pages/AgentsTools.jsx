@@ -1040,6 +1040,25 @@ export default function AgentsTools() {
           <p className="ag-section-sub">An agent is an LLM that doesn’t just answer once — it works in a loop. Given a goal, it reasons about what to do, calls a tool to act, observes the result, and repeats until the task is done. That loop is what separates an agent from a single prompt-and-response.</p>
 
           <div className="ag-card">
+            <div className="ag-card-title">Agent vs. simple LLM call</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-3)' }}>
+              {[
+                { label: 'Simple LLM call', tint: 'var(--color-error)',   soft: 'var(--surface-2)',  points: ['Single input, single output', 'No tools or external data', 'Relies purely on training knowledge', 'One shot — no self-correction'] },
+                { label: 'Agent',            tint: 'var(--color-success)', soft: 'var(--surface-1)',  points: ['Multi-step reasoning loop', 'Calls real tools (search, code, APIs)', 'Grounds answers in live data', 'Self-corrects by observing results'] },
+              ].map(col => (
+                <div key={col.label} style={{ background: col.soft, border: `1px solid ${col.tint}`, borderRadius: 'var(--radius-md)', padding: 'var(--spacing-4)' }}>
+                  <div style={{ font: 'var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary)', color: col.tint, marginBottom: 'var(--spacing-3)' }}>{col.label}</div>
+                  {col.points.map(p => (
+                    <div key={p} style={{ display: 'flex', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-1)', font: 'var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)' }}>
+                      <span style={{ color: col.tint, flexShrink: 0 }}>▸</span>{p}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="ag-card">
             <div className="ag-card-title">Agent execution loop</div>
             <div className="loop-container">
               {LOOP_STEPS.map((step, i) => (
@@ -1085,25 +1104,6 @@ export default function AgentsTools() {
               <button className="loop-btn secondary" onClick={() => { setLoopStep(0); setLoopRunning(false) }}>
                 <ArrowCounterClockwiseIcon size={14} weight="bold" /> Reset
               </button>
-            </div>
-          </div>
-
-          <div className="ag-card">
-            <div className="ag-card-title">Agent vs. simple LLM call</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-3)' }}>
-              {[
-                { label: 'Simple LLM call', tint: 'var(--color-error)',   soft: 'var(--surface-2)',  points: ['Single input, single output', 'No tools or external data', 'Relies purely on training knowledge', 'One shot — no self-correction'] },
-                { label: 'Agent',            tint: 'var(--color-success)', soft: 'var(--surface-1)',  points: ['Multi-step reasoning loop', 'Calls real tools (search, code, APIs)', 'Grounds answers in live data', 'Self-corrects by observing results'] },
-              ].map(col => (
-                <div key={col.label} style={{ background: col.soft, border: `1px solid ${col.tint}`, borderRadius: 'var(--radius-md)', padding: 'var(--spacing-4)' }}>
-                  <div style={{ font: 'var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary)', color: col.tint, marginBottom: 'var(--spacing-3)' }}>{col.label}</div>
-                  {col.points.map(p => (
-                    <div key={p} style={{ display: 'flex', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-1)', font: 'var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)' }}>
-                      <span style={{ color: col.tint, flexShrink: 0 }}>▸</span>{p}
-                    </div>
-                  ))}
-                </div>
-              ))}
             </div>
           </div>
         </div>
