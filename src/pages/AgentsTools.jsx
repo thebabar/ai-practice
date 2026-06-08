@@ -1037,7 +1037,7 @@ export default function AgentsTools() {
       {tab === 0 && (
         <div className="ag-panel">
           <div className="ag-section-title">The agent loop</div>
-          <p className="ag-section-sub">Unlike a single LLM call, agents operate in a loop — perceive, reason, call a tool, observe the result, and repeat until the task is done. Watch it run step by step.</p>
+          <p className="ag-section-sub">An agent is an LLM that doesn’t just answer once — it works in a loop. Given a goal, it reasons about what to do, calls a tool to act, observes the result, and repeats until the task is done. That loop is what separates an agent from a single prompt-and-response.</p>
 
           <div className="ag-card">
             <div className="ag-card-title">Agent execution loop</div>
