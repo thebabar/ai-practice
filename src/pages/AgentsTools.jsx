@@ -1043,11 +1043,20 @@ export default function AgentsTools() {
             <div className="ag-card-title">Agent vs. simple LLM call</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-3)' }}>
               {[
-                { label: 'Simple LLM call', tint: 'var(--color-error)',   soft: 'var(--surface-2)',  points: ['Single input, single output', 'No tools or external data', 'Relies purely on training knowledge', 'One shot — no self-correction'] },
-                { label: 'Agent',            tint: 'var(--color-success)', soft: 'var(--surface-1)',  points: ['Multi-step reasoning loop', 'Calls real tools (search, code, APIs)', 'Grounds answers in live data', 'Self-corrects by observing results'] },
+                { label: 'Simple LLM call', tint: 'var(--color-error)',   titleColor: 'var(--color-error)',   soft: 'var(--surface-2)', borderWidth: 1, emphasize: false, points: ['Single input, single output', 'No tools or external data', 'Relies purely on training knowledge', 'One shot — no self-correction'] },
+                { label: 'Agent',            tint: 'var(--color-success)', titleColor: 'var(--text-primary)', soft: 'var(--surface-1)', borderWidth: 2, emphasize: true,  points: ['Multi-step reasoning loop', 'Calls real tools (search, code, APIs)', 'Grounds answers in live data', 'Self-corrects by observing results'] },
               ].map(col => (
-                <div key={col.label} style={{ background: col.soft, border: `1px solid ${col.tint}`, borderRadius: 'var(--radius-md)', padding: 'var(--spacing-4)' }}>
-                  <div style={{ font: 'var(--text-weight-label) var(--text-size-body)/1.2 var(--font-primary)', color: col.tint, marginBottom: 'var(--spacing-3)' }}>{col.label}</div>
+                <div
+                  key={col.label}
+                  style={{
+                    background: col.soft,
+                    border: `${col.borderWidth}px solid ${col.tint}`,
+                    borderRadius: 'var(--radius-md)',
+                    padding: 'var(--spacing-4)',
+                    boxShadow: col.emphasize ? 'var(--shadow-e2)' : 'none',
+                  }}
+                >
+                  <div style={{ font: 'var(--text-weight-h3) var(--text-size-h3)/var(--text-lh-h3) var(--font-primary)', letterSpacing: 'var(--text-ls-h3)', color: col.titleColor, marginBottom: 'var(--spacing-3)' }}>{col.label}</div>
                   {col.points.map(p => (
                     <div key={p} style={{ display: 'flex', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-1)', font: 'var(--text-weight-body) var(--text-size-caption)/var(--text-lh-body) var(--font-primary)', color: 'var(--text-secondary)' }}>
                       <span style={{ color: col.tint, flexShrink: 0 }}>▸</span>{p}
