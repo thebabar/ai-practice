@@ -353,7 +353,7 @@ const css = `
   font-weight: 600;
 }
 .roi-result-box--net { border-color: var(--color-success); }
-.roi-result-box--net .roi-result-val { color: var(--color-success); }
+.roi-result-box--net .roi-result-val { color: var(--text-primary); }
 .roi-result-box--neg { border-color: var(--color-error); }
 .roi-result-box--neg .roi-result-val { color: var(--color-error); }
 
@@ -391,7 +391,7 @@ const css = `
   border-radius: var(--radius-sm);
   transition: width var(--duration-standard) var(--ease-standard);
 }
-.roi-vsbar-fill--val { background: var(--color-success); }
+.roi-vsbar-fill--val { background: var(--text-primary); }
 .roi-vsbar-fill--cost { background: ${ACCENT}; }
 .roi-vsbar-amt {
   width: 110px;
