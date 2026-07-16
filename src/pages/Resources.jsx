@@ -693,7 +693,7 @@ export default function Resources() {
                     </div>
                     <div className="rs-level-name">{t.name}</div>
                     <div className="rs-level-desc">{t.desc}</div>
-                    <div className="rs-level-meta">{parts.join(' · ')}</div>
+                    <div className="rs-level-meta">{parts.map(p => <div key={p}>{p}</div>)}</div>
                   </div>
                 )
               })}
