@@ -106,3 +106,37 @@ Token Optimization, Agents/Tools & Context, Vector Embeddings, Temperature & Sam
 - All new LLM activities default to `tier: 'user'` unless explicitly specified as `tier: 'pro'`
 - Excel files not persisted in `window.storage` (too heavy) — re-upload required each session
 - Single `.jsx` file architecture for the learning module artifact for simplicity
+
+---
+
+## Session log — July 15, 2026
+
+### Resources page (`/learn-claude`) — expanded from 4 to 6 tracks
+- New **Product Managers** track (7 resources + own quiz): AI Fluency ×2, Cowork, Building
+  Effective Agents, Claude Code best practices, Claude Design intro, internal AI ROI calculator.
+- New **App Builder** track (7 resources + own quiz): idea-to-shipped-app persona. Cross-links
+  the internal `/app-building` and `/build-with-claude-code` pages.
+- Track order is now **least → most technical**: Beginner, Intermediate, Product Managers,
+  Designers (renamed from "Claude Design"), App Builder, Developer. Picker grid is 3 per row.
+- New `Tool` resource type (wrench badge, "Open tool" action) for internal site pages.
+- Gap-analysis additions: Claude Code best practices (tops Intermediate; also in Developer + PM
+  + App Builder with audience-specific copy), Interactive prompt engineering tutorial
+  (Intermediate + Developer), Claude Platform 101, Building Effective Agents, Claude Cookbooks.
+
+### Glossary — 53 → 67 terms
+- Agents category grew 6 → 17: MCP, subagent, agent skills, workflow vs agent, context
+  engineering, prompt injection, evals, guardrails, HITL, agent memory, computer use.
+- Foundations added: reasoning/extended thinking, zero/few-shot prompting, multimodal.
+- First glossary cross-links into `/ai-risk-governance` (security/governance terms).
+
+### Working conventions (also in Claude Code project memory)
+- Duplicate resources across tracks are welcome — ease of access beats DRY.
+- A resource appearing in multiple tracks gets its `desc` rewritten per track audience.
+- Quizzes are always track-specific; never shared or overwritten.
+
+### Open items
+- Home hero stats are **hardcoded** (17 visualisations, 67 glossary terms) — update both when
+  adding pages/terms, or derive from the arrays to stop them going stale.
+- Internal Tool cards carry the "Community" badge; consider a third "In-house" badge style.
+- Untracked `sample_texts/` dir (city/forest/mountain/ocean .txt) sitting in repo — keep or delete?
+- Site now also served at `labs.prismskills.ai` (same Vercel deploy as aibitbybot.vercel.app).
