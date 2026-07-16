@@ -4,7 +4,7 @@ import {
   PlantIcon, RocketLaunchIcon, CodeIcon, PaintBrushIcon,
   BookOpenIcon, PlayCircleIcon, SealCheckIcon, UsersThreeIcon,
   QuestionIcon, ArrowSquareOutIcon, CheckIcon, XIcon, ArticleIcon,
-  BriefcaseIcon, WrenchIcon,
+  BriefcaseIcon, WrenchIcon, HammerIcon,
 } from '@phosphor-icons/react'
 
 // Resources is a guided curriculum → uses the structured-content signal (blue).
@@ -54,8 +54,7 @@ const css = `
 .rs-section-sub { font-size: 16px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 28px; text-align: center; }
 
 /* Level selector */
-.rs-level-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
-@media (max-width: 1200px) { .rs-level-grid { grid-template-columns: repeat(3, 1fr); } }
+.rs-level-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 @media (max-width: 980px) { .rs-level-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 480px) { .rs-level-grid { grid-template-columns: 1fr; } }
 .rs-level-card { background: var(--surface-1); border: 1px solid var(--border-default); border-radius: var(--radius-card); padding: 28px 22px; cursor: pointer; transition: all 0.2s; text-align: center; display: flex; flex-direction: column; align-items: center; }
@@ -263,6 +262,26 @@ const TRACKS = {
       { q: 'Prompt engineering for production systems is mostly about…', opts: ['Iterative experimentation, clear context, evals, and version control', 'Memorizing magic keywords', 'Always raising temperature to 1', 'Picking the largest model regardless of cost'], correct: 0, explanation: "Treat prompts like code: iterate against evals, version them, and ground them in concrete context — Anthropic's experts emphasize this." },
     ],
   },
+  appBuilder: {
+    name: 'App Builder',
+    Icon: HammerIcon,
+    desc: 'Go from idea to shipped app with AI doing the heavy lifting. Prototype, build, and deploy — no engineering background required.',
+    resources: [
+      { id: 'ab1', type: 'Course', source: 'Community', title: 'Build with Andrew', provider: 'DeepLearning.AI', instructor: 'Andrew Ng', desc: 'Describe an app idea and let AI build it — no coding needed. The ideal on-ramp for this track.', url: 'https://learn.deeplearning.ai/courses/build-with-andrew' },
+      { id: 'ab2', type: 'Course', source: 'Official', title: 'AI Fluency for Builders', provider: 'Anthropic Academy', desc: 'Collaborate with AI effectively while staying focused on the thing that matters: shipping.', url: 'https://anthropic.skilljar.com/ai-fluency-for-builders' },
+      { id: 'ab3', type: 'Course', source: 'Official', title: 'Claude Code 101', provider: 'Anthropic Academy', desc: 'Direct an agent that builds your app for you: give it a goal, review its work, iterate.', url: 'https://anthropic.skilljar.com/claude-code-101' },
+      { id: 'ab4', type: 'Reference', source: 'Official', title: 'Claude Code best practices', provider: 'Claude Code docs', desc: 'Habits that make AI-built apps go smoothly: describe outcomes, review in small steps, let the agent plan first.', url: 'https://code.claude.com/docs/en/best-practices' },
+      { id: 'ab5', type: 'Video', source: 'Community', title: 'Claude Design Basics: Master 95% in 10 Minutes', desc: 'Prototype your interface in Claude Design, then hand the validated design to Claude Code to build.', youtubeId: 'X7YMMyd2Qnk' },
+      { id: 'ab6', type: 'Tool', source: 'Community', title: 'App Building', provider: 'AI Visual Lab', desc: 'Module-based walkthrough of building an AI app end to end — built into this site.', url: '/app-building' },
+      { id: 'ab7', type: 'Tool', source: 'Community', title: 'Build with Claude Code', provider: 'AI Visual Lab', desc: 'Hands-on guide to shipping your first project with Claude Code — built into this site.', url: '/build-with-claude-code' },
+    ],
+    quiz: [
+      { q: 'The fastest path from idea to working app with AI is usually…', opts: ['Describe the outcome, let the AI build, then iterate on what you see', 'Write complete technical specs before touching anything', 'Learn a web framework first', 'Outsource it and wait'], correct: 0, explanation: 'AI building tools reward quick iteration on something real over big up-front specification.' },
+      { q: 'When Claude Code builds something wrong, the best move is to…', opts: ['Describe what you expected vs what you got, and let it fix the gap', 'Start the whole project over', 'Fix every mistake by hand', 'Lower your standards'], correct: 0, explanation: 'Plain-language feedback is usually enough — the agent can locate and repair its own mistakes.' },
+      { q: 'A good prototype-to-production flow is…', opts: ['Prototype in Claude Design, hand off to Claude Code, deploy and iterate', 'Skip prototyping and write production code first', 'Polish the design for months before building', 'Deploy first, design later'], correct: 0, explanation: 'Prototype cheaply, hand the validated design to the build agent, then ship and improve in small steps.' },
+      { q: 'Before shipping an AI-built app, you should always…', opts: ['Walk through the real user flows yourself', 'Assume the AI verified everything', 'Delete the error handling to simplify', 'Add every feature you can think of'], correct: 0, explanation: 'AI accelerates the building; verifying the product actually behaves as intended is still your job.' },
+    ],
+  },
   productManagers: {
     name: 'Product Managers',
     Icon: BriefcaseIcon,
@@ -303,7 +322,7 @@ const TRACKS = {
   },
 }
 
-const LEVEL_ORDER = ['beginner', 'intermediate', 'developer', 'productManagers', 'claudeDesign']
+const LEVEL_ORDER = ['beginner', 'intermediate', 'developer', 'appBuilder', 'productManagers', 'claudeDesign']
 
 const FILTERS = [
   { key: 'all', label: 'All', test: () => true },
