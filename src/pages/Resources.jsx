@@ -303,7 +303,7 @@ const TRACKS = {
     ],
   },
   claudeDesign: {
-    name: 'Claude Design',
+    name: 'Designers',
     Icon: PaintBrushIcon,
     desc: 'Design with Claude. Build prototypes, slides, one-pagers, websites, and design systems through conversation.',
     accessNote: { intro: 'Access Claude Design at', url: 'https://claude.ai/design', label: 'claude.ai/design' },
@@ -322,7 +322,7 @@ const TRACKS = {
   },
 }
 
-const LEVEL_ORDER = ['beginner', 'intermediate', 'developer', 'appBuilder', 'productManagers', 'claudeDesign']
+const LEVEL_ORDER = ['beginner', 'intermediate', 'productManagers', 'claudeDesign', 'appBuilder', 'developer']
 
 const FILTERS = [
   { key: 'all', label: 'All', test: () => true },
