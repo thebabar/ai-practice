@@ -243,6 +243,7 @@ const TRACKS = {
       { id: 'd10', type: 'Course', source: 'Official', title: 'Model Context Protocol: Advanced Topics', provider: 'Anthropic Academy', desc: 'Advanced MCP patterns: sampling, notifications, file system access, transports.', url: 'https://anthropic.skilljar.com/model-context-protocol-advanced-topics' },
       { id: 'd11', type: 'Course', source: 'Community', title: 'Agentic AI', provider: 'DeepLearning.AI', instructor: 'Andrew Ng', duration: '~8h', desc: 'Build agentic systems with evals and design patterns. Covers AI broadly, not just Claude.', url: 'https://learn.deeplearning.ai/courses/agentic-ai' },
       { id: 'd12', type: 'Reference', source: 'Official', title: 'Developer docs', provider: 'Claude Platform', desc: 'Official Claude API and platform documentation.', url: 'https://platform.claude.com/docs' },
+      { id: 'd13', type: 'Reference', source: 'Official', title: 'Claude Code best practices', provider: 'Claude Code docs', desc: 'Patterns for getting the most out of Claude Code: setup, workflows, and agentic coding tips.', url: 'https://code.claude.com/docs/en/best-practices' },
     ],
     quiz: [
       { q: 'The Claude API lets developers…', opts: ["Integrate Claude's capabilities into their own applications", 'Only use a web chat', 'Train new base models', "Access other companies' private data"], correct: 0, explanation: 'The API is how you build Claude-powered applications programmatically.' },
