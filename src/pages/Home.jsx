@@ -404,7 +404,7 @@ export default function Home() {
         <h1 className="hero-title">Learn AI visually</h1>
         <p className="hero-desc">Stop reading about AI. Start seeing it. Every visualisation is interactive, hands-on, and built to give you real intuition — not just theory.</p>
         <div className="hero-stats">
-          {[["13", "Visualisations"], ["53", "Glossary terms"], ["100%", "Free and open"]].map(([n, l]) => (
+          {[["13", "Visualisations"], ["67", "Glossary terms"], ["100%", "Free and open"]].map(([n, l]) => (
             <div key={l} style={{ textAlign: 'center' }}>
               <div className="hero-stat-num">{n}</div>
               <div className="hero-stat-lbl">{l}</div>
@@ -425,7 +425,7 @@ export default function Home() {
           <BookOpenIcon size={20} weight="duotone" />
           <div>
             <div className="gl-utility-title">Glossary</div>
-            <div className="gl-utility-desc">53 terms · Foundations · Tokens · Sampling · Agents · Embeddings · RAG</div>
+            <div className="gl-utility-desc">67 terms · Foundations · Tokens · Sampling · Agents · Embeddings · RAG</div>
           </div>
           <ArrowRightIcon size={16} weight="bold" className="gl-utility-arrow" />
         </Link>

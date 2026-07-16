@@ -54,7 +54,8 @@ const css = `
 .rs-section-sub { font-size: 16px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 28px; text-align: center; }
 
 /* Level selector */
-.rs-level-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.rs-level-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+@media (max-width: 1200px) { .rs-level-grid { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 980px) { .rs-level-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 480px) { .rs-level-grid { grid-template-columns: 1fr; } }
 .rs-level-card { background: var(--surface-1); border: 1px solid var(--border-default); border-radius: var(--radius-card); padding: 28px 22px; cursor: pointer; transition: all 0.2s; text-align: center; display: flex; flex-direction: column; align-items: center; }
