@@ -4,6 +4,7 @@ import {
   PlantIcon, RocketLaunchIcon, CodeIcon, PaintBrushIcon,
   BookOpenIcon, PlayCircleIcon, SealCheckIcon, UsersThreeIcon,
   QuestionIcon, ArrowSquareOutIcon, CheckIcon, XIcon, ArticleIcon,
+  BriefcaseIcon, WrenchIcon,
 } from '@phosphor-icons/react'
 
 // Resources is a guided curriculum → uses the structured-content signal (blue).
@@ -261,6 +262,26 @@ const TRACKS = {
       { q: 'Prompt engineering for production systems is mostly about…', opts: ['Iterative experimentation, clear context, evals, and version control', 'Memorizing magic keywords', 'Always raising temperature to 1', 'Picking the largest model regardless of cost'], correct: 0, explanation: "Treat prompts like code: iterate against evals, version them, and ground them in concrete context — Anthropic's experts emphasize this." },
     ],
   },
+  productManagers: {
+    name: 'Product Managers',
+    Icon: BriefcaseIcon,
+    desc: 'Scope, evaluate, and ship AI features. Judge use cases, prototype fast, and learn when an agent is worth it — no code required. Pairs well with the level tracks.',
+    resources: [
+      { id: 'pm1', type: 'Course', source: 'Official', title: 'AI Fluency: Framework & Foundations', provider: 'Anthropic Academy', desc: 'The foundation: delegate to AI, describe what you want, and judge what comes back.', url: 'https://anthropic.skilljar.com/ai-fluency-framework-foundations' },
+      { id: 'pm2', type: 'Course', source: 'Official', title: 'AI Fluency for Builders', provider: 'Anthropic Academy', desc: 'AI fluency aimed at people shipping products — impact and efficiency without losing sight of delivery.', url: 'https://anthropic.skilljar.com/ai-fluency-for-builders' },
+      { id: 'pm3', type: 'Course', source: 'Official', title: 'Introduction to Claude Cowork', provider: 'Anthropic Academy', desc: 'Delegate real deliverables — research, briefs, analyses — and come back to finished work.', url: 'https://anthropic.skilljar.com/introduction-to-claude-cowork' },
+      { id: 'pm4', type: 'Article', source: 'Official', title: 'Building effective agents', provider: 'Anthropic Engineering', desc: 'The decision framework behind agent features: workflows vs agents, and when the simpler option wins.', url: 'https://www.anthropic.com/research/building-effective-agents' },
+      { id: 'pm5', type: 'Reference', source: 'Official', title: 'Claude Code best practices', provider: 'Claude Code docs', desc: 'How to write specs an AI agent can actually execute: clear outcomes, constraints, and success criteria.', url: 'https://code.claude.com/docs/en/best-practices' },
+      { id: 'pm6', type: 'Video', source: 'Official', title: 'Introducing Claude Design', desc: 'Turn an idea into a clickable prototype before committing engineering time.', youtubeId: 't_LBECIQQqs' },
+      { id: 'pm7', type: 'Tool', source: 'Community', title: 'AI ROI calculator', provider: 'AI Visual Lab', desc: 'Estimate the return on an AI use case with real numbers — built into this site.', url: '/ai-roi' },
+    ],
+    quiz: [
+      { q: 'When does an agent beat a fixed workflow?', opts: ['Open-ended problems where you can’t predict the steps in advance', 'Every task, always', 'Only trivial tasks', 'When you want the lowest cost and latency'], correct: 0, explanation: "Anthropic's guidance: reach for agents on open-ended problems, and prefer the simplest solution — often a workflow — everywhere else." },
+      { q: 'A spec an AI agent can execute well should…', opts: ['State the outcome, constraints, and success criteria', 'List every click in order', 'Avoid concrete examples', 'Stay vague to give the model freedom'], correct: 0, explanation: 'Clear outcomes and success criteria let the agent plan its own path; step-by-step scripts and vagueness both underuse it.' },
+      { q: 'AI Fluency means collaborating with AI…', opts: ['Effectively, efficiently, ethically, and safely', 'Only through code', 'Without checking outputs', 'By maximizing prompt length'], correct: 0, explanation: "That's the AI Fluency framework's definition, built on Delegation, Description, Discernment, and Diligence." },
+      { q: 'Before pitching an AI feature, the strongest first step is to…', opts: ['Prototype it and estimate ROI with real numbers', 'Write a 40-page requirements doc', 'Wait for a competitor to ship it', 'Pick the biggest model available'], correct: 0, explanation: 'A fast prototype plus an ROI estimate makes the case concrete before engineering time is committed.' },
+    ],
+  },
   claudeDesign: {
     name: 'Claude Design',
     Icon: PaintBrushIcon,
@@ -281,7 +302,7 @@ const TRACKS = {
   },
 }
 
-const LEVEL_ORDER = ['beginner', 'intermediate', 'developer', 'claudeDesign']
+const LEVEL_ORDER = ['beginner', 'intermediate', 'developer', 'productManagers', 'claudeDesign']
 
 const FILTERS = [
   { key: 'all', label: 'All', test: () => true },
@@ -311,8 +332,8 @@ function saveProgress(ids) {
 // ─── Badges ───────────────────────────────────────────────────────────────
 function TypeBadge({ type }) {
   // Reference items render with the BookOpen icon, like courses. Article gets its own icon.
-  const Icon = type === 'Video' ? PlayCircleIcon : type === 'Article' ? ArticleIcon : BookOpenIcon
-  const label = type === 'Video' ? 'Video' : type === 'Article' ? 'Article' : type === 'Reference' ? 'Reference' : 'Course'
+  const Icon = type === 'Video' ? PlayCircleIcon : type === 'Article' ? ArticleIcon : type === 'Tool' ? WrenchIcon : BookOpenIcon
+  const label = type === 'Video' ? 'Video' : type === 'Article' ? 'Article' : type === 'Reference' ? 'Reference' : type === 'Tool' ? 'Tool' : 'Course'
   return (
     <span className="rs-badge rs-badge-type">
       <Icon size={16} weight="duotone" color={ACCENT_ICON} />
@@ -388,7 +409,7 @@ function ResourceCard({ res, isFirst, completed, onToggle, onPlay }) {
             </button>
           ) : (
             <a className="rs-link" href={res.url} target="_blank" rel="noopener noreferrer">
-              {res.type === 'Reference' ? 'Read docs' : res.type === 'Article' ? 'Read article' : 'Open course'}
+              {res.type === 'Reference' ? 'Read docs' : res.type === 'Article' ? 'Read article' : res.type === 'Tool' ? 'Open tool' : 'Open course'}
               <ArrowSquareOutIcon size={15} weight="bold" color={ACCENT_ICON} />
             </a>
           )}
@@ -658,10 +679,12 @@ export default function Resources() {
                 const courses = t.resources.filter(r => r.type === 'Course' || r.type === 'Reference').length
                 const articles = t.resources.filter(r => r.type === 'Article').length
                 const videos = t.resources.filter(r => r.type === 'Video').length
+                const tools = t.resources.filter(r => r.type === 'Tool').length
                 const parts = []
                 if (courses) parts.push(`${courses} course${courses > 1 ? 's' : ''}`)
                 if (articles) parts.push(`${articles} article${articles > 1 ? 's' : ''}`)
                 if (videos) parts.push(`${videos} video${videos > 1 ? 's' : ''}`)
+                if (tools) parts.push(`${tools} tool${tools > 1 ? 's' : ''}`)
                 return (
                   <div key={key} className="rs-level-card" onClick={() => pickLevel(key)}>
                     <div className="rs-level-icon">
