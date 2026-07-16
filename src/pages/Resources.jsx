@@ -218,6 +218,7 @@ const TRACKS = {
       { id: 'i4', type: 'Video', source: 'Official', title: 'What are skills?', desc: 'How Skills teach Claude to do a task once, then apply it automatically when relevant.', youtubeId: 'bjdBVZa66oU' },
       { id: 'i5', type: 'Course', source: 'Community', title: 'Build with Andrew', provider: 'DeepLearning.AI', instructor: 'Andrew Ng', desc: 'No coding needed — describe an app idea and let AI build it. Covers AI broadly.', url: 'https://learn.deeplearning.ai/courses/build-with-andrew' },
       { id: 'i6', type: 'Video', source: 'Community', title: 'Claude Skills Tutorial (2026): Build, Run, and Share', desc: 'Kevin Stratvert walks through building, running, and sharing your own Claude Skills.', youtubeId: 'O_z9vDLgvoY' },
+      { id: 'i7', type: 'Reference', source: 'Official', title: 'Claude Code best practices', provider: 'Claude Code docs', desc: 'Working habits that transfer beyond coding: clear instructions, iteration, and letting Claude plan before it acts.', url: 'https://code.claude.com/docs/en/best-practices' },
     ],
     quiz: [
       { q: "Per Anthropic's experts, prompt engineering is mostly about…", opts: ['Iterative experimentation and clear communication', 'One perfect prompt on the first try', 'Memorizing secret keywords', 'Writing in a programming language'], correct: 0, explanation: 'The deep-dive roundtable stresses iteration and clear communication.' },
