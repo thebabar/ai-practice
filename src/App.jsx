@@ -1,4 +1,5 @@
 import { Routes, Route, useNavigate } from 'react-router-dom'
+import GlossaryScope from './components/GlossaryScope.jsx'
 import { ClerkProvider } from '@clerk/clerk-react'
 import Home from './pages/Home.jsx'
 import IntroLLMs from './pages/IntroLLMs.jsx'
@@ -28,35 +29,37 @@ const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 
 function AppRoutes() {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/intro-llms" element={<IntroLLMs />} />
-      <Route path="/types-of-llms" element={<TypesOfLLMs />} />
-      <Route path="/token-optimization" element={<TokenOptimization />} />
-      <Route path="/agents-tools" element={<AgentsTools />} />
-      <Route path="/vector-embeddings" element={<VectorEmbeddings />} />
-      <Route path="/temperature-sampling" element={<TemperatureSampling />} />
-      <Route path="/rag" element={<RAG />} />
-      <Route path="/glossary" element={<Glossary />} />
-      <Route path="/neural-networks" element={<NeuralNetworks />} />
-      <Route path="/image-generation" element={<ImageGeneration />} />
-      <Route path="/workflow-canvas" element={<WorkflowCanvas />} />
-      <Route path="/agent-simulation" element={<AgentSimulation />} />
-      <Route path="/board-briefing" element={<BoardBriefing />} />
-      <Route path="/learn-claude" element={<Resources />} />
-      <Route path="/ai-risk-governance" element={<AIRiskGovernance />} />
-      <Route path="/app-building" element={<AppBuilding />} />
-      <Route path="/build-with-claude-code" element={<BuildWithClaudeCode />} />
-      <Route path="/ai-roi" element={<AiRoi />} />
-      <Route path="/use-case-builder" element={<UseCaseBuilderGate />} />
-      <Route path="/use-case-builder/verify" element={<UseCaseBuilderVerify />} />
-      {CLERK_PUBLISHABLE_KEY && (
-        <>
-          <Route path="/sign-in/*" element={<SignInPage />} />
-          <Route path="/sign-up/*" element={<SignUpPage />} />
-        </>
-      )}
-    </Routes>
+    <GlossaryScope>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/intro-llms" element={<IntroLLMs />} />
+        <Route path="/types-of-llms" element={<TypesOfLLMs />} />
+        <Route path="/token-optimization" element={<TokenOptimization />} />
+        <Route path="/agents-tools" element={<AgentsTools />} />
+        <Route path="/vector-embeddings" element={<VectorEmbeddings />} />
+        <Route path="/temperature-sampling" element={<TemperatureSampling />} />
+        <Route path="/rag" element={<RAG />} />
+        <Route path="/glossary" element={<Glossary />} />
+        <Route path="/neural-networks" element={<NeuralNetworks />} />
+        <Route path="/image-generation" element={<ImageGeneration />} />
+        <Route path="/workflow-canvas" element={<WorkflowCanvas />} />
+        <Route path="/agent-simulation" element={<AgentSimulation />} />
+        <Route path="/board-briefing" element={<BoardBriefing />} />
+        <Route path="/learn-claude" element={<Resources />} />
+        <Route path="/ai-risk-governance" element={<AIRiskGovernance />} />
+        <Route path="/app-building" element={<AppBuilding />} />
+        <Route path="/build-with-claude-code" element={<BuildWithClaudeCode />} />
+        <Route path="/ai-roi" element={<AiRoi />} />
+        <Route path="/use-case-builder" element={<UseCaseBuilderGate />} />
+        <Route path="/use-case-builder/verify" element={<UseCaseBuilderVerify />} />
+        {CLERK_PUBLISHABLE_KEY && (
+          <>
+            <Route path="/sign-in/*" element={<SignInPage />} />
+            <Route path="/sign-up/*" element={<SignUpPage />} />
+          </>
+        )}
+      </Routes>
+    </GlossaryScope>
   )
 }
 

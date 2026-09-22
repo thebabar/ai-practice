@@ -5,9 +5,10 @@ import GlossaryPopover from './GlossaryPopover.jsx'
 /* =====================================================================
    GlossaryScope — auto-links glossary terms inside its subtree.
 
-   Wrap a page's content and the first mention of each glossary term in
-   static prose becomes an <abbr class="prism-gloss"> that opens a
-   definition popover on hover, focus or tap. No prose edits required.
+   Mounted once around the router in App.jsx, so every page gets it.
+   The first mention of each glossary term in static prose becomes an
+   <abbr class="prism-gloss"> that opens a definition popover on hover,
+   focus or tap. No prose edits, and no per-page wiring.
 
    Opting out: put data-no-gloss on any element to exclude its subtree.
    Headings and the shared nav are excluded automatically; page heroes
@@ -33,6 +34,22 @@ import GlossaryPopover from './GlossaryPopover.jsx'
  * "first mention" slot and starve the body copy. */
 const SKIP_TAGS = /^(ABBR|A|NAV|H1|H2|H3|H4|H5|H6|CODE|PRE|SCRIPT|STYLE|TEXTAREA|INPUT|SELECT|OPTION|BUTTON|SVG|PATH|CANVAS)$/
 
+/* Every page in this repo names its banner `<prefix>-hero` and its
+ * knowledge check `<prefix>-quiz*`, so the convention does the work a
+ * per-page data-no-gloss attribute otherwise would:
+ *   hero — persists across tab panels, so it would permanently consume
+ *          the "first mention" slot for every tab beneath it.
+ *   quiz — linking a term in a question hands over the answer.
+ * Also skips our own popover, which is portalled into the body and so
+ * would otherwise be walked as ordinary page content. */
+const SKIP_CLASS = /(^|-)(hero|quiz)(-|$)|^prism-gloss-pop$/
+
+function skipByClass(el) {
+  const cn = el.className
+  if (!cn || typeof cn !== 'string') return false
+  return cn.split(/\s+/).some(c => SKIP_CLASS.test(c))
+}
+
 /* True when we may rewrite this element's text children.
  *  - nothing foreign among the children (only text + abbrs we added)
  *  - and, before we have touched it, exactly one text child */
@@ -49,6 +66,9 @@ function isSafeParent(el) {
 }
 
 export default function GlossaryScope({ children, className, style }) {
+  // display:contents keeps this wrapper out of layout entirely, so the
+  // component can sit around the whole router without disturbing any
+  // page's own root styling.
   const rootRef = useRef(null)
   const [active, setActive] = useState(null)   // { term, rect }
   const closeTimer = useRef(0)
@@ -78,6 +98,7 @@ export default function GlossaryScope({ children, className, style }) {
             if (SKIP_TAGS.test(p.tagName)) return NodeFilter.FILTER_REJECT
             if (p.hasAttribute('data-no-gloss')) return NodeFilter.FILTER_REJECT
             if (p.isContentEditable) return NodeFilter.FILTER_REJECT
+            if (skipByClass(p)) return NodeFilter.FILTER_REJECT
             if (p.className && typeof p.className === 'string' &&
                 p.className.includes('recharts')) return NodeFilter.FILTER_REJECT
           }
@@ -220,7 +241,7 @@ export default function GlossaryScope({ children, className, style }) {
   }, [active])
 
   return (
-    <div ref={rootRef} className={className} style={style}>
+    <div ref={rootRef} className={className} style={{ display: 'contents', ...style }}>
       {children}
       {active && (
         <GlossaryPopover

@@ -201,7 +201,7 @@ export default function Glossary() {
   })()
 
   return (
-    <div className="gl-root">
+    <div className="gl-root" data-no-gloss>
       <style>{css}</style>
       <NavBar />
       <header className="gl-hero">
