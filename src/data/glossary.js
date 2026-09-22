@@ -129,6 +129,7 @@ export const EXTRA_ALIASES = {
   'Chain-of-Thought (CoT)': ['chain of thought'],
   'RAG': ['retrieval-augmented generation', 'retrieval augmented generation'],
   'Agentic Loop': ['agent loop'],
+  'Multi-agent System': ['multi-agent'],
   'Evals': ['eval'],
   'Fine-tuning': ['fine-tune', 'fine-tuned', 'finetuning'],
   'Pre-training': ['pre-trained', 'pretraining'],
@@ -171,7 +172,12 @@ export function getMatcher() {
   TERMS.forEach(t => {
     if (NO_AUTO.has(t.term)) return
     const aliases = [...deriveAliases(t.term), ...(EXTRA_ALIASES[t.term] || [])]
-    aliases.forEach(a => {
+    // Any multi-word alias can also be written hyphenated as a compound
+    // modifier ('context-window limits', 'vector-database lookup'), so
+    // register that spelling too rather than listing each by hand.
+    const withHyphenated = aliases.flatMap(a =>
+      a.includes(' ') ? [a, a.replace(/ /g, '-')] : [a])
+    withHyphenated.forEach(a => {
       const key = a.toLowerCase()
       // First term to claim an alias keeps it — TERMS order is stable.
       if (!byAlias.has(key)) byAlias.set(key, { term: t, alias: a, cs: CASE_SENSITIVE.test(a) })
@@ -186,9 +192,13 @@ export function getMatcher() {
     .map(escapeRe)
     .join('|')
 
-  // Hyphen sits in both boundary classes so 'Top-k' cannot match inside
-  // 'Top-k-style' and 'shot' cannot match inside 'Zero-shot'.
-  const regex = new RegExp(`(?<![A-Za-z0-9-])(${alternation})(s?)(?![A-Za-z0-9-])`, 'gi')
+  // Word boundaries are letters/digits only. A hyphen must NOT count as
+  // a word character here: technical prose is full of hyphenated
+  // compounds ('per-token pricing', 'RAG-based retrieval',
+  // 'context-window limits') and treating '-' as part of the word
+  // silently drops every one of them. Multi-word aliases are still
+  // safe because the alternation is ordered longest-first.
+  const regex = new RegExp(`(?<![A-Za-z0-9])(${alternation})(s?)(?![A-Za-z0-9])`, 'gi')
 
   const resolve = matched => {
     const hit = byAlias.get(matched.toLowerCase())
