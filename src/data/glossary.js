@@ -95,3 +95,108 @@ export const TERMS = [
   { id: 51, term: 'Grounding', category: 'RAG', definition: 'Anchoring an LLM response in specific retrieved or provided source material, reducing hallucination by constraining the model to answer from verifiable text.', example: null, seeIn: [{ label: 'RAG', path: '/rag' }] },
   { id: 52, term: 'Vector Index', category: 'RAG', definition: 'The data structure that stores embedded document chunks for fast approximate nearest-neighbor search. Common algorithms: HNSW (graph-based), IVF (cluster-based).', example: null, seeIn: [{ label: 'RAG', path: '/rag' }] },
 ]
+
+/* =====================================================================
+   Inline auto-linking support
+   ---------------------------------------------------------------------
+   The `term` field above is a DISPLAY name ('Large Language Model
+   (LLM)'), not something that appears verbatim in prose. Everything
+   below turns those display names into match patterns.
+   ===================================================================== */
+
+/* Terms excluded from inline auto-linking. Two reasons to be on this
+ * list: the word is ordinary English and would underline constantly
+ * ('prompt', 'parameters'), or the display name is a comparison title
+ * that never occurs as a phrase ('Workflow vs Agent'). All of these
+ * still appear on the glossary page — this only suppresses auto-links. */
+export const NO_AUTO = new Set([
+  'Parameters',
+  'Prompt',
+  'Vocabulary',
+  'Workflow vs Agent',
+])
+
+/* Match strings that deriveAliases() cannot infer: spelling variants,
+ * common short forms, and informal names. Plurals are handled by the
+ * matcher (trailing `s`) and do not belong here. */
+export const EXTRA_ALIASES = {
+  'Vector Database': ['vector DB', 'vector store'],
+  'Nearest Neighbor Search': ['nearest neighbour search', 'nearest neighbor', 'nearest neighbour'],
+  'Cosine Similarity': ['cosine distance'],
+  'Large Language Model (LLM)': ['large language models'],
+  'Human-in-the-Loop (HITL)': ['human in the loop'],
+  'Model Context Protocol (MCP)': ['MCP server'],
+  'Chain-of-Thought (CoT)': ['chain of thought'],
+  'RAG': ['retrieval-augmented generation', 'retrieval augmented generation'],
+  'Agentic Loop': ['agent loop'],
+  'Evals': ['eval'],
+  'Fine-tuning': ['fine-tune', 'fine-tuned', 'finetuning'],
+  'Pre-training': ['pre-trained', 'pretraining'],
+}
+
+/* 'LLM', 'RAG', 'CoT', 'ReAct' must match case-sensitively — otherwise
+ * 'rag' in "ragged" context or a sentence-initial 'React' produces a
+ * false link. A plain lowercase phrase ('context window') matches
+ * case-insensitively so it catches headings and sentence starts. */
+const CASE_SENSITIVE = /[A-Z]{2,}/
+
+/* 'Large Language Model (LLM)' -> ['Large Language Model', 'LLM']
+ * 'Tool Use / Function Calling' -> ['Tool Use', 'Function Calling', <full>] */
+export function deriveAliases(term) {
+  const out = new Set()
+  const paren = term.match(/^(.*?)\s*\(([^)]+)\)\s*$/)
+  const base = paren ? paren[1].trim() : term
+  if (paren) out.add(paren[2].trim())
+
+  if (base.includes(' / ')) {
+    base.split(' / ').forEach(p => out.add(p.trim()))
+    out.add(base)
+  } else {
+    out.add(base)
+  }
+  return [...out].filter(Boolean)
+}
+
+const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+/* Built once, lazily. Returns { regex, resolve } where resolve() maps a
+ * matched string back to its term, applying the case-sensitivity rule. */
+let MATCHER = null
+
+export function getMatcher() {
+  if (MATCHER) return MATCHER
+
+  const byAlias = new Map()   // lowercased alias -> { term, alias, cs }
+
+  TERMS.forEach(t => {
+    if (NO_AUTO.has(t.term)) return
+    const aliases = [...deriveAliases(t.term), ...(EXTRA_ALIASES[t.term] || [])]
+    aliases.forEach(a => {
+      const key = a.toLowerCase()
+      // First term to claim an alias keeps it — TERMS order is stable.
+      if (!byAlias.has(key)) byAlias.set(key, { term: t, alias: a, cs: CASE_SENSITIVE.test(a) })
+    })
+  })
+
+  // Longest first so 'Vector Database' wins over 'Vector', and
+  // 'Top-p' is never truncated to 'Top'.
+  const alternation = [...byAlias.values()]
+    .map(v => v.alias)
+    .sort((a, b) => b.length - a.length)
+    .map(escapeRe)
+    .join('|')
+
+  // Hyphen sits in both boundary classes so 'Top-k' cannot match inside
+  // 'Top-k-style' and 'shot' cannot match inside 'Zero-shot'.
+  const regex = new RegExp(`(?<![A-Za-z0-9-])(${alternation})(s?)(?![A-Za-z0-9-])`, 'gi')
+
+  const resolve = matched => {
+    const hit = byAlias.get(matched.toLowerCase())
+    if (!hit) return null
+    if (hit.cs && matched !== hit.alias) return null
+    return hit.term
+  }
+
+  MATCHER = { regex, resolve, aliasCount: byAlias.size }
+  return MATCHER
+}

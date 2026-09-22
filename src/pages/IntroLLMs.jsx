@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import NavBar from '../components/NavBar.jsx'
+import GlossaryScope from '../components/GlossaryScope.jsx'
 import {
   BooksIcon, ArrowRightIcon, ChartLineDownIcon, ArrowsClockwiseIcon,
   WarningIcon, CalendarBlankIcon, BrainIcon, RulerIcon, ScalesIcon,
@@ -807,11 +808,11 @@ export default function IntroLLMs() {
 
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
-    <div className="il-root">
+    <GlossaryScope className="il-root">
       <style>{css}</style>
       <NavBar />
 
-      <header className="il-hero">
+      <header className="il-hero" data-no-gloss>
         <div className="il-eyebrow">Foundations</div>
         <h1 className="il-title">Introduction to LLMs</h1>
         <p className="il-subtitle">Understand how large language models work — from next-token prediction to emergent abilities, tokens, prompts, and limitations.</p>
@@ -1168,7 +1169,7 @@ export default function IntroLLMs() {
 
         {/* ── Tab 5: Quiz ─────────────────────────────────────────────────────── */}
         {tab === 5 && (
-          <div className="il-quiz-wrap">
+          <div className="il-quiz-wrap" data-no-gloss>
             {done ? (
               <div className="il-quiz-done">
                 <div className="il-quiz-done-score">{score}/{SESSION_SIZE}</div>
@@ -1233,6 +1234,6 @@ export default function IntroLLMs() {
         )}
 
       </div>
-    </div>
+    </GlossaryScope>
   )
 }

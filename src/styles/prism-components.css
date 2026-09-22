@@ -259,3 +259,109 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ── Glossary inline term + definition popover ────────────────
+ *  .prism-gloss is written into prose by <GlossaryScope>; the
+ *  popover is portalled to <body>, so it sits outside any page
+ *  wrapper and must style itself from tokens alone.
+ * ───────────────────────────────────────────────────────────── */
+
+.prism-gloss {
+  text-decoration: none;
+  border-bottom: 1px dashed var(--border-strong);
+  cursor: help;
+  color: inherit;
+  transition: border-color var(--duration-fast) var(--ease-standard),
+              background var(--duration-fast) var(--ease-standard);
+}
+.prism-gloss:hover,
+.prism-gloss:focus-visible {
+  border-bottom-color: var(--purple-500);
+  background: var(--purple-50);
+  outline: none;
+}
+.prism-gloss:focus-visible {
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+  border-radius: var(--radius-sm);
+}
+
+.prism-gloss-pop {
+  position: fixed;
+  z-index: 1000;
+  box-sizing: border-box;
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-e2);
+  padding: var(--spacing-3);
+  color: var(--text-primary);
+  font-family: var(--font-primary);
+}
+
+.prism-gloss-pop-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-2);
+}
+.prism-gloss-pop-term {
+  font: var(--text-weight-label) var(--text-size-label)/var(--text-lh-label) var(--font-primary);
+  letter-spacing: var(--text-ls-label);
+}
+.prism-gloss-pop-cat {
+  flex: none;
+  font: var(--text-weight-meta) var(--text-size-meta)/var(--text-lh-meta) var(--font-primary);
+  letter-spacing: var(--text-ls-meta);
+  color: var(--text-tertiary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 1px var(--spacing-2);
+}
+
+.prism-gloss-pop-def {
+  margin: 0;
+  font: var(--text-weight-caption) var(--text-size-caption)/var(--text-lh-caption) var(--font-primary);
+  color: var(--text-secondary);
+}
+
+.prism-gloss-pop-eg {
+  margin: var(--spacing-2) 0 0;
+  padding: var(--spacing-2);
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  font: var(--text-weight-meta) var(--text-size-meta)/var(--text-lh-meta) var(--font-primary);
+  color: var(--text-secondary);
+}
+.prism-gloss-pop-eg span {
+  display: block;
+  color: var(--text-tertiary);
+  letter-spacing: var(--text-ls-meta);
+  margin-bottom: 2px;
+}
+
+.prism-gloss-pop-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-3);
+  padding-top: var(--spacing-2);
+  border-top: 1px solid var(--border-default);
+}
+.prism-gloss-pop-link,
+.prism-gloss-pop-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  font: var(--text-weight-meta) var(--text-size-meta)/var(--text-lh-meta) var(--font-primary);
+  color: var(--purple-500);
+}
+.prism-gloss-pop-all { margin-left: auto; color: var(--text-tertiary); }
+.prism-gloss-pop-link:hover,
+.prism-gloss-pop-all:hover { text-decoration: underline; }
+
+@media (max-width: 480px) {
+  .prism-gloss-pop { max-width: calc(100vw - 24px); }
+}
